@@ -1,4 +1,4 @@
-﻿namespace Mockbench.Shared.Models.Microservice
+﻿namespace Mockbench.Shared.Models.Enum
 {
     // indexing with spaces so we can insert more in future with logical ordering maintained
     public enum ProxyMode 

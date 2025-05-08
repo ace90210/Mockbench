@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Mockbench.Shared.Helper;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using Mockbench.Shared.Helper;
 
 namespace Mockbench.Shared.Models.Environment
 {
-    public class BaseEnvironmentDto : IValidatableObject
+    public class EnvironmentDto : IValidatableObject
     {
         public int Id { get; set; }
 
@@ -20,10 +17,6 @@ namespace Mockbench.Shared.Models.Environment
         [MaxLength(150, ErrorMessage = "field exceeded max length {0}")]
         [RegularExpression(@"^[a-zA-Z0-9]*$", ErrorMessage = "Must have alpha numeric characters only")]
         public string Path { get; set; }
-
-        public int TenantId { get; set; }
-        
-        public string TenantName { get; set; }
 
         public DateTime? SimulateTime { get; set; }
 

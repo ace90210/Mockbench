@@ -8,7 +8,6 @@ using Mockbench.Shared.Constants;
 using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Response;
 using Mockbench.Shared.Models.Utility;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace Mockbench.Api.Controllers.AdminControllers
 {

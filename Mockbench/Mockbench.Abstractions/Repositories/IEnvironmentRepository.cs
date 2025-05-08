@@ -5,15 +5,13 @@ namespace Mockbench.Abstractions.Repositories
 {
     public interface IEnvironmentRepository
     {
-        Task<BaseEnvironmentDto> CreateEnvironment(BaseEnvironmentDto newEnvironmentDto);
+        Task<EnvironmentDto> CreateEnvironment(EnvironmentDto newEnvironmentDto);
         Task<bool> DeleteEnvironment(int id);
-        Task<List<PathNameItem>> GetAllEnvironmentNameAndPathsForTenant(int tenantId);
-        Task<List<PathNameItem>> GetAllEnvironmentNameAndPathsForTenant(int tenantId, int excludingEnvironmentId);
-        Task<BasicEnvironmentDto> GetEnvironmentById(int id);
-        Task<int?> GetEnvironmentId(int tenantId, string environmentPath);
-        Task<int?> GetEnvironmentId(string path, string environmentPath);
-        Task<IEnumerable<BasicEnvironmentDto>> GetEnvironments();
-        Task<EnvironmentOverviewCollection> GetEnvironmentsByTenantId(int id);
-        Task<bool> UpdateEnvironmentBaseValues(BaseEnvironmentDto updatedEnvironment);
+        Task<List<PathNameItem>> GetAllEnvironmentNameAndPaths();
+        Task<List<PathNameItem>> GetAllEnvironmentNameAndPaths(int excludingEnvironmentId);
+        Task<EnvironmentDto> GetEnvironmentById(int id);
+        Task<int?> GetEnvironmentId(string environmentPath);
+        Task<IEnumerable<EnvironmentDto>> GetEnvironments();
+        Task<bool> UpdateEnvironmentBaseValues(EnvironmentDto updatedEnvironment);
     }
 }

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using Mockbench.Shared.Constants;
+﻿using Mockbench.Shared.Constants;
 using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.Headers;
+using System.ComponentModel.DataAnnotations;
 
 namespace Mockbench.Shared.Models.Microservice
 {
@@ -23,8 +20,6 @@ namespace Mockbench.Shared.Models.Microservice
         public string Name { get; set; }
 
         public bool Enabled { get; set; } = true;
-
-        public int RegisteredEnvironmentId { get; set; }
 
         [OptionalUrl(ErrorMessage = "target url must be a valid url")]
         [MaxLength(250, ErrorMessage = "field exceeded max length {0}")]
@@ -61,7 +56,6 @@ namespace Mockbench.Shared.Models.Microservice
             target.Path = Path;
             target.Name = Name;
             target.Enabled = Enabled;
-            target.RegisteredEnvironmentId = RegisteredEnvironmentId;
             target.TargetUrl = TargetUrl;
             target.FakeDelay = FakeDelay;
             target.ProxyMode = ProxyMode;

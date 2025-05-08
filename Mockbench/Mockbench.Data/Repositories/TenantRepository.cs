@@ -2,7 +2,6 @@
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Data.Contexts;
 using Mockbench.Data.Models;
-using Mockbench.Shared.Models.Environment;
 using Mockbench.Shared.Models.General;
 using Mockbench.Shared.Models.Tenant;
 
@@ -33,109 +32,65 @@ namespace Mockbench.Data.Repositories
 
         public async Task<TenantListDto> GetAllTenantsListAsync(int skip, int take)
         {
-            var tenants = await _context.Tenants.Include(t => t.Environments).ToListAsync();
+            var tenants = await _context.Tenants.ToListAsync();
 
             return new TenantListDto()
             {
                 TotalTenants = tenants.Count,
                 Tenants = tenants.Select(t =>
                 {
-                    return new BaseTenantDto()
+                    return new TenantBase()
                     {
                         Id = t.ID,
                         Name = t.Name,
                         Path = t.Path,
-                        SimulateTime = t.SimulateTime,
-                        RegisteredEnvironments = t.Environments?.Select(rs =>
-                                    new BaseEnvironmentDto()
-                                    {
-                                        Id = rs.ID,
-                                        Name = rs.Name,
-                                        DefaultHealthCheckUrl = rs.DefaultHealthCheckUrl,
-                                        Enabled = rs.Enabled,
-                                        Path = rs.Path,
-                                        SimulateTime = rs.SimulateTime
-                                    }
-                        ).ToList() ?? new List<BaseEnvironmentDto>()
+                        SimulateTime = t.SimulateTime
                     };
                 }).Skip(skip).Take(take).ToList()
             };
         }
 
-        public async Task<BaseTenantDto> GetTenantByIdAsync(int id)
+        public async Task<TenantBase?> GetTenantByIdAsync(int id)
         {
-            var tenant = await _context.Tenants.Include(t => t.Environments).FirstOrDefaultAsync(t => t.ID == id);
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ID == id);
 
-            return tenant == null ? null : new BaseTenantDto()
+            return tenant == null ? null : new TenantBase()
             {
                 Id = tenant.ID,
                 Name = tenant.Name,
                 Path = tenant.Path,
-                SimulateTime = tenant.SimulateTime,
-                RegisteredEnvironments = tenant.Environments?.Select(rs =>
-                            new BaseEnvironmentDto()
-                            {
-                                Id = rs.ID,
-                                Name = rs.Name,
-                                DefaultHealthCheckUrl = rs.DefaultHealthCheckUrl,
-                                Enabled = rs.Enabled,
-                                Path = rs.Path,
-                                SimulateTime = rs.SimulateTime
-                            }
-                        ).ToList() ?? new List<BaseEnvironmentDto>()
+                SimulateTime = tenant.SimulateTime
             };
         }
 
-        public async Task<BaseTenantDto> GetTenantByNameAsync(string name)
+        public async Task<TenantBase?> GetTenantByNameAsync(string name)
         {
-            var tenant = await _context.Tenants.Include(t => t.Environments).FirstOrDefaultAsync(t => t.Name == name);
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Name == name);
 
 
-            return tenant == null ? null : new BaseTenantDto()
+            return tenant == null ? null : new TenantBase()
             {
                 Id = tenant.ID,
                 Name = tenant.Name,
                 Path = tenant.Path,
-                SimulateTime = tenant.SimulateTime,
-                RegisteredEnvironments = tenant.Environments?.Select(rs =>
-                            new BaseEnvironmentDto()
-                            {
-                                Id = rs.ID,
-                                Name = rs.Name,
-                                DefaultHealthCheckUrl = rs.DefaultHealthCheckUrl,
-                                Enabled = rs.Enabled,
-                                Path = rs.Path,
-                                SimulateTime = rs.SimulateTime
-                            }
-                        ).ToList() ?? new List<BaseEnvironmentDto>()
+                SimulateTime = tenant.SimulateTime
             };
         }
 
-        public async Task<BaseTenantDto> GetTenantByPathAsync(string path)
+        public async Task<TenantBase?> GetTenantByPathAsync(string path)
         {
-            var tenant = await _context.Tenants.Include(t => t.Environments).FirstOrDefaultAsync(t => t.Path == path.ToLower());
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Path == path.ToLower());
 
-            return tenant == null ? null : new BaseTenantDto()
+            return tenant == null ? null : new TenantBase()
             {
                 Id = tenant.ID,
                 Name = tenant.Name,
                 Path = tenant.Path,
-                SimulateTime = tenant.SimulateTime,
-                RegisteredEnvironments = tenant.Environments?.Select(rs =>
-                            new BaseEnvironmentDto()
-                            {
-                                Id = rs.ID,
-                                Name = rs.Name,
-                                DefaultHealthCheckUrl = rs.DefaultHealthCheckUrl,
-                                Enabled = rs.Enabled,
-                                Path = rs.Path,
-                                SimulateTime = rs.SimulateTime
-                            }
-                        ).ToList() ?? new List<BaseEnvironmentDto>()
+                SimulateTime = tenant.SimulateTime
             };
         }
 
-        public async Task<BaseTenantDto> CreateTenantAsync(BaseTenantDto newTenantDto)
+        public async Task<TenantBase> CreateTenantAsync(TenantBase newTenantDto)
         {
             if (newTenantDto == null)
                 throw new Exception("No tenant provided");
@@ -159,7 +114,7 @@ namespace Mockbench.Data.Repositories
 
             await _context.SaveChangesAsync();
 
-            return new BaseTenantDto()
+            return new TenantBase()
             {
                 Id = newTenant.ID,
                 Name = newTenant.Name,
@@ -173,7 +128,7 @@ namespace Mockbench.Data.Repositories
         /// </summary>
         /// <param name="updatedTenant">the updated tenant</param>
         /// <returns>true if updated successfully</returns>
-        public async Task<bool> UpdateTenantBaseValuesAsync(BaseTenantDto updatedTenant)
+        public async Task<bool> UpdateTenantBaseValuesAsync(TenantBase updatedTenant)
         {
             var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ID == updatedTenant.Id);
 

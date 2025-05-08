@@ -5,7 +5,6 @@ using Mockbench.Data.Contexts;
 using Mockbench.Data.Models;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Models.Configuration;
-using Mockbench.Shared.Models.Tenant;
 using Mockbench.Shared.Models.Timetravel;
 using Mockbench.Shared.Models.Utility;
 
@@ -17,6 +16,13 @@ namespace Mockbench.Data.Repositories
         private readonly DeploymentConfiguration _deploymentConfiguration;
         private readonly TenantMapper _tenantMapper = new TenantMapper();
         private readonly TenantClonerMapper _tenantClonerMapper = new TenantClonerMapper();
+
+        private readonly EnvironmentMapper _environmentMapper = new EnvironmentMapper();
+        private readonly EnvironmentClonerMapper _environmentClonerMapper = new EnvironmentClonerMapper();
+
+        private readonly MicroserviceMapper _microserviceMapper = new MicroserviceMapper();
+        private readonly MicroserviceClonerMapper _microserviceClonerMapper = new MicroserviceClonerMapper();
+
 
         public BaseRepository(MockbenchMainContext context, IOptions<DeploymentConfiguration> deploymentOptions)
         {
@@ -143,14 +149,11 @@ namespace Mockbench.Data.Repositories
 
             var microservices = _context.Microservices.Include(m => m.Endpoints)
                                                         .ThenInclude(sr => sr.MockResponses)
-                                                        .AsSplitQuery()
-                                                        .Where(m => m.EnvironmentID == id);
+                                                        .AsSplitQuery();
 
             var result = microservices.SelectMany(m => m.Endpoints)
                                         .SelectMany(sr => sr.MockResponses)
                                         .Select(mr => mr.CreatedUtc).ToList();
-
-
 
             return new TimeTravelDto()
             {
@@ -172,13 +175,7 @@ namespace Mockbench.Data.Repositories
                 };
             }
 
-            var environments = _context.Environments.Include(t => t.Microservices)
-                                                        .ThenInclude(m => m.Endpoints)
-                                                        .ThenInclude(sr => sr.MockResponses)
-                                                        .AsSplitQuery()
-                                                        .Where(sg => sg.TenantID == id);
-
-            var result = environments.SelectMany(sg => sg.Microservices)
+            var result = _context.Microservices
                                         .SelectMany(m => m.Endpoints)
                                         .SelectMany(sr => sr.MockResponses)
                                         .Select(mr => mr.CreatedUtc).ToList();
@@ -204,64 +201,72 @@ namespace Mockbench.Data.Repositories
             };
 
             var tenants = _context.Tenants.ToList();
-            
-            foreach (var tenant in tenants)   
+
+            tenants.ForEach(t =>
             {
-                foreach (var environment in tenant.Environments)
-                {
-                    environment.Microservices = _context.Microservices
+                t.ID = 0;
+            });
+
+            var environments = _context.Environments.ToList();
+
+            environments.ForEach(e =>
+            {
+                e.ID = 0;
+            });
+
+            fullDatabase.Tenants = _tenantMapper.ToTenantDtos(tenants);
+
+            fullDatabase.Environments = _environmentMapper.ToEnvironmentDtos(environments);
+
+            var microservices = _context.Microservices
                         .Include(ms => ms.Headers)
-                        .Where(ms => ms.EnvironmentID == environment.ID)
+                        .Include(ms => ms.Endpoints)
                         .ToList();
+
+            fullDatabase.Microservices = _microserviceMapper.ToMicroserviceDtos(microservices);
+
                     
-                    foreach (var microservice in environment.Microservices)
-                    {
-                        microservice.Endpoints = _context.Endpoints
-                                                                .Include(sr => sr.EndpointHeaders)
-                                                                .Include(sr => sr.QueryParameters)
-                                                                .Where(sr => sr.MicroserviceID == microservice.ID)
-                                                                .AsSplitQuery()
-                                                                .ToList();
+            foreach (var microservice in microservices)
+            {
+                microservice.Endpoints = _context.Endpoints
+                                                        .Include(sr => sr.EndpointHeaders)
+                                                        .Include(sr => sr.QueryParameters)
+                                                        .Where(sr => sr.MicroserviceID == microservice.ID)
+                                                        .AsSplitQuery()
+                                                        .ToList();
                         
 
-                        foreach (var endpoint in microservice.Endpoints)
-                        {
-                            endpoint.MockResponses = _context.MockResponses
-                                                            .Include(mr => mr.Headers)
-                                                            .Where(mr => mr.EndpointId == endpoint.ID)
-                                                            .ToList();
+                foreach (var endpoint in microservice.Endpoints)
+                {
+                    endpoint.MockResponses = _context.MockResponses
+                                                    .Include(mr => mr.Headers)
+                                                    .Where(mr => mr.EndpointId == endpoint.ID)
+                                                    .ToList();
                             
-                            //clear ids to zero
-                            endpoint.MockResponses.ForEach(mr =>
-                            {
-                                mr.ID = 0;
-                                mr.Headers?.ForEach(h => h.ID = 0);
-                            });
-                        }
-                        
-                        //clear ids to zero
-                        microservice.Endpoints.ForEach(mr =>
-                        {
-                            mr.ID = 0;
-                            mr.EndpointHeaders?.ForEach(h => h.ID = 0);
-                            mr.QueryParameters?.ForEach(h => h.Id = 0);
-                        });
-                    }
-                    
                     //clear ids to zero
-                    environment.Microservices.ForEach(mr =>
+                    endpoint.MockResponses.ForEach(mr =>
                     {
                         mr.ID = 0;
                         mr.Headers?.ForEach(h => h.ID = 0);
                     });
                 }
+                        
+                //clear ids to zero
+                microservice.Endpoints.ForEach(mr =>
+                {
+                    mr.ID = 0;
+                    mr.EndpointHeaders?.ForEach(h => h.ID = 0);
+                    mr.QueryParameters?.ForEach(h => h.Id = 0);
+                });
             }
-            
-            fullDatabase.Tenants = tenants.Select(t =>
+                    
+            //clear ids to zero
+            microservices.ForEach(mr =>
             {
-                t.ID = 0;
-                return _tenantMapper.ToTenantDto(t);
-            }).ToList();
+                mr.ID = 0;
+                mr.Headers?.ForEach(h => h.ID = 0);
+                mr.Endpoints?.ForEach(e => e.ID = 0);
+            });            
             
             return fullDatabase;
         }

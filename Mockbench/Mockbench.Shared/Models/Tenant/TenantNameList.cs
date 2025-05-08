@@ -4,6 +4,6 @@ namespace Mockbench.Shared.Models.Tenant
 {
     public class TenantNameList
     {
-        public List<EntityKeyName> Tenants { get; set; }
+        public List<EntityKeyName> TenantNames { get; set; }
     }
 }

@@ -7,9 +7,13 @@ namespace Mockbench.Data.Models
     [Mapper]
     public partial class TenantMapper
     {
-        public partial FullTenantDto ToTenantDto(Tenant tenant);
+        public partial TenantBase ToTenantDto(Tenant tenant);
 
-        public partial Tenant ToTenantEntity(FullTenantDto tenant);
+        public partial Tenant ToTenantEntity(TenantBase tenant);
+
+        public partial List<TenantBase> ToTenantDtos(List<Tenant> tenants);
+
+        public partial List<Tenant> ToTenantEntities(List<TenantBase> tenants);
     }
 
     [Mapper(UseDeepCloning = true)]
@@ -17,7 +21,7 @@ namespace Mockbench.Data.Models
     {
         public partial Tenant Clone(Tenant tenant);
 
-        public partial FullTenantDto Clone(FullTenantDto tenant);
+        public partial TenantBase Clone(TenantBase tenant);
     }
 
     public class Tenant

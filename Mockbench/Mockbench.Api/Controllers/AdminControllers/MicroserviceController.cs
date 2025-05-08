@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Helper;
+using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.Microservice;
 using Mockbench.Shared.Models.Utility;
 using System.ComponentModel.DataAnnotations;
@@ -57,7 +58,7 @@ namespace Mockbench.Api.Controllers.AdminControllers
             if (string.IsNullOrWhiteSpace(microservicePath))
                 return BadRequest(ErrorMessageConstants.MicroservicePath);
             
-            var service = await _microserviceRepository.GetMicroservice(environmentId, microservicePath);
+            var service = await _microserviceRepository.GetMicroservice(microservicePath);
 
             if(service == null)
                 return NotFound(ErrorMessageConstants.MicroserviceNotFound);
@@ -76,38 +77,9 @@ namespace Mockbench.Api.Controllers.AdminControllers
         [HttpGet("searchresultlist")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceResultDto>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<IEnumerable<MicroserviceSearchResultDto>>> GetAllMicroserviceSearchResults()
+        public async Task<ActionResult<IEnumerable<MicroserviceResultDto>>> GetAllMicroserviceSearchResults()
         {
             return Ok(await _microserviceRepository.GetAllMicroserviceSearchResults());
-        }
-
-        [HttpGet("list/{environmentId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceResultDto>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<IEnumerable<MicroserviceResultDto>>> GetMicroservicesForEnvironment(int environmentId)
-        {
-            if (environmentId <= 0)
-                return BadRequest(ErrorMessageConstants.EnvironmentId);
-            
-            return Ok(await _microserviceRepository.GetAllMicroservicesForEnvironment(environmentId));
-        }
-
-        [HttpGet("parents/{microserviceId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceParentIds))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MicroserviceParentIds>> GetParentIds(int microserviceId)
-        {
-            if (microserviceId <= 0)
-                return BadRequest(ErrorMessageConstants.MicroserviceId);
-            
-            var microserviceParentIds = await _microserviceRepository.GetParentIds(microserviceId);
-
-            if(microserviceParentIds == null)
-                return NotFound(ErrorMessageConstants.MicroserviceNotFound);
-
-            return Ok(microserviceParentIds);
         }
 
         [HttpPost("{environmentId}")]
@@ -116,11 +88,8 @@ namespace Mockbench.Api.Controllers.AdminControllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MicroserviceResultDto>> CreateMicroservice(int environmentId, [FromBody] MicroserviceResultDto? newMicroservice)
-        {
-            if (environmentId <= 0)
-                return BadRequest(ErrorMessageConstants.EnvironmentId);
-            
+        public async Task<ActionResult<MicroserviceResultDto>> CreateMicroservice([FromBody] MicroserviceResultDto? newMicroservice)
+        {            
             if (newMicroservice == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
             
@@ -136,12 +105,9 @@ namespace Mockbench.Api.Controllers.AdminControllers
             if (newMicroservice.ProxyMode != ProxyMode.None && string.IsNullOrWhiteSpace(newMicroservice.TargetUrl))
                 return BadRequest(ErrorMessageConstants.MicroserviceTargetUrl);
 
-            if (newMicroservice.RegisteredEnvironmentId > 0 && newMicroservice.RegisteredEnvironmentId != environmentId)
-                return BadRequest(ErrorMessageConstants.IdMissMatch);
-
             var results = new List<ValidationResult>();
 
-            var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNamesForEnvironment(environmentId);
+            var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNames();
 
             bool isValid = GeneralHelper.TryValidateFullObject(newMicroservice, new ValidationContext(newMicroservice,
                 new Dictionary<object, object?>()
@@ -153,7 +119,6 @@ namespace Mockbench.Api.Controllers.AdminControllers
             if (!isValid)
                 return BadRequest(results.ToBadRequestResult());
 
-            newMicroservice.RegisteredEnvironmentId = environmentId;
             var createdMicroservice = await _microserviceRepository.CreateMicroservice(newMicroservice);
 
             if (createdMicroservice == null)
@@ -190,7 +155,7 @@ namespace Mockbench.Api.Controllers.AdminControllers
             
             var results = new List<ValidationResult>();
 
-            var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNamesForEnvironment(updatedMicroservice.RegisteredEnvironmentId, microserviceId);
+            var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNames(microserviceId);
 
             bool isValid = GeneralHelper.TryValidateFullObject(updatedMicroservice, new ValidationContext(updatedMicroservice, 
                 new Dictionary<object, object?>()

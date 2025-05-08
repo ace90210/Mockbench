@@ -7,6 +7,6 @@ namespace Mockbench.Abstractions.ProxyServices
 {
     public interface IProxyService
     {
-        Task<IActionResult> ProxyRequestToMicroserviceAsync(MatchingEndpointMicroserviceDetailsDto microservice, RestType restType, HttpContext context, string endpointPath);
+        Task<IActionResult> ProxyRequestToMicroserviceAsync(MicroserviceResultDto microservice, RestType restType, HttpContext context, string endpointPath);
     }
 }

@@ -3,10 +3,8 @@ using Mockbench.Abstractions.Repositories;
 using Mockbench.Data.Contexts;
 using Mockbench.Data.Mappers;
 using Mockbench.Data.Models;
-using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.Environment;
 using Mockbench.Shared.Models.General;
-using Mockbench.Shared.Models.Microservice;
 
 namespace Mockbench.Data.Repositories
 {
@@ -14,102 +12,46 @@ namespace Mockbench.Data.Repositories
     {
         private readonly MockbenchMainContext _context;
 
-        public EnvironmentRepository(MockbenchMainContext context)
+        private readonly EnvironmentMapper _environmentMapper;
+
+        public EnvironmentRepository(MockbenchMainContext context, EnvironmentMapper environmentMapper)
         {
             _context = context;
+            _environmentMapper = environmentMapper;
         }
 
-        public async Task<IEnumerable<BasicEnvironmentDto>> GetEnvironments()
+        public async Task<IEnumerable<EnvironmentDto>> GetEnvironments()
         {
-            var services = await _context.Environments.Include(sg => sg.Tenant).ToListAsync();
+            var services = await _context.Environments.ToListAsync();
 
-            return services.Select(sg =>
-                           new BasicEnvironmentDto()
-                           {
-                               Id = sg.ID,
-                               Name = sg.Name,
-                               Enabled = sg.Enabled,
-                               Path = $"{sg.Path}",
-                               TenantId = sg.TenantID,
-                               TenantName = sg.Tenant.Name,
-                               DefaultHealthCheckUrl = sg.DefaultHealthCheckUrl,
-                               Microservices = GetMicroservicesForEnvironment(sg.ID),
-                               SimulateTime = sg.SimulateTime
-                           }
-                       );
+            return _environmentMapper.ToEnvironmentDtos(services);
         }
 
-        public async Task<List<PathNameItem>> GetAllEnvironmentNameAndPathsForTenant(int tenantId)
+        public async Task<List<PathNameItem>> GetAllEnvironmentNameAndPaths()
         {
-            var environmentPaths = _context.Environments.Where(sg => sg.TenantID == tenantId)
+            var environmentPaths = _context.Environments
                 .Select(sg => new PathNameItem(sg.Name, sg.Path));
 
             return await environmentPaths.ToListAsync();
         }
 
-        public async Task<List<PathNameItem>> GetAllEnvironmentNameAndPathsForTenant(int tenantId, int excludingServiceId)
+        public async Task<List<PathNameItem>> GetAllEnvironmentNameAndPaths(int excludingServiceId)
         {
-            var environmentPaths = _context.Environments.Where(sg => sg.TenantID == tenantId && sg.ID != excludingServiceId)
+            var environmentPaths = _context.Environments.Where(sg => sg.ID != excludingServiceId)
                 .Select(sg => new PathNameItem(sg.Name, sg.Path));
 
             return await environmentPaths.ToListAsync();
         }
 
-        public async Task<EnvironmentOverviewCollection> GetEnvironmentsByTenantId(int id)
-        {
-            var tenant = await _context.Tenants.Include(t => t.Environments).FirstOrDefaultAsync(sg => sg.ID == id);
-
-            if (tenant == null)
-            {
-                return null;
-            }
-
-            if (tenant.Environments?.Count == 0)
-            {
-                return new EnvironmentOverviewCollection()
-                {
-                    TenantId = id,
-                    TenantName = tenant.Name,
-                    Environments = new List<BasicEnvironmentDto>()
-                };
-            }
-
-
-            return new EnvironmentOverviewCollection()
-            {
-                TenantId = id,
-                TenantName = tenant.Name,
-                Environments = tenant.Environments?.Select(sg =>
-                            new BasicEnvironmentDto()
-                            {
-                                Id = sg.ID,
-                                Name = sg.Name,
-                                Enabled = sg.Enabled,
-                                Path = $"{sg.Path}",
-                                TenantId = sg.TenantID,
-                                TenantName = sg.Tenant.Name,
-                                DefaultHealthCheckUrl = sg.DefaultHealthCheckUrl,
-                                Microservices = GetMicroservicesForEnvironment(sg.ID),
-                                SimulateTime = sg.SimulateTime
-                            }
-                        ).ToList()
-            };
-        }
-
-        public async Task<BasicEnvironmentDto> GetEnvironmentById(int id)
+        public async Task<EnvironmentDto?> GetEnvironmentById(int id)
         {
             var environment = await _context.Environments
-                                        .Include(sg => sg.Tenant)
-                                        .Include(sg => sg.Microservices)
-                                        .ThenInclude(ms => ms.Endpoints)
-                                        .ThenInclude(sr => sr.MockResponses)
-                                        .AsSplitQuery()
                                         .FirstOrDefaultAsync(sg => sg.ID == id);
 
-            return environment.ToBasicEnvironmentDto();
+            return environment?.ToBaseEnvironmentDto();
         }
 
-        public async Task<BaseEnvironmentDto> CreateEnvironment(BaseEnvironmentDto newEnvironmentDto)
+        public async Task<EnvironmentDto> CreateEnvironment(EnvironmentDto newEnvironmentDto)
         {
             if (newEnvironmentDto == null)
                 throw new Exception("No environment provided");
@@ -120,17 +62,14 @@ namespace Mockbench.Data.Repositories
             if (string.IsNullOrWhiteSpace(newEnvironmentDto.Name))
                 throw new Exception("Environment name missing or empty");
 
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ID == newEnvironmentDto.TenantId);
+            var environments = _context.Environments;
 
-            if (tenant == null)
-                return null;
 
             var newEnvironment = new Models.Environment()
             {
                 Name = newEnvironmentDto.Name,
                 Path = newEnvironmentDto.Path.ToLower(),
                 DefaultHealthCheckUrl = newEnvironmentDto.DefaultHealthCheckUrl,
-                TenantID = newEnvironmentDto.TenantId,
                 Enabled = newEnvironmentDto.Enabled,
                 SimulateTime = newEnvironmentDto.SimulateTime
             };
@@ -139,14 +78,13 @@ namespace Mockbench.Data.Repositories
 
             await _context.SaveChangesAsync();
 
-            return new BaseEnvironmentDto()
+            return new EnvironmentDto()
             {
                 Id = newEnvironment.ID,
                 Name = newEnvironment.Name,
                 DefaultHealthCheckUrl = newEnvironment.DefaultHealthCheckUrl,
                 Enabled = newEnvironment.Enabled,
                 Path = $"{newEnvironment.Path}",
-                TenantId = newEnvironment.TenantID,
                 SimulateTime = newEnvironment.SimulateTime
             };
         }
@@ -156,7 +94,7 @@ namespace Mockbench.Data.Repositories
         /// </summary>
         /// <param name="updatedEnvironment">the updated service</param>
         /// <returns>true if updated successfully</returns>
-        public async Task<bool> UpdateEnvironmentBaseValues(BaseEnvironmentDto updatedEnvironment)
+        public async Task<bool> UpdateEnvironmentBaseValues(EnvironmentDto updatedEnvironment)
         {
             var existingEnvironment = await _context.Environments.FirstOrDefaultAsync(sg => sg.ID == updatedEnvironment.Id);
 
@@ -189,45 +127,11 @@ namespace Mockbench.Data.Repositories
             return true;
         }
 
-        public async Task<int?> GetEnvironmentId(string path, string environmentPath)
-        {
-            var tenantPathToLower = path.ToLower();
-            var environmentPathToLower = environmentPath.ToLower();
-
-            return (await _context.Environments.FirstOrDefaultAsync(sg => sg.Path == environmentPathToLower && sg.Tenant.Path == tenantPathToLower))?.ID;
-        }
-
-        public async Task<int?> GetEnvironmentId(int tenantId, string environmentPath)
+        public async Task<int?> GetEnvironmentId(string environmentPath)
         {
             var environmentPathToLower = environmentPath.ToLower();
 
-            return (await _context.Environments.FirstOrDefaultAsync(sg => sg.Path == environmentPathToLower && sg.Tenant.ID == tenantId))?.ID;
-        }
-
-        private List<MicroserviceResultDto> GetMicroservicesForEnvironment(int environmentId)
-        {
-            var microservices = _context.Microservices.Include(ms => ms.Headers)
-                .Where(pd => pd.EnvironmentID == environmentId).ToList();
-
-            if (microservices.Count == 0)
-                return new List<MicroserviceResultDto>();
-
-            return microservices.Select(ms => new MicroserviceResultDto
-            {
-                Id = ms.ID,
-                Name = ms.Name,
-                Enabled = ms.Enabled,
-                ProxyMode = ms.ProxyMode,
-                RandomiseMockResult = ms.RandomiseMockResult,
-                Path = ms.Path,
-                FakeDelay = ms.FakeDelay,
-                TargetUrl = ms.TargetUrl,
-                RegisteredEnvironmentId = ms.EnvironmentID,
-                SimulateTime = ms.SimulateTime,
-                HeadersMode = HeadersMode.UserDefined,
-                PassThroughTenant = false,
-                Headers = ms.Headers?.ToDtos()
-            }).ToList();
+            return (await _context.Environments.FirstOrDefaultAsync(sg => sg.Path == environmentPathToLower))?.ID;
         }
     }
 }

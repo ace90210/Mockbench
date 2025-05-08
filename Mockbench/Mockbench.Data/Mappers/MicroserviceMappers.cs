@@ -5,7 +5,7 @@ namespace Mockbench.Data.Mappers
 {
     public static class MicroserviceMappers
     {
-        public static MicroserviceResultDto ToDto(this Microservice microservice, int environmentId)
+        public static MicroserviceResultDto? ToDto(this Microservice microservice, int environmentId)
         {
             return microservice == null ? null : new MicroserviceResultDto()
             {
@@ -17,7 +17,6 @@ namespace Mockbench.Data.Mappers
                 RandomiseMockResult = microservice.RandomiseMockResult,
                 FakeDelay = microservice.FakeDelay,
                 TargetUrl = microservice.TargetUrl,
-                RegisteredEnvironmentId = environmentId,
                 SimulateTime = microservice.SimulateTime,
                 PassThroughTenant = microservice.PassThroughTenant,
                 HeadersMode = microservice.HeadersMode,
@@ -26,7 +25,7 @@ namespace Mockbench.Data.Mappers
             };
         }
 
-        public static List<MicroserviceResultDto> ToDtos(this List<Microservice> microservice, int environmentId)
+        public static List<MicroserviceResultDto?>? ToDtos(this List<Microservice> microservice, int environmentId)
         {
             return microservice?.Select(rr => rr.ToDto(environmentId)).ToList();
         }

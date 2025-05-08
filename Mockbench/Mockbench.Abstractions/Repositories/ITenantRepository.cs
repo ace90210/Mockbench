@@ -5,14 +5,14 @@ namespace Mockbench.Abstractions.Repositories
 {
     public interface ITenantRepository
     {
-        Task<BaseTenantDto> CreateTenantAsync(BaseTenantDto newTenantDto);
+        Task<TenantBase> CreateTenantAsync(TenantBase newTenantDto);
         Task<bool> DeleteTenantAsync(int id);
         Task<List<PathNameItem>> GetAllTakenTenantNameAndPathsAsync();
         Task<List<PathNameItem>> GetAllTakenTenantNameAndPathsAsync(int excludingId);
         Task<TenantListDto> GetAllTenantsListAsync(int skip, int take);
-        Task<BaseTenantDto> GetTenantByIdAsync(int id);
-        Task<BaseTenantDto> GetTenantByNameAsync(string name);
-        Task<BaseTenantDto> GetTenantByPathAsync(string path);
-        Task<bool> UpdateTenantBaseValuesAsync(BaseTenantDto updatedTenant);
+        Task<TenantBase> GetTenantByIdAsync(int id);
+        Task<TenantBase> GetTenantByNameAsync(string name);
+        Task<TenantBase> GetTenantByPathAsync(string path);
+        Task<bool> UpdateTenantBaseValuesAsync(TenantBase updatedTenant);
     }
 }

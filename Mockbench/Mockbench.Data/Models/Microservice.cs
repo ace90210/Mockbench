@@ -1,11 +1,32 @@
 ﻿using Mockbench.Data.Models.Headers;
 using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.Microservice;
+using Riok.Mapperly.Abstractions;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Mockbench.Data.Models
 {
+    [Mapper]
+    public partial class MicroserviceMapper
+    {
+        public partial FullMicroserviceDto ToMicroserviceDto(Microservice tenant);
+
+        public partial Microservice ToMicroserviceEntity(FullMicroserviceDto tenant);
+
+        public partial List<FullMicroserviceDto> ToMicroserviceDtos(List<Microservice> tenants);
+
+        public partial List<Microservice> ToMicroserviceEntities(List<FullMicroserviceDto> tenants);
+    }
+
+    [Mapper(UseDeepCloning = true)]
+    public partial class MicroserviceClonerMapper
+    {
+        public partial Microservice Clone(Microservice tenant);
+
+        public partial FullMicroserviceDto Clone(FullMicroserviceDto tenant);
+    }
+
     public class Microservice
     {
         [Key]
@@ -23,7 +44,7 @@ namespace Mockbench.Data.Models
 
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public int EnvironmentID { get; set; }
+        public int MicroserviceID { get; set; }
 
         [MaxLength(450)]
         public string TargetUrl { get; set; } = string.Empty;
@@ -44,9 +65,6 @@ namespace Mockbench.Data.Models
         public HeadersMode HeadersMode { get; set; }
 
         public bool InjectForwardingHeadersOnRequest { get; set; }
-
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public Environment Environment { get; set; }
 
         public List<ServiceHeader> Headers { get; set; }
 

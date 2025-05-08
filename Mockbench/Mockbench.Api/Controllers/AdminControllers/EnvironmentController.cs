@@ -25,9 +25,9 @@ namespace Mockbench.Api.Controllers.AdminControllers
         }
 
         [HttpGet("list")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<BasicEnvironmentDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<EnvironmentDto>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<IEnumerable<BasicEnvironmentDto>>> Get()
+        public async Task<ActionResult<IEnumerable<EnvironmentDto>>> Get()
         {
             _logger.LogInformation("Get Environment list called");
             var environments = await _environmentRepository.GetEnvironments();
@@ -35,74 +35,12 @@ namespace Mockbench.Api.Controllers.AdminControllers
             return Ok(environments);
         }
 
-        [HttpGet("list/{tenantId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnvironmentOverviewCollection))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<EnvironmentOverviewCollection>> Get(int tenantId)
-        {
-            if (tenantId <= 0)
-                return BadRequest(ErrorMessageConstants.TenantId);
-            
-            var environments = await _environmentRepository.GetEnvironmentsByTenantId(tenantId);
-
-            if (environments == null)
-                return NotFound(ErrorMessageConstants.TenantNotFound);
-
-            return Ok(environments);
-        }
-
-        [HttpGet("findbyfullpath/{tenantpath}/{environmentpath}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BasicEnvironmentDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<BasicEnvironmentDto>> GetByFullPath(string tenantpath, string environmentpath)
-        {
-            if (string.IsNullOrWhiteSpace(tenantpath))
-                return BadRequest(ErrorMessageConstants.TenantPath);
-            
-            if (string.IsNullOrWhiteSpace(environmentpath))
-                return BadRequest(ErrorMessageConstants.EnvironmentPath);
-            
-            var environmentId = await _environmentRepository.GetEnvironmentId(tenantpath, environmentpath);
-
-            if (environmentId == null)
-                return NotFound(ErrorMessageConstants.EnvironmentNotFound);
-
-            var environment = await _environmentRepository.GetEnvironmentById(environmentId.Value);
-
-            return Ok(environment);
-        }
-
-        [HttpGet("findbypath/{tenant}/{environmentpath}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BasicEnvironmentDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<BasicEnvironmentDto>> GetByFullPath(int tenant, string environmentpath)
-        {
-            if (tenant <= 0)
-                return BadRequest(ErrorMessageConstants.TenantId);
-            
-            if (string.IsNullOrWhiteSpace(environmentpath))
-                return BadRequest(ErrorMessageConstants.EnvironmentPath);
-            
-            var environmentId = await _environmentRepository.GetEnvironmentId(tenant, environmentpath);
-
-            if (environmentId == null)
-                return NotFound(ErrorMessageConstants.EnvironmentNotFound);
-
-            var environment = await _environmentRepository.GetEnvironmentById(environmentId.Value);
-
-            return Ok(environment);
-        }
-
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BasicEnvironmentDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnvironmentDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<BasicEnvironmentDto>> GetEnvironmentById(int id)
+        public async Task<ActionResult<EnvironmentDto>> GetEnvironmentById(int id)
         {
             if (id <= 0)
                 return BadRequest(ErrorMessageConstants.EnvironmentId);
@@ -113,28 +51,23 @@ namespace Mockbench.Api.Controllers.AdminControllers
         }
 
         [HttpPost("{tenantId}")]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(BaseEnvironmentDto))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(EnvironmentDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<BaseEnvironmentDto>> CreateEnvironment(int tenantId, [FromBody] BaseEnvironmentDto? newEnvironment)
-        {
-            if (tenantId <= 0)
-                return BadRequest(ErrorMessageConstants.TenantId);
-            
+        public async Task<ActionResult<EnvironmentDto>> CreateEnvironment([FromBody] EnvironmentDto? newEnvironment)
+        {            
             if (newEnvironment == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
 
             if (newEnvironment.Id != 0)
                 return BadRequest(ErrorMessageConstants.NewEnvironmentId);
 
-            if (newEnvironment.TenantId > 0 && newEnvironment.TenantId != tenantId)
-                return BadRequest(ErrorMessageConstants.IdMissMatch);
 
             var results = new List<ValidationResult>();
 
-            var existingEnvironmentPaths = await _environmentRepository.GetAllEnvironmentNameAndPathsForTenant(tenantId);
+            var existingEnvironmentPaths = await _environmentRepository.GetAllEnvironmentNameAndPaths();
 
             bool isValid = GeneralHelper.TryValidateFullObject(newEnvironment, new ValidationContext(newEnvironment, 
                 new Dictionary<object, object?>()
@@ -157,12 +90,12 @@ namespace Mockbench.Api.Controllers.AdminControllers
         }
 
         [HttpPut("{environmentId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BaseEnvironmentDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnvironmentDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<BaseEnvironmentDto>> UpdateEnvironment(int environmentId, [FromBody] BaseEnvironmentDto? updatedEnvironment)
+        public async Task<ActionResult<EnvironmentDto>> UpdateEnvironment(int environmentId, [FromBody] EnvironmentDto? updatedEnvironment)
         {
             if (environmentId <= 0)
                 return BadRequest(ErrorMessageConstants.EnvironmentId);
@@ -175,7 +108,7 @@ namespace Mockbench.Api.Controllers.AdminControllers
 
             var results = new List<ValidationResult>();
 
-            var existingEnvironmentPaths = await _environmentRepository.GetAllEnvironmentNameAndPathsForTenant(updatedEnvironment.TenantId, environmentId);
+            var existingEnvironmentPaths = await _environmentRepository.GetAllEnvironmentNameAndPaths(environmentId);
 
             bool isValid = GeneralHelper.TryValidateFullObject(updatedEnvironment, new ValidationContext(updatedEnvironment, 
                 new Dictionary<object, object?>()
