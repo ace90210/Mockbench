@@ -19,7 +19,9 @@ namespace Mockbench.Shared.Models.Tenant
         public string Path { get; set; }
 
         public DateTime? SimulateTime { get; set; }
-        
+
+        public List<TenantVariableDto> Variables { get; set; }
+
         /// <summary>
         /// Validates tenant
         /// </summary>

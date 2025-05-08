@@ -25,14 +25,14 @@ namespace Mockbench.Data.Repositories
         
         public async Task<List<PathNameItem>> GetAllTakenTenantNameAndPathsAsync(int excludingId)
         {
-            var tenants = _context.Tenants.Where(rt => rt.ID != excludingId).Select(rt => new PathNameItem(rt.Name, rt.Path));
+            var tenants = _context.Tenants.Include(t => t.Variables).Where(rt => rt.ID != excludingId).Select(rt => new PathNameItem(rt.Name, rt.Path));
 
             return await tenants.ToListAsync();
         }
 
         public async Task<TenantListDto> GetAllTenantsListAsync(int skip, int take)
         {
-            var tenants = await _context.Tenants.ToListAsync();
+            var tenants = await _context.Tenants.Include(t => t.Variables).ToListAsync();
 
             return new TenantListDto()
             {
@@ -52,20 +52,26 @@ namespace Mockbench.Data.Repositories
 
         public async Task<TenantBase?> GetTenantByIdAsync(int id)
         {
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ID == id);
+            var tenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.ID == id);
 
             return tenant == null ? null : new TenantBase()
             {
                 Id = tenant.ID,
                 Name = tenant.Name,
                 Path = tenant.Path,
-                SimulateTime = tenant.SimulateTime
+                SimulateTime = tenant.SimulateTime,
+                Variables = tenant.Variables.Select(v => new TenantVariableDto()
+                {
+                    Id = v.Id,
+                    Key = v.Key,
+                    Value = v.Value
+                }).ToList()
             };
         }
 
         public async Task<TenantBase?> GetTenantByNameAsync(string name)
         {
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Name == name);
+            var tenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Name == name);
 
 
             return tenant == null ? null : new TenantBase()
@@ -73,20 +79,32 @@ namespace Mockbench.Data.Repositories
                 Id = tenant.ID,
                 Name = tenant.Name,
                 Path = tenant.Path,
-                SimulateTime = tenant.SimulateTime
+                SimulateTime = tenant.SimulateTime,
+                Variables = tenant.Variables.Select(v => new TenantVariableDto()
+                {
+                    Id = v.Id,
+                    Key = v.Key,
+                    Value = v.Value
+                }).ToList()
             };
         }
 
         public async Task<TenantBase?> GetTenantByPathAsync(string path)
         {
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Path == path.ToLower());
+            var tenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Path == path.ToLower());
 
             return tenant == null ? null : new TenantBase()
             {
                 Id = tenant.ID,
                 Name = tenant.Name,
                 Path = tenant.Path,
-                SimulateTime = tenant.SimulateTime
+                SimulateTime = tenant.SimulateTime,
+                Variables = tenant.Variables.Select(v => new TenantVariableDto()
+                {
+                    Id = v.Id,
+                    Key = v.Key,
+                    Value = v.Value
+                }).ToList()
             };
         }
 
@@ -98,7 +116,7 @@ namespace Mockbench.Data.Repositories
             if (string.IsNullOrWhiteSpace(newTenantDto.Path))
                 throw new Exception("Error path missing or empty");
 
-            var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Path.ToLower() == newTenantDto.Path.ToLower());
+            var existingTenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Path.ToLower() == newTenantDto.Path.ToLower());
 
             if (existingTenant != null)
                 throw new Exception("tenant with same path already exists. Tenant paths MUST be unique");
@@ -107,7 +125,12 @@ namespace Mockbench.Data.Repositories
             {
                 Name = newTenantDto.Name,
                 Path = newTenantDto.Path.ToLower(),
-                SimulateTime = newTenantDto.SimulateTime
+                SimulateTime = newTenantDto.SimulateTime,
+                Variables = newTenantDto.Variables.Select(v => new TenantVariable()
+                {
+                    Key = v.Key,
+                    Value = v.Value
+                }).ToList()
             };
 
             _context.Tenants.Add(newTenant);
@@ -119,7 +142,13 @@ namespace Mockbench.Data.Repositories
                 Id = newTenant.ID,
                 Name = newTenant.Name,
                 Path = newTenant.Path,
-                SimulateTime = newTenant.SimulateTime
+                SimulateTime = newTenant.SimulateTime,
+                Variables = newTenant.Variables.Select(v => new TenantVariableDto()
+                {
+                    Id = v.Id,
+                    Key = v.Key,
+                    Value = v.Value
+                }).ToList()
             };
         }
 
@@ -130,7 +159,7 @@ namespace Mockbench.Data.Repositories
         /// <returns>true if updated successfully</returns>
         public async Task<bool> UpdateTenantBaseValuesAsync(TenantBase updatedTenant)
         {
-            var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ID == updatedTenant.Id);
+            var existingTenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.ID == updatedTenant.Id);
 
             if (existingTenant == null)
                 return false;
@@ -138,6 +167,48 @@ namespace Mockbench.Data.Repositories
             existingTenant.Name = updatedTenant.Name;
             existingTenant.Path = updatedTenant.Path.ToLower();
             existingTenant.SimulateTime = updatedTenant.SimulateTime;
+
+
+
+            if (existingTenant.Variables == null)
+            {
+                existingTenant.Variables = new List<TenantVariable>();
+            }
+
+            if(updatedTenant.Variables == null)
+            {
+                updatedTenant.Variables = new List<TenantVariableDto>();
+            }
+
+            var toAdd = new List<TenantVariableDto>();
+            var toRemove = existingTenant.Variables.Where(v => !updatedTenant.Variables.Any(uv => uv.Key == v.Key));
+
+            foreach (var variable in toRemove.ToList())
+            {
+                existingTenant.Variables.Remove(variable);
+            }
+
+            foreach (var variable in updatedTenant.Variables)
+            {
+                var existingVariable = existingTenant.Variables.FirstOrDefault(v => v.Key == variable.Key);
+                if (existingVariable != null)
+                {
+                    existingVariable.Value = variable.Value;
+                }
+                else
+                {
+                    toAdd.Add(variable);
+                }
+            }
+
+            foreach(var variable in toAdd)
+            {
+                existingTenant.Variables.Add(new TenantVariable()
+                {
+                    Key = variable.Key,
+                    Value = variable.Value
+                });
+            }
 
             await _context.SaveChangesAsync();
             return true;

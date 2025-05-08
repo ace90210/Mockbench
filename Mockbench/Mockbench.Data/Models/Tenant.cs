@@ -40,5 +40,7 @@ namespace Mockbench.Data.Models
         public string Path { get; set; }
 
         public DateTime? SimulateTime { get; set; }
+
+        public List<TenantVariable> Variables { get; set; } = new List<TenantVariable>();
     }
 }

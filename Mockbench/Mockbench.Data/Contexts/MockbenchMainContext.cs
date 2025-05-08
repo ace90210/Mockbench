@@ -20,6 +20,10 @@ namespace Mockbench.Data.Contexts
 
         public DbSet<Models.Environment> Environments { get; set; }
 
+        public DbSet<TenantVariable> TenantVariables { get; set; }
+
+        public DbSet<EnvironmentVariable> EnvironmentVariables { get; set; }
+
         public DbSet<Endpoint> Endpoints { get; set; }
 
         public DbSet<MockResponse> MockResponses { get; set; }

@@ -48,5 +48,7 @@ namespace Mockbench.Data.Models
         public string DefaultHealthCheckUrl { get; set; }
 
         public DateTime? SimulateTime { get; set; }
+
+        public List<EnvironmentVariable> Variables { get; set; }
     }
 }
