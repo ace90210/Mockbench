@@ -1,0 +1,224 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Mockbench.Abstractions.Repositories;
+using Mockbench.Shared.Constants;
+using Mockbench.Shared.Helper;
+using Mockbench.Shared.Models.Microservice;
+using Mockbench.Shared.Models.Utility;
+using System.ComponentModel.DataAnnotations;
+
+namespace Mockbench.Api.Controllers.AdminControllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class MicroserviceController : ControllerBase
+    {
+
+        private readonly ILogger<MicroserviceController> _logger;
+        private readonly IMicroserviceRepository _microserviceRepository;
+
+        public MicroserviceController(ILogger<MicroserviceController>? logger, IMicroserviceRepository? microserviceRepository)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _microserviceRepository = microserviceRepository ?? throw new ArgumentNullException(nameof(microserviceRepository));
+        }
+
+        [HttpGet("{microserviceId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceResultDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<MicroserviceResultDto>> Get(int microserviceId)
+        {
+            _logger.LogInformation("Getting microservice: {MicroserviceId}", microserviceId);
+
+            if (microserviceId <= 0)
+                return BadRequest(ErrorMessageConstants.MicroserviceId);
+            
+            var service =  await _microserviceRepository.GetMicroserviceById(microserviceId);
+
+            if (service == null)
+                return NotFound(ErrorMessageConstants.MicroserviceNotFound);
+
+            return Ok(service);
+        }
+
+        [HttpGet("findbypath/{environmentId}/{microservicePath}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceResultDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<MicroserviceResultDto>> Get(int environmentId, string? microservicePath)
+        {
+            if (environmentId <= 0)
+                return BadRequest(ErrorMessageConstants.EnvironmentId);
+            
+            if (string.IsNullOrWhiteSpace(microservicePath))
+                return BadRequest(ErrorMessageConstants.MicroservicePath);
+            
+            var service = await _microserviceRepository.GetMicroservice(environmentId, microservicePath);
+
+            if(service == null)
+                return NotFound(ErrorMessageConstants.MicroserviceNotFound);
+
+            return Ok(service);
+        }
+
+        [HttpGet("list")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceResultDto>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<IEnumerable<MicroserviceResultDto>>> GetAllMicroservices()
+        {
+            return Ok(await _microserviceRepository.GetAllMicroservices());
+        }
+
+        [HttpGet("searchresultlist")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceResultDto>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<IEnumerable<MicroserviceSearchResultDto>>> GetAllMicroserviceSearchResults()
+        {
+            return Ok(await _microserviceRepository.GetAllMicroserviceSearchResults());
+        }
+
+        [HttpGet("list/{environmentId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceResultDto>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<IEnumerable<MicroserviceResultDto>>> GetMicroservicesForEnvironment(int environmentId)
+        {
+            if (environmentId <= 0)
+                return BadRequest(ErrorMessageConstants.EnvironmentId);
+            
+            return Ok(await _microserviceRepository.GetAllMicroservicesForEnvironment(environmentId));
+        }
+
+        [HttpGet("parents/{microserviceId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceParentIds))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<MicroserviceParentIds>> GetParentIds(int microserviceId)
+        {
+            if (microserviceId <= 0)
+                return BadRequest(ErrorMessageConstants.MicroserviceId);
+            
+            var microserviceParentIds = await _microserviceRepository.GetParentIds(microserviceId);
+
+            if(microserviceParentIds == null)
+                return NotFound(ErrorMessageConstants.MicroserviceNotFound);
+
+            return Ok(microserviceParentIds);
+        }
+
+        [HttpPost("{environmentId}")]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MicroserviceResultDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<MicroserviceResultDto>> CreateMicroservice(int environmentId, [FromBody] MicroserviceResultDto? newMicroservice)
+        {
+            if (environmentId <= 0)
+                return BadRequest(ErrorMessageConstants.EnvironmentId);
+            
+            if (newMicroservice == null)
+                return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
+            
+            if (newMicroservice.Id != 0)
+                return BadRequest(ErrorMessageConstants.NewMicroserviceId);
+
+            if (string.IsNullOrWhiteSpace(newMicroservice.Name))
+                return BadRequest(ErrorMessageConstants.MicroserviceName);
+            
+            if (string.IsNullOrWhiteSpace(newMicroservice.Path))
+                return BadRequest(ErrorMessageConstants.MicroservicePath);
+
+            if (newMicroservice.ProxyMode != ProxyMode.None && string.IsNullOrWhiteSpace(newMicroservice.TargetUrl))
+                return BadRequest(ErrorMessageConstants.MicroserviceTargetUrl);
+
+            if (newMicroservice.RegisteredEnvironmentId > 0 && newMicroservice.RegisteredEnvironmentId != environmentId)
+                return BadRequest(ErrorMessageConstants.IdMissMatch);
+
+            var results = new List<ValidationResult>();
+
+            var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNamesForEnvironment(environmentId);
+
+            bool isValid = GeneralHelper.TryValidateFullObject(newMicroservice, new ValidationContext(newMicroservice,
+                new Dictionary<object, object?>()
+                {
+                    { "Path", existingPaths.Select(ep => ep.Path) },
+                    { "Name", existingPaths.Select(ep => ep.Name) }
+                }), results);
+
+            if (!isValid)
+                return BadRequest(results.ToBadRequestResult());
+
+            newMicroservice.RegisteredEnvironmentId = environmentId;
+            var createdMicroservice = await _microserviceRepository.CreateMicroservice(newMicroservice);
+
+            if (createdMicroservice == null)
+                return NotFound(ErrorMessageConstants.EnvironmentNotFound);
+            
+            return StatusCode(201, createdMicroservice);
+        }
+
+        [HttpPut("{microserviceId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult> UpdateMicroservice(int microserviceId, [FromBody] MicroserviceResultDto? updatedMicroservice)
+        {
+            if (microserviceId <= 0)
+                return BadRequest(ErrorMessageConstants.MicroserviceId);
+            
+            if (updatedMicroservice == null)
+                return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
+            
+            if (updatedMicroservice.Id != microserviceId)
+                return BadRequest(ErrorMessageConstants.IdMissMatch);
+
+            if (string.IsNullOrWhiteSpace(updatedMicroservice.Name))
+                return BadRequest(ErrorMessageConstants.MicroserviceName);
+            
+            if (string.IsNullOrWhiteSpace(updatedMicroservice.Path))
+                return BadRequest(ErrorMessageConstants.MicroservicePath);
+
+            if (updatedMicroservice.ProxyMode != ProxyMode.None && string.IsNullOrWhiteSpace(updatedMicroservice.TargetUrl))
+                return BadRequest(ErrorMessageConstants.MicroserviceTargetUrl);
+            
+            var results = new List<ValidationResult>();
+
+            var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNamesForEnvironment(updatedMicroservice.RegisteredEnvironmentId, microserviceId);
+
+            bool isValid = GeneralHelper.TryValidateFullObject(updatedMicroservice, new ValidationContext(updatedMicroservice, 
+                new Dictionary<object, object?>()
+                {
+                    { "Path", existingPaths.Select(ep => ep.Path) },
+                    { "Name", existingPaths.Select(ep => ep.Name) }
+                }), results);
+
+            if (!isValid)
+                return BadRequest(results.ToBadRequestResult());
+
+            return await _microserviceRepository.UpdateMicroservice(updatedMicroservice) ? Ok() : NotFound();
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult> Delete(int id)
+        {
+            if (id <= 0)
+                return BadRequest(ErrorMessageConstants.MicroserviceId);
+
+            if (await _microserviceRepository.DeleteMicroservice(id))
+                return Ok();
+
+            return NoContent();
+        }
+    }
+}
