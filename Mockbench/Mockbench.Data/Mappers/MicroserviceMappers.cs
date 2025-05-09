@@ -9,7 +9,7 @@ namespace Mockbench.Data.Mappers
         {
             return microservice == null ? null : new MicroserviceResultDto()
             {
-                Id = microservice.ID,
+                Id = microservice.Id,
                 Name = microservice.Name,
                 Path = microservice.Path,
                 Enabled = microservice.Enabled,

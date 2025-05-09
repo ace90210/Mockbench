@@ -25,18 +25,19 @@ namespace Mockbench.Api.Controllers.AdminControllers
             _endpointRepository = endpointRepository ?? throw new ArgumentNullException(nameof(endpointRepository));
         }
 
-        [HttpGet("list/{microserviceId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<EndpointDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<IEnumerable<EndpointDto>>> GetAllForMicroservice(int microserviceId)
-        {
-            if (microserviceId <= 0)
-                return BadRequest(ErrorMessageConstants.MicroserviceId);
-            
-            _logger.LogInformation("get request for microservice: {MicroserviceId}", microserviceId);
-            return Ok(await _endpointRepository.GetAllEndpointsForMicroserviceAsync(microserviceId));
-        }
+        // TODO reimplement this
+        //[HttpGet("list/{microserviceId}")]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<EndpointDto>))]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        //public async Task<ActionResult<IEnumerable<EndpointDto>>> GetAllForMicroservice(int microserviceId)
+        //{
+        //    if (microserviceId <= 0)
+        //        return BadRequest(ErrorMessageConstants.MicroserviceId);
+
+        //    _logger.LogInformation("get request for microservice: {MicroserviceId}", microserviceId);
+        //    return Ok(await _endpointRepository.GetAllMatchingEndpointsAsync(microserviceId));
+        //}
 
         [HttpGet("{endpointId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EndpointDto))]

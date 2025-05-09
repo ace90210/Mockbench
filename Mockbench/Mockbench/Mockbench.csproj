@@ -19,8 +19,14 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<ProjectReference Include="..\Mockbench.Abstractions\Mockbench.Abstractions.csproj" />
 		<ProjectReference Include="..\Mockbench.Api\Mockbench.Api.csproj" />
 		<ProjectReference Include="..\Mockbench.Client\Mockbench.Client.csproj" />
+		<ProjectReference Include="..\Mockbench.Data.Sqlite\Mockbench.Data.Sqlite.csproj" />
+		<ProjectReference Include="..\Mockbench.Data.SqlServer\Mockbench.Data.SqlServer.csproj" />
+		<ProjectReference Include="..\Mockbench.Data\Mockbench.Data.csproj" />
+		<ProjectReference Include="..\Mockbench.Services\Mockbench.Services.csproj" />
+		<ProjectReference Include="..\Mockbench.Shared\Mockbench.Shared.csproj" />
 	</ItemGroup>
 
 </Project>

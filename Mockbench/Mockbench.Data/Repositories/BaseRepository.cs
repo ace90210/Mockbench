@@ -5,6 +5,9 @@ using Mockbench.Data.Contexts;
 using Mockbench.Data.Models;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Models.Configuration;
+using Mockbench.Shared.Models.Environment;
+using Mockbench.Shared.Models.Microservice;
+using Mockbench.Shared.Models.Tenant;
 using Mockbench.Shared.Models.Timetravel;
 using Mockbench.Shared.Models.Utility;
 
@@ -33,7 +36,7 @@ namespace Mockbench.Data.Repositories
         #region Set Simulation Time
         public async Task<bool> SetSimulateTimeOnRequest(DateTime? time, int id)
         {
-            var endpoint = await _context.Endpoints.FirstOrDefaultAsync(rr => rr.ID == id);
+            var endpoint = await _context.Endpoints.FirstOrDefaultAsync(rr => rr.Id == id);
 
             if (endpoint == null)
                 return false;
@@ -47,7 +50,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<bool> SetSimulateTimeOnMicroservice(DateTime? time, int id)
         {
-            var microservice = await _context.Microservices.FirstOrDefaultAsync(m => m.ID == id);
+            var microservice = await _context.Microservices.FirstOrDefaultAsync(m => m.Id == id);
 
             if (microservice == null)
                 return false;
@@ -73,7 +76,7 @@ namespace Mockbench.Data.Repositories
         }
         public async Task<bool> SetSimulateTimeOnTenant(DateTime? time, int id)
         {
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ID == id);
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id);
 
             if (tenant == null)
                 return false;
@@ -89,7 +92,7 @@ namespace Mockbench.Data.Repositories
         #region Get Times
         public async Task<TimeTravelDto> GetRequestTimes(int id)
         {
-            var endpointDto = await _context.Endpoints.Include(sr => sr.MockResponses).FirstOrDefaultAsync(sr => sr.ID == id);
+            var endpointDto = await _context.Endpoints.Include(sr => sr.MockResponses).FirstOrDefaultAsync(sr => sr.Id == id);
 
             if (endpointDto == null)
             {
@@ -112,7 +115,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<TimeTravelDto> GetMicroserviceTimes(int id)
         {
-            var microservice = await _context.Microservices.FirstOrDefaultAsync(m => m.ID == id);
+            var microservice = await _context.Microservices.FirstOrDefaultAsync(m => m.Id == id);
 
             if(microservice == null)
             {
@@ -123,7 +126,7 @@ namespace Mockbench.Data.Repositories
                 };
             }
 
-            var endpoints = _context.Endpoints.Include(sr => sr.MockResponses).Where(sr => sr.MicroserviceID == id);
+            var endpoints = _context.Endpoints.Include(sr => sr.MockResponses).Where(sr => sr.MicroserviceId == id);
 
             var result = endpoints.SelectMany(sr => sr.MockResponses)
                                             .Select(mr => mr.CreatedUtc).ToList();
@@ -164,7 +167,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<TimeTravelDto> GetTenanEnvironmentTimes(int id)
         {
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ID == id);
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id);
 
             if (tenant == null)
             {
@@ -204,7 +207,11 @@ namespace Mockbench.Data.Repositories
 
             tenants.ForEach(t =>
             {
-                t.ID = 0;
+                t.Id = 0;
+                t.Variables.ForEach(v =>
+                {
+                    v.Id = 0;
+                });
             });
 
             var environments = _context.Environments.ToList();
@@ -212,6 +219,10 @@ namespace Mockbench.Data.Repositories
             environments.ForEach(e =>
             {
                 e.ID = 0;
+                e.Variables.ForEach(v =>
+                {
+                    v.Id = 0;
+                });
             });
 
             fullDatabase.Tenants = _tenantMapper.ToTenantDtos(tenants);
@@ -231,7 +242,7 @@ namespace Mockbench.Data.Repositories
                 microservice.Endpoints = _context.Endpoints
                                                         .Include(sr => sr.EndpointHeaders)
                                                         .Include(sr => sr.QueryParameters)
-                                                        .Where(sr => sr.MicroserviceID == microservice.ID)
+                                                        .Where(sr => sr.MicroserviceId == microservice.Id)
                                                         .AsSplitQuery()
                                                         .ToList();
                         
@@ -240,7 +251,7 @@ namespace Mockbench.Data.Repositories
                 {
                     endpoint.MockResponses = _context.MockResponses
                                                     .Include(mr => mr.Headers)
-                                                    .Where(mr => mr.EndpointId == endpoint.ID)
+                                                    .Where(mr => mr.EndpointId == endpoint.Id)
                                                     .ToList();
                             
                     //clear ids to zero
@@ -254,7 +265,7 @@ namespace Mockbench.Data.Repositories
                 //clear ids to zero
                 microservice.Endpoints.ForEach(mr =>
                 {
-                    mr.ID = 0;
+                    mr.Id = 0;
                     mr.EndpointHeaders?.ForEach(h => h.ID = 0);
                     mr.QueryParameters?.ForEach(h => h.Id = 0);
                 });
@@ -263,33 +274,75 @@ namespace Mockbench.Data.Repositories
             //clear ids to zero
             microservices.ForEach(mr =>
             {
-                mr.ID = 0;
+                mr.Id = 0;
                 mr.Headers?.ForEach(h => h.ID = 0);
-                mr.Endpoints?.ForEach(e => e.ID = 0);
+                mr.Endpoints?.ForEach(e => e.Id = 0);
             });            
             
             return fullDatabase;
         }
 
-        public async Task<bool> ImportDatabase(FullDatabaseDto import, bool skipDuplicateTenants)
+        public async Task<bool> ImportDatabase(FullDatabaseDto import, bool skipDuplicates)
         {
             if (import.Tenants == null)
-                return false;
-            var tenants = import.Tenants.Select(t=> _tenantMapper.ToTenantEntity(t));
+                import.Tenants = new List<TenantBase>();
 
-            var existingTenant = _context.Tenants;
+            if (import.Environments == null)
+                import.Environments = new List<EnvironmentDto>();
+
+
+            if (import.Microservices == null)
+                import.Microservices = new List<FullMicroserviceDto>();
+
+            var tenants = _tenantMapper.ToTenantEntities(import.Tenants.ToList());
+            var environments = _environmentMapper.ToEnvironmentEntities(import.Environments.ToList());
+            var microservices = _microserviceMapper.ToMicroserviceEntities(import.Microservices.ToList());
+
+            var existingTenants = _context.Tenants;
 
             foreach (var tenant in tenants)
             {
-                if (!existingTenant.Any(et => et.Name.ToUpper().Equals(tenant.Name.ToUpper()) ||
+                if (!existingTenants.Any(et => et.Name.ToUpper().Equals(tenant.Name.ToUpper()) ||
                                                     et.Path.ToUpper().Equals(tenant.Path.ToUpper())
                                         ))
                 {
                     _context.Tenants.Add(tenant);
                 }
-                else if(!skipDuplicateTenants)
+                else if (!skipDuplicates)
                 {
                     throw new InvalidOperationException("Cannot import duplicate tenant");
+                }
+            }
+
+            var existingEnvironments = _context.Environments;
+
+            foreach (var environment in environments)
+            {
+                if (!existingEnvironments.Any(e => e.Name.ToUpper().Equals(environment.Name.ToUpper()) ||
+                                                    e.Path.ToUpper().Equals(environment.Path.ToUpper())
+                                        ))
+                {
+                    _context.Environments.Add(environment);
+                }
+                else if (!skipDuplicates)
+                {
+                    throw new InvalidOperationException("Cannot import duplicate environment");
+                }
+            }
+
+            var existingMicroservices = _context.Microservices;
+
+            foreach (var microservice in microservices)
+            {
+                if (!existingMicroservices.Any(em => em.Name.ToUpper().Equals(microservice.Name.ToUpper()) ||
+                                                    em.Path.ToUpper().Equals(microservice.Path.ToUpper())
+                                        ))
+                {
+                    _context.Microservices.Add(microservice);
+                }
+                else if (!skipDuplicates)
+                {
+                    throw new InvalidOperationException("Cannot import duplicate microservice");
                 }
             }
 

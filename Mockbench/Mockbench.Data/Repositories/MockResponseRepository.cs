@@ -62,7 +62,7 @@ namespace Mockbench.Data.Repositories
                 throw new Exception("No endpoint id provided");
             }
 
-            var endpoint = _context.Endpoints.Include(sr => sr.MockResponses).FirstOrDefault(sr => sr.ID == mockResponseId);
+            var endpoint = _context.Endpoints.Include(sr => sr.MockResponses).FirstOrDefault(sr => sr.Id == mockResponseId);
 
             if (endpoint == null)
                 return null;
@@ -109,7 +109,7 @@ namespace Mockbench.Data.Repositories
                 throw new Exception("No response provided");
             }
 
-            var existingRequest = _context.Endpoints.Include(r => r.MockResponses).FirstOrDefault(r => r.ID == endpointId);
+            var existingRequest = _context.Endpoints.Include(r => r.MockResponses).FirstOrDefault(r => r.Id == endpointId);
 
             if (existingRequest == null)
             {
@@ -136,7 +136,7 @@ namespace Mockbench.Data.Repositories
                 return (true, new List<MockResponseDto>());
             }
 
-            var existingRequest = _context.Endpoints.Include(r => r.MockResponses).FirstOrDefault(r => r.ID == endpointId);
+            var existingRequest = _context.Endpoints.Include(r => r.MockResponses).FirstOrDefault(r => r.Id == endpointId);
 
             if (existingRequest == null)
             {
@@ -167,7 +167,7 @@ namespace Mockbench.Data.Repositories
                 return true;
             }
 
-            var existingRequest = _context.Endpoints.Include(r => r.MockResponses).FirstOrDefault(r => r.ID == endpointId);
+            var existingRequest = _context.Endpoints.Include(r => r.MockResponses).FirstOrDefault(r => r.Id == endpointId);
 
             if (existingRequest == null)
             {

@@ -38,7 +38,11 @@ namespace Mockbench.Shared.Models.Endpoint
 
         public DateTime CreatedUtc { get; set; }
 
-        public int MicroserviceId { get; set; }
+        public int? TenantId { get; set; }
+
+        public int? EnvironmentId { get; set; }
+
+        public int? MicroserviceId { get; set; }
 
         public List<EndpointHeaderDto> EndpointHeaders { get; set; }
 

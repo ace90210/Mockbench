@@ -29,7 +29,7 @@ namespace Mockbench.Data.Models
         [Key]
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public int ID { get; set; }
+        public int Id { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         [MaxLength(50)]
@@ -42,5 +42,7 @@ namespace Mockbench.Data.Models
         public DateTime? SimulateTime { get; set; }
 
         public List<TenantVariable> Variables { get; set; } = new List<TenantVariable>();
+
+        public List<Endpoint> Endpoints { get; set; }
     }
 }

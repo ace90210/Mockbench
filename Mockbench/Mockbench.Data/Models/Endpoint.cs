@@ -11,7 +11,7 @@ namespace Mockbench.Data.Models
         [Key]
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public int ID { get; set; }
+        public int Id { get; set; }
         
         [Required(AllowEmptyStrings = true)]
         [MaxLength(500)]
@@ -75,10 +75,16 @@ namespace Mockbench.Data.Models
 
         public List<EndpointHeader> EndpointHeaders { get; set; }
 
-        // ReSharper disable once InconsistentNaming
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public int MicroserviceID { get; set; }
+        public int? TenantId { get; set; }
 
-        public Microservice Microservice { get; set; }
+        public Tenant? Tenant { get; set; }
+
+        public int? EnvironmentId { get; set; }
+
+        public Environment? Environment{ get; set; }
+
+        public int? MicroserviceId { get; set; }
+
+        public Microservice? Microservice { get; set; }
     }
 }

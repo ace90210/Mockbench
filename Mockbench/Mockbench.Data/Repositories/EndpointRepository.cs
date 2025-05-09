@@ -18,34 +18,45 @@ namespace Mockbench.Data.Repositories
 
         public async Task<EndpointDto> GetEndpoint(int id)
         {
-            var sr = await _context.Endpoints.Include(sr => sr.MockResponses)
-                                                    .Include(sr => sr.QueryParameters)
-                                                    .Include(sr => sr.EndpointHeaders)
+            var e = await _context.Endpoints.Include(e => e.MockResponses)
+                                                    .Include(e => e.QueryParameters)
+                                                    .Include(e => e.EndpointHeaders)
                                                     .AsSplitQuery()
-                                                    .FirstOrDefaultAsync(rr => rr.ID == id);
+                                                    .FirstOrDefaultAsync(rr => rr.Id == id);
 
-            if (sr == null)
+            if (e == null)
                 return null;
 
-            return sr.ToDto(createNew: false, createChecksumOnResponses: true);
+            return e.ToDto(createNew: false, createChecksumOnResponses: true);
         }
 
         public async Task<UpdateEndpointDto> GetUpdateEndpoint(int id)
         {
-            var sr = await GetEndpoint(id);
+            var e = await GetEndpoint(id);
 
-            return sr?.ToUpdateDto();
+            return e?.ToUpdateDto();
         }
 
-        public async Task<IEnumerable<EndpointDto>> GetAllEndpointsForMicroserviceAsync(int microserviceId)
+        public async Task<IEnumerable<EndpointDto>> GetAllMatchingEndpointsAsync(string? tenantPath, string? environmentPath, string? microservicePath, string endpointUrl)
         {
-            var endpoint = await _context.Endpoints.Include(sr => sr.QueryParameters)
-                                                                .Include(sr => sr.EndpointHeaders)
-                                                                .Include(sr => sr.MockResponses)
-                                                                .ThenInclude(mr => mr.Headers)
-                                                                .Where(sr => sr.MicroserviceID == microserviceId)
-                                                                .AsSplitQuery()
-                                                                .ToListAsync();
+            var endpoint = await _context.Endpoints
+                                             .Include(e => e.QueryParameters)
+                                             .Include(e => e.EndpointHeaders)
+                                             .Include(e => e.MockResponses)
+                                                 .ThenInclude(mr => mr.Headers)
+                                             .Where(e =>
+                                                                 ((e.Tenant == null || e.Tenant.Path == null) && tenantPath == null) ||
+                                                                 (e.Tenant != null && e.Tenant.Path == tenantPath)
+                                                            &&
+                                                                 ((e.Environment == null || e.Environment.Path == null) && environmentPath == null) ||
+                                                                 (e.Environment != null && e.Environment.Path == environmentPath)
+                                                            &&
+                                                                 ((e.Microservice == null || e.Microservice.Path == null) && microservicePath == null) ||
+                                                                 (e.Microservice != null && e.Microservice.Path == microservicePath)
+                                                            && (endpointUrl.StartsWith(e.FromUrl))
+                                                             )
+                                                             .AsSplitQuery()
+                                                             .ToListAsync();
 
             return endpoint.ToDtos(createNew: false, createChecksumOnResponses: false);
         }
@@ -55,7 +66,7 @@ namespace Mockbench.Data.Repositories
             if (endpointDto == null)
                 throw new Exception("No endpoint provided");
 
-            var microserviceExists = _context.Microservices.Any(m => m.ID == microserviceId);
+            var microserviceExists = _context.Microservices.Any(m => m.Id == microserviceId);
 
             if (!microserviceExists)
                 return null;
@@ -76,11 +87,11 @@ namespace Mockbench.Data.Repositories
             if (endpointDto == null)
                 throw new Exception("No endpoint provided");
 
-            var existingendpoint = await _context.Endpoints.Include(sr => sr.MockResponses)
-                                                                        .Include(sr => sr.QueryParameters)
-                                                                        .Include(sr => sr.EndpointHeaders)
+            var existingendpoint = await _context.Endpoints.Include(e => e.MockResponses)
+                                                                        .Include(e => e.QueryParameters)
+                                                                        .Include(e => e.EndpointHeaders)
                                                                         .AsSplitQuery()
-                                                                        .FirstOrDefaultAsync(t => t.ID == endpointId);
+                                                                        .FirstOrDefaultAsync(t => t.Id == endpointId);
 
             if (existingendpoint == null)
                 return null;
@@ -102,11 +113,11 @@ namespace Mockbench.Data.Repositories
             if (responses == null)
                 throw new Exception("No responses provided");
 
-            var existingendpoint = await _context.Endpoints.Include(sr => sr.MockResponses)
-                                                                        .Include(sr => sr.QueryParameters)
-                                                                        .Include(sr => sr.EndpointHeaders)
+            var existingendpoint = await _context.Endpoints.Include(e => e.MockResponses)
+                                                                        .Include(e => e.QueryParameters)
+                                                                        .Include(e => e.EndpointHeaders)
                                                                         .AsSplitQuery()
-                                                                        .FirstOrDefaultAsync(t => t.ID == endpointId);
+                                                                        .FirstOrDefaultAsync(t => t.Id == endpointId);
 
             if (existingendpoint == null)
                 return null;
@@ -122,7 +133,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<bool> DeleteEndpoint(int endpointId)
         {
-            var existedRequest = await _context.Endpoints.FirstOrDefaultAsync(rd => rd.ID == endpointId);
+            var existedRequest = await _context.Endpoints.FirstOrDefaultAsync(rd => rd.Id == endpointId);
 
             if (existedRequest == null)
                 return false;

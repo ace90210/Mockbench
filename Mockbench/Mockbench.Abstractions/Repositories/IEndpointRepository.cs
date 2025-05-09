@@ -8,7 +8,7 @@ namespace Mockbench.Abstractions.Repositories
         Task AddResponseToEndpointAsync(int endpointId, MockResponseDto mockResponseDto);
         Task<EndpointDto> CreateEndpointAsync(int microserviceId, EndpointDto endpointDto);
         Task<bool> DeleteEndpoint(int endpointId);
-        Task<IEnumerable<EndpointDto>> GetAllEndpointsForMicroserviceAsync(int microserviceId);
+        Task<IEnumerable<EndpointDto>> GetAllMatchingEndpointsAsync(string? tenantPath, string? environmentPath, string? microservicePath, string endpointUrl);
         Task<EndpointDto> GetEndpoint(int id);
         Task<UpdateEndpointDto> GetUpdateEndpoint(int id);
 

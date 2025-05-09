@@ -10,7 +10,7 @@ namespace Mockbench.Data.Mappers
 {
     public static class EndpointMappers
     {
-        public static Endpoint ToEntity(this EndpointDto endpointDto, bool createNew, bool createChecksumOnResponses)
+        public static Endpoint? ToEntity(this EndpointDto endpointDto, bool createNew, bool createChecksumOnResponses)
         {
             return endpointDto == null ? null : new Endpoint()
             {
@@ -20,7 +20,9 @@ namespace Mockbench.Data.Mappers
                 ExpectAuthHeader = endpointDto.ExpectAuthHeader,
                 MockBehaviour = endpointDto.MockBehaviour,
                 Enabled = endpointDto.Enabled,
-                MicroserviceID = endpointDto.MicroserviceId,
+                TenantId = endpointDto.TenantId,
+                EnvironmentId = endpointDto.EnvironmentId,
+                MicroserviceId = endpointDto.MicroserviceId,
                 CreatedUtc = !createNew ? endpointDto.CreatedUtc : DateTime.Now,
                 RestType = endpointDto.RestType,
                 SimulateTime = endpointDto.SimulateTime,
@@ -36,7 +38,7 @@ namespace Mockbench.Data.Mappers
             return endpointDtos?.Select(endpointDto => endpointDto.ToEntity(createNew, createChecksumOnResponses)).ToList();
         }
 
-        public static Endpoint ToEntity(this UpdateEndpointDto endpointDto, bool createChecksumOnResponses)
+        public static Endpoint? ToEntity(this UpdateEndpointDto endpointDto, bool createChecksumOnResponses)
         {
             return endpointDto == null ? null : new Endpoint()
             {
@@ -61,18 +63,20 @@ namespace Mockbench.Data.Mappers
             return endpointDtos?.Select(endpointDto => endpointDto.ToEntity(createChecksumOnResponses)).ToList();
         }
 
-        public static EndpointDto ToDto(this Endpoint endpoint, bool createNew, bool createChecksumOnResponses)
+        public static EndpointDto? ToDto(this Endpoint endpoint, bool createNew, bool createChecksumOnResponses)
         {
             return endpoint == null ? null : new EndpointDto()
             {
-                Id = endpoint.ID,
+                Id = endpoint.Id,
                 FromBody = endpoint.FromBody,
                 FromUrl = endpoint.FromUrl,
                 ExactUrlMatch = endpoint.ExactUrlMatch,
                 ExpectAuthHeader = endpoint.ExpectAuthHeader,
                 MockBehaviour = endpoint.MockBehaviour,
                 Enabled = endpoint.Enabled,
-                MicroserviceId = endpoint.MicroserviceID,
+                TenantId = endpoint.TenantId,
+                EnvironmentId = endpoint.EnvironmentId,
+                MicroserviceId = endpoint.MicroserviceId,
                 CreatedUtc = !createNew ? endpoint.CreatedUtc : DateTime.Now,
                 RestType = endpoint.RestType,
                 SimulateTime = endpoint.SimulateTime,
@@ -89,7 +93,7 @@ namespace Mockbench.Data.Mappers
             return endpoints?.Select(endpoint => endpoint.ToDto(createNew, createChecksumOnResponses)).ToList();
         }
 
-        public static UpdateEndpointDto ToUpdateDto(this Endpoint endpoint, bool createChecksumOnResponses)
+        public static UpdateEndpointDto? ToUpdateDto(this Endpoint endpoint, bool createChecksumOnResponses)
         {
             return endpoint == null ? null : new UpdateEndpointDto()
             {
@@ -114,7 +118,7 @@ namespace Mockbench.Data.Mappers
             return endpoints?.Select(endpoint => endpoint.ToUpdateDto(createChecksumOnResponses)).ToList();
         }
 
-        public static UpdateEndpointDto ToUpdateDto(this EndpointDto endpoint)
+        public static UpdateEndpointDto? ToUpdateDto(this EndpointDto endpoint)
         {
             return endpoint == null ? null : new UpdateEndpointDto()
             {

@@ -27,7 +27,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<List<PathNameItem>> GetAllMicroservicePathAndNames(int excludingMicroserviceId)
         {
-            var paths = _context.Microservices.Where(pd => pd.ID != excludingMicroserviceId).Select(rs => new PathNameItem(rs.Name, rs.Path));
+            var paths = _context.Microservices.Where(pd => pd.Id != excludingMicroserviceId).Select(rs => new PathNameItem(rs.Name, rs.Path));
 
             return await paths.ToListAsync();
         }
@@ -38,7 +38,7 @@ namespace Mockbench.Data.Repositories
 
             return new MicroserviceResultDto()
             {
-                Id = ms.ID,
+                Id = ms.Id,
                 Name = ms.Name,
                 Path = ms.Path,
                 Enabled = ms.Enabled,
@@ -56,14 +56,14 @@ namespace Mockbench.Data.Repositories
 
         public async Task<MicroserviceResultDto> GetMicroserviceById(int id)
         {
-            var ms = await _context.Microservices.Include(m => m.Headers).FirstOrDefaultAsync(ms => ms.ID == id);
+            var ms = await _context.Microservices.Include(m => m.Headers).FirstOrDefaultAsync(ms => ms.Id == id);
 
             if (ms == null)
                 return null;
 
             return new MicroserviceResultDto()
             {
-                Id = ms.ID,
+                Id = ms.Id,
                 Name = ms.Name,
                 Path = ms.Path,
                 Enabled = ms.Enabled,
@@ -85,7 +85,7 @@ namespace Mockbench.Data.Repositories
 
             return microservices.Select(ms => new MicroserviceResultDto()
             {
-                Id = ms.ID,
+                Id = ms.Id,
                 Name = ms.Name,
                 Path = ms.Path,
                 Enabled = ms.Enabled,
@@ -110,7 +110,7 @@ namespace Mockbench.Data.Repositories
 
             return microservices.Select(ms => new MicroserviceResultDto()
             {
-                Id = ms.ID,
+                Id = ms.Id,
                 Name = ms.Name,
                 Path = ms.Path,
                 Enabled = ms.Enabled,
@@ -143,7 +143,7 @@ namespace Mockbench.Data.Repositories
 
             return new MicroserviceResultDto()
             {
-                Id = microservice.ID,
+                Id = microservice.Id,
                 Name = microservice.Name,
                 Path = microservice.Path,
                 Enabled = microservice.Enabled,
@@ -170,7 +170,7 @@ namespace Mockbench.Data.Repositories
 
             return new MicroserviceResultDto()
                 {
-                    Id = microservice.ID,
+                    Id = microservice.Id,
                     Name = microservice.Name,
                     Path = microservice.Path,
                     Enabled = microservice.Enabled,
@@ -217,7 +217,7 @@ namespace Mockbench.Data.Repositories
 
             return new MicroserviceResultDto()
             {
-                Id = newMicroservice.ID,
+                Id = newMicroservice.Id,
                 Name = newMicroservice.Name,
                 TargetUrl = newMicroservice.TargetUrl,
                 Path = newMicroservice.Path,
@@ -241,7 +241,7 @@ namespace Mockbench.Data.Repositories
             if (string.IsNullOrWhiteSpace(updatedMicroservice.Path))
                 return false;
 
-            var existingMicroservice = await _context.Microservices.Include(m => m.Headers).FirstOrDefaultAsync(t => t.ID == updatedMicroservice.Id);
+            var existingMicroservice = await _context.Microservices.Include(m => m.Headers).FirstOrDefaultAsync(t => t.Id == updatedMicroservice.Id);
 
             if (existingMicroservice == null)
                 return false;
@@ -311,7 +311,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<bool> DeleteMicroservice(int id)
         {
-            var existingMicroservice = await _context.Microservices.FirstOrDefaultAsync(m => m.ID == id);
+            var existingMicroservice = await _context.Microservices.FirstOrDefaultAsync(m => m.Id == id);
 
             if (existingMicroservice == null)
                 return false;

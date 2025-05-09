@@ -25,7 +25,7 @@ namespace Mockbench.Data.Repositories
         
         public async Task<List<PathNameItem>> GetAllTakenTenantNameAndPathsAsync(int excludingId)
         {
-            var tenants = _context.Tenants.Include(t => t.Variables).Where(rt => rt.ID != excludingId).Select(rt => new PathNameItem(rt.Name, rt.Path));
+            var tenants = _context.Tenants.Include(t => t.Variables).Where(rt => rt.Id != excludingId).Select(rt => new PathNameItem(rt.Name, rt.Path));
 
             return await tenants.ToListAsync();
         }
@@ -41,7 +41,7 @@ namespace Mockbench.Data.Repositories
                 {
                     return new TenantBase()
                     {
-                        Id = t.ID,
+                        Id = t.Id,
                         Name = t.Name,
                         Path = t.Path,
                         SimulateTime = t.SimulateTime
@@ -52,11 +52,11 @@ namespace Mockbench.Data.Repositories
 
         public async Task<TenantBase?> GetTenantByIdAsync(int id)
         {
-            var tenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.ID == id);
+            var tenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Id == id);
 
             return tenant == null ? null : new TenantBase()
             {
-                Id = tenant.ID,
+                Id = tenant.Id,
                 Name = tenant.Name,
                 Path = tenant.Path,
                 SimulateTime = tenant.SimulateTime,
@@ -76,7 +76,7 @@ namespace Mockbench.Data.Repositories
 
             return tenant == null ? null : new TenantBase()
             {
-                Id = tenant.ID,
+                Id = tenant.Id,
                 Name = tenant.Name,
                 Path = tenant.Path,
                 SimulateTime = tenant.SimulateTime,
@@ -95,7 +95,7 @@ namespace Mockbench.Data.Repositories
 
             return tenant == null ? null : new TenantBase()
             {
-                Id = tenant.ID,
+                Id = tenant.Id,
                 Name = tenant.Name,
                 Path = tenant.Path,
                 SimulateTime = tenant.SimulateTime,
@@ -139,7 +139,7 @@ namespace Mockbench.Data.Repositories
 
             return new TenantBase()
             {
-                Id = newTenant.ID,
+                Id = newTenant.Id,
                 Name = newTenant.Name,
                 Path = newTenant.Path,
                 SimulateTime = newTenant.SimulateTime,
@@ -159,7 +159,7 @@ namespace Mockbench.Data.Repositories
         /// <returns>true if updated successfully</returns>
         public async Task<bool> UpdateTenantBaseValuesAsync(TenantBase updatedTenant)
         {
-            var existingTenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.ID == updatedTenant.Id);
+            var existingTenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Id == updatedTenant.Id);
 
             if (existingTenant == null)
                 return false;
@@ -216,7 +216,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<bool> DeleteTenantAsync(int id)
         {
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ID == id);
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id);
 
             if (tenant == null)
                 return false;

@@ -30,9 +30,7 @@ namespace Mockbench.Data.Models
     public class Microservice
     {
         [Key]
-        // ReSharper disable once InconsistentNaming
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public int ID { get; set; }
+        public int Id { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         [MaxLength(50)]
@@ -41,10 +39,6 @@ namespace Mockbench.Data.Models
         [Required]
         [MaxLength(50)]
         public string Path { get; set; }
-
-        // ReSharper disable once InconsistentNaming
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public int MicroserviceID { get; set; }
 
         [MaxLength(450)]
         public string TargetUrl { get; set; } = string.Empty;

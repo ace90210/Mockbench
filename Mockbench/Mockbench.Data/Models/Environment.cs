@@ -50,5 +50,7 @@ namespace Mockbench.Data.Models
         public DateTime? SimulateTime { get; set; }
 
         public List<EnvironmentVariable> Variables { get; set; }
+
+        public List<Endpoint> Endpoints { get; set; }
     }
 }
