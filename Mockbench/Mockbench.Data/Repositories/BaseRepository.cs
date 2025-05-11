@@ -5,6 +5,7 @@ using Mockbench.Data.Contexts;
 using Mockbench.Data.Models;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Models.Configuration;
+using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Environment;
 using Mockbench.Shared.Models.Microservice;
 using Mockbench.Shared.Models.Tenant;
@@ -348,6 +349,76 @@ namespace Mockbench.Data.Repositories
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<(bool, MatchingEndpoints?)> CreateTenantEnvironmentMicroserviceIfNotExists(MatchingEndpoints matchingEndpoints)
+        {
+            if (matchingEndpoints == null)
+                return (false, matchingEndpoints);
+
+            bool changed = false;
+
+            var existingTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Path == matchingEndpoints.TenantPath);
+
+            if (matchingEndpoints!.Tenant == null && !string.IsNullOrWhiteSpace(matchingEndpoints.TenantPath))
+            {
+                if(existingTenant == null)
+                {
+                    var tenant = new Tenant()
+                    {
+                        Path = matchingEndpoints.TenantPath,
+                        Name = matchingEndpoints.TenantPath
+                    };
+                    _context.Tenants.Add(tenant);
+                    changed = true;
+
+                    existingTenant = tenant;
+                }
+            }
+
+            var existingEnvironment = await _context.Environments.FirstOrDefaultAsync(e => e.Path == matchingEndpoints.EnvironmentPath);
+
+            if (matchingEndpoints!.Environment == null && !string.IsNullOrWhiteSpace(matchingEndpoints.EnvironmentPath))
+            {
+                if (existingEnvironment == null)
+                {
+                    var environment = new Models.Environment()
+                    {
+                        Path = matchingEndpoints.EnvironmentPath,
+                        Name = matchingEndpoints.EnvironmentPath
+                    };
+                    _context.Environments.Add(environment);
+                    changed = true;
+
+                    existingEnvironment = environment;
+                }
+            }
+
+            var existingMicroservice = await _context.Microservices.FirstOrDefaultAsync(m => m.Path == matchingEndpoints.MicroservicePath);
+
+            if (matchingEndpoints!.Microservice == null && !string.IsNullOrWhiteSpace(matchingEndpoints.MicroservicePath))
+            {
+                if (existingMicroservice == null)
+                {
+                    var microservice = new Microservice()
+                    {
+                        Path = matchingEndpoints.MicroservicePath,
+                        Name = matchingEndpoints.MicroservicePath
+                    };
+                    _context.Microservices.Add(microservice);
+                    changed = true;
+
+                    existingMicroservice = microservice;
+                }
+            }
+            if (changed)
+            {
+                await _context.SaveChangesAsync();
+                matchingEndpoints.Tenant = _tenantMapper.ToTenantDto(existingTenant);
+                matchingEndpoints.Environment = _environmentMapper.ToEnvironmentDto(existingEnvironment);
+                matchingEndpoints.Microservice = _microserviceMapper.ToMicroserviceDto(existingMicroservice);
+            }
+            return (true, matchingEndpoints);
         }
     }
 }

@@ -1,18 +1,17 @@
-﻿using System.Web;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using Mockbench.Abstractions.MockServices;
 using Mockbench.Abstractions.Repositories;
+using Mockbench.Abstractions.Services;
 using Mockbench.Services.Helpers;
 using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Enum;
-using Mockbench.Shared.Models.Environment;
 using Mockbench.Shared.Models.Headers;
 using Mockbench.Shared.Models.Microservice;
 using Mockbench.Shared.Models.QueryParameters;
 using Mockbench.Shared.Models.Response;
 using Mockbench.Shared.Models.Tenant;
+using System.Web;
 
 namespace Mockbench.Services.MockServices
 {
@@ -20,65 +19,75 @@ namespace Mockbench.Services.MockServices
     {
         private static readonly Random RandomNumberGenerator = new();
 
+        private readonly IBaseRepository _baseRepository;
+
         private readonly IEndpointRepository _endpointRepository;
 
-        public MockService(IEndpointRepository endpointRepository)
+        public MockService(IEndpointRepository endpointRepository, IBaseRepository baseRepository)
         {
             _endpointRepository = endpointRepository;
+            _baseRepository = baseRepository;
         }
 
-        public async Task<EndpointDto> GetMatchingEndpointDtoAsync(TenantBase tenant, EnvironmentDto environment, FullMicroserviceDto microservice, RestType restType, HttpContext context, string endpointPath)
+        public async Task<EndpointDto?> GetMatchingEndpointDtoAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string endpointPath)
         {
             string body = restType != RestType.GET ? await GeneralHelpers.RequestBodyToStringAsync(context?.Request) : null;
 
-            return await FindMatchingEndpointAsync(tenant?.Path, environment?.Path, microservice?.Path, context, restType, endpointPath, body);
+            return await FindExactEndpointAsync(matchingEndpoints, context, restType, endpointPath, body);
         }
 
-        public async Task<MockResponseDto> GetMockResponseAsync(TenantBase tenant, EnvironmentDto environment, FullMicroserviceDto microservice, RestType restType, HttpContext context, string endpointPath)
+        public async Task<MockResponseDto?> GetMockResponseAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string endpointPath)
         {
-            DateTime? resolvedSimulateTime = microservice.SimulateTime?.AddMicroseconds(1) ??
-                                    environment.SimulateTime?.AddMicroseconds(1) ??
-                                    tenant.SimulateTime?.AddMicroseconds(1);
+            if(matchingEndpoints == null || matchingEndpoints.Endpoints == null || matchingEndpoints.Endpoints.Count == 0)
+            {
+                return null;
+            }
 
-            var matchingRequestDto = await GetMatchingEndpointDtoAsync(tenant, environment, microservice, restType, context, endpointPath);
+            DateTime? resolvedSimulateTime = matchingEndpoints.Microservice?.SimulateTime?.AddMicroseconds(1) ??
+                                    matchingEndpoints.Environment?.SimulateTime?.AddMicroseconds(1) ??
+                                    matchingEndpoints.Tenant?.SimulateTime?.AddMicroseconds(1);
 
-            MockResponseDto existingResponse = InnerGetMockResponse(matchingRequestDto, microservice.RandomiseMockResult, resolvedSimulateTime);
+            var matchingRequestDto = await GetMatchingEndpointDtoAsync(matchingEndpoints, restType, context, endpointPath);
+
+            MockResponseDto existingResponse = InnerGetMockResponse(matchingRequestDto, matchingEndpoints.Microservice?.RandomiseMockResult ?? false, resolvedSimulateTime);
 
             if (existingResponse?.FakeDelay > 0)
             {
                 await Task.Delay(existingResponse.FakeDelay);
             }
-            else if (microservice.FakeDelay > 0)
+            else if (matchingEndpoints.Microservice?.FakeDelay > 0)
             {
-                await Task.Delay(microservice.FakeDelay);
+                await Task.Delay(matchingEndpoints.Microservice.FakeDelay);
             }
 
             return existingResponse;
         }
 
-        public async Task CreateMockResponseIfNotExistAsync(TenantBase tenant, EnvironmentDto environment, FullMicroserviceDto microservice, HttpContext context, RestType restType, string endpointPath, string requestBody, HttpResponseMessage response, TimeSpan latency)
+        public async Task CreateMockResponseIfNotExistAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointPath, string requestBody, HttpResponseMessage response, TimeSpan latency)
         {
-            var matchingEndpoint = await FindMatchingEndpointAsync(tenant?.Path, environment?.Path, microservice?.Path, context, restType, endpointPath, requestBody);
+            await _baseRepository.CreateTenantEnvironmentMicroserviceIfNotExists(matchingEndpoints);
 
-            if (matchingEndpoint == null || matchingEndpoint.MockBehaviour == MockBehaviour.AutoMockWithProxy)
+            var exactEndpoint = await FindExactEndpointAsync(matchingEndpoints, context, restType, endpointPath, requestBody);
+
+            if (exactEndpoint == null || exactEndpoint.MockBehaviour == MockBehaviour.AutoMockWithProxy)
             {
-                var mockResponse = await BuildMockResponseAsync(microservice, response, latency);
+                var mockResponse = await BuildMockResponseAsync(matchingEndpoints, response, latency);
 
-                if (matchingEndpoint == null)
+                if (exactEndpoint == null)
                 {
-                    var endpoint = BuildMockServiceRequestUsingResponse(microservice, context, restType, endpointPath, requestBody, mockResponse);
+                    var endpoint = BuildMockEndpointUsingResponse(matchingEndpoints, context, restType, endpointPath, requestBody, mockResponse);
 
-                    await _endpointRepository.CreateEndpointAsync(microservice.Id, endpoint);
+                    await _endpointRepository.CreateEndpointAsync(endpoint);
                 }
-                else if (!DoesResponseExist(matchingEndpoint, mockResponse))
+                else if (!DoesResponseExist(exactEndpoint, mockResponse))
                 {
                     // no responses found add to requests list of responses
-                    await _endpointRepository.AddResponseToEndpointAsync(matchingEndpoint.Id, mockResponse);
+                    await _endpointRepository.AddResponseToEndpointAsync(exactEndpoint.Id, mockResponse);
                 }
             }
         }
 
-        private static async Task<MockResponseDto> BuildMockResponseAsync(FullMicroserviceDto microservice, HttpResponseMessage response, TimeSpan latency)
+        private static async Task<MockResponseDto> BuildMockResponseAsync(MatchingEndpoints matchingEndpoints, HttpResponseMessage response, TimeSpan latency)
         {
             if (response == null)
             {
@@ -98,31 +107,33 @@ namespace Mockbench.Services.MockServices
                 Code = response.StatusCode
             };
 
-            mockResponse.Headers = GetResponseHeaders(microservice, response);
+            mockResponse.Headers = GetResponseHeaders(matchingEndpoints.Microservice, response);
 
             return mockResponse;
         }
 
-        private static EndpointDto BuildMockServiceRequestUsingResponse(FullMicroserviceDto microservice, HttpContext context, RestType restType, string endpointPath, string requestBody, MockResponseDto newResponse)
+        private static EndpointDto BuildMockEndpointUsingResponse(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointPath, string requestBody, MockResponseDto newResponse)
         {
             var queryParams = HttpUtility.ParseQueryString(context.Request.QueryString.ToString());
 
             //no request so create new request for the provided response
             var endpoint = new EndpointDto()
             {
-                MicroserviceId = microservice.Id,
+                TenantId = matchingEndpoints.Tenant?.Id,
+                EnvironmentId = matchingEndpoints.Environment?.Id,
+                MicroserviceId = matchingEndpoints.Microservice?.Id,
                 ExactUrlMatch = true,
                 FromBody = requestBody,
                 FromUrl = endpointPath,
                 RestType = restType,
                 MockResponses = new List<MockResponseDto>() { newResponse },
                 Enabled = true,
-                EndpointHeaders = GetRequestHeaders(microservice, context),
+                EndpointHeaders = GetRequestHeaders(matchingEndpoints.Microservice, context),
                 ExpectAuthHeader = context.Request.Headers.Any(h => h.Key.ToLower() == "authorization"),
                 QueryParameters = queryParams.AllKeys.Select((k, i) => new QueryParameterDto() { Name = k, Value = queryParams[k], OrderIndex = i }).ToList()
             };
 
-            if (microservice.Headers != null && microservice.Headers.Count > 0)
+            if (matchingEndpoints.Microservice?.Headers != null && matchingEndpoints?.Microservice.Headers.Count > 0)
             {
                 endpoint.ExpectAuthHeader = endpoint.EndpointHeaders?.Any(h => h.Name.ToLower() == "authorization") ?? false;
             }
@@ -160,7 +171,7 @@ namespace Mockbench.Services.MockServices
             return serviceHeaders;
         }
 
-        private static List<MockResponseHeaderDto> GetResponseHeaders(FullMicroserviceDto microservice, HttpResponseMessage response)
+        private static List<MockResponseHeaderDto> GetResponseHeaders(FullMicroserviceDto? microservice, HttpResponseMessage response)
         {
             var responseHeaders = new List<MockResponseHeaderDto>();
             foreach (var header in response.Headers.Where(h => h.Key.ToLower() != "host"))
@@ -191,11 +202,14 @@ namespace Mockbench.Services.MockServices
             return responseHeaders;
         }
 
-        public async Task<EndpointDto> FindMatchingEndpointAsync(string? tenantPath, string? environmentPath, string? microservicePath, HttpContext context, RestType restType, string endpointUrl, string requestBody)
+        public async Task<EndpointDto?> FindExactEndpointAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointUrl, string requestBody)
         {
-            var allMicroserviceEndpoints = await _endpointRepository.GetAllMatchingEndpointsAsync(tenantPath, environmentPath, microservicePath, endpointUrl);
+            if (matchingEndpoints == null || matchingEndpoints.Endpoints == null || matchingEndpoints.Endpoints.Count == 0)
+            {
+                return null;
+            }
 
-            foreach (var endpoint in allMicroserviceEndpoints.Where(mc => mc.RestType == restType))
+            foreach (var endpoint in matchingEndpoints.Endpoints.Where(mc => mc.RestType == restType))
             {
                 if (CompareRequest($"{endpointUrl}", requestBody, endpoint, context.Request.QueryString))
                 {

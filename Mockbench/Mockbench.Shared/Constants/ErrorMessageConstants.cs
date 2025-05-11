@@ -27,9 +27,11 @@ public static class ErrorMessageConstants
     public const string EnvironmentName = "Invalid environment name";
     
     public const string EnvironmentPath = "Invalid environment path";
-    
+
     public const string EnvironmentDisabled = "environment is disabled";
-    
+
+    public const string EndpointDisabled = "endpoint is disabled";
+
     public const string EndpointId = "Invalid endpoint id";
     
     public const string EndpointNotFound = "Endpoint not found";

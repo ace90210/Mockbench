@@ -2,6 +2,7 @@
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Data.Contexts;
 using Mockbench.Data.Mappers;
+using Mockbench.Data.Models;
 using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Response;
 
@@ -10,6 +11,10 @@ namespace Mockbench.Data.Repositories
     public class EndpointRepository : IEndpointRepository
     {
         private readonly MockbenchMainContext _context;
+
+        private readonly TenantMapper _tenantMapper = new();
+        private readonly EnvironmentMapper environmentMapper = new();
+        private readonly MicroserviceMapper _microserviceMapper = new();
 
         public EndpointRepository(MockbenchMainContext context)
         {
@@ -37,7 +42,7 @@ namespace Mockbench.Data.Repositories
             return e?.ToUpdateDto();
         }
 
-        public async Task<IEnumerable<EndpointDto>> GetAllMatchingEndpointsAsync(string? tenantPath, string? environmentPath, string? microservicePath, string endpointUrl)
+        public async Task<MatchingEndpoints> GetAllMatchingEndpointsAsync(string? tenantPath, string? environmentPath, string? microservicePath, string endpointUrl)
         {
             var endpoint = await _context.Endpoints
                                              .Include(e => e.QueryParameters)
@@ -58,7 +63,19 @@ namespace Mockbench.Data.Repositories
                                                              .AsSplitQuery()
                                                              .ToListAsync();
 
-            return endpoint.ToDtos(createNew: false, createChecksumOnResponses: false);
+            var tenant = _context.Tenants.FirstOrDefault(t => t.Path == tenantPath);
+            var environment = _context.Environments.FirstOrDefault(e => e.Path == environmentPath);
+            var microservice = _context.Microservices.FirstOrDefault(m => m.Path == microservicePath);
+
+            return new MatchingEndpoints() {
+                Tenant = tenant != null ? _tenantMapper.ToTenantDto(tenant) : null,
+                Environment = environment != null ? environmentMapper.ToEnvironmentDto(environment) : null,
+                Microservice = microservice != null ? _microserviceMapper.ToMicroserviceDto(microservice) : null,
+                TenantPath = tenantPath,
+                EnvironmentPath = environmentPath,
+                MicroservicePath = microservicePath,
+                Endpoints = endpoint.ToDtos(createNew: false, createChecksumOnResponses: false)
+            };
         }
 
         public async Task<EndpointDto> CreateEndpointAsync(int microserviceId, EndpointDto endpointDto)

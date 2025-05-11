@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Primitives;
 using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.General;
@@ -9,7 +7,7 @@ namespace Mockbench.Shared.Helper;
 
 public static class HttpHelpers
 {
-    public static List<HeaderItem> GetResponseHeadersToAdd(MicroserviceResultDto microservice, IEnumerable<HeaderItem> responseHeaders)
+    public static List<HeaderItem> GetResponseHeadersToAdd(MicroserviceResultDto? microservice, IEnumerable<HeaderItem> responseHeaders)
     {
         var headersToAdd = new List<HeaderItem>();
         
@@ -17,7 +15,9 @@ public static class HttpHelpers
         {
             if (header.Value != default(StringValues))
             {
-                switch (microservice.HeadersMode)
+                var headersMode = microservice?.HeadersMode ?? HeadersMode.All;
+
+                switch (headersMode)
                 {
                     case HeadersMode.All:
                     {
@@ -25,7 +25,7 @@ public static class HttpHelpers
                     } break;
                     case HeadersMode.UserDefined:
                     {
-                        var matchingHeader = microservice.Headers?.Any(h =>
+                        var matchingHeader = microservice!.Headers?.Any(h =>
                             h.Enabled && h.Incoming && h.Name.ToUpper().Equals(header.Name.ToUpper()));
                         if (matchingHeader ?? false)
                         {

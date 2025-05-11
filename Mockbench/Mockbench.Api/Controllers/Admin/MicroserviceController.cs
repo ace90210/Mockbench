@@ -9,7 +9,7 @@ using Mockbench.Shared.Models.Microservice;
 using Mockbench.Shared.Models.Utility;
 using System.ComponentModel.DataAnnotations;
 
-namespace Mockbench.Api.Controllers.AdminControllers
+namespace Mockbench.Api.Controllers.Admin
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -9,7 +9,7 @@ using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Response;
 using Mockbench.Shared.Models.Utility;
 
-namespace Mockbench.Api.Controllers.AdminControllers
+namespace Mockbench.Api.Controllers.Admin
 {
     [ApiController]
     [Route("api/[controller]")]

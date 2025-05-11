@@ -1,7 +1,7 @@
 ﻿using Mockbench.Shared;
 using Mockbench.Shared.Models.Timetravel;
 
-namespace Mockbench.Abstractions.MockServices
+namespace Mockbench.Abstractions.Services
 {
     public interface ISimulateTimeService
     {

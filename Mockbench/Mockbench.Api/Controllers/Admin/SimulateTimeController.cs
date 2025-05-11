@@ -6,7 +6,7 @@ using Mockbench.Shared;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Models.Timetravel;
 
-namespace Mockbench.Api.Controllers.AdminControllers
+namespace Mockbench.Api.Controllers.Admin
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Text;
 
-namespace Mockbench.Api.Controllers.AdminControllers
+namespace Mockbench.Api.Controllers.Admin
 {
     [Route("api/[controller]")]
     [ApiController]

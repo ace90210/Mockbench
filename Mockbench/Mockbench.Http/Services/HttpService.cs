@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mockbench.Abstractions.MockServices;
-using Mockbench.Abstractions.ProxyServices;
+using Mockbench.Abstractions.services;
+using Mockbench.Abstractions.Services;
 using Mockbench.Services.Helpers;
 using Mockbench.Services.Hubs;
 using Mockbench.Shared.Constants;
@@ -38,28 +39,28 @@ namespace Mockbench.Server.Services
             _logger = logger;
         }
 
-        public async Task<IActionResult> ProcessMicroserviceRequestAsync(TenantBase tenant, EnvironmentDto environment, FullMicroserviceDto microservice, RestType restType, HttpContext context, string endpointPath)
+        public async Task<IActionResult> ProcessRequestAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string endpointPath)
         {
             if (context == null)
                 throw new ArgumentNullException($"Error {nameof(context)} is null");
 
             RestoreHeaderTypes(context);
 
-            await SendLiveFeedMessageAsync(context, endpointPath, microservice.Id);
+            //await SendLiveFeedMessageAsync(context, endpointPath, microservice.Id);
 
-            var foundRequest = await _mockService.GetMatchingEndpointDtoAsync(tenant, environment, microservice, restType, context, endpointPath);
+            var foundRequest = await _mockService.GetMatchingEndpointDtoAsync(matchingEndpoints, restType, context, endpointPath);
 
             bool shouldFallback = false;
             IActionResult proxyResponse = null;
 
             // If proxy mode is enabled, try to proxy the request first
-            if (microservice.ProxyMode == ProxyMode.FailOver || microservice.ProxyMode == ProxyMode.Proxy)
+            if (matchingEndpoints.Microservice != null && matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver || matchingEndpoints.Microservice.ProxyMode == ProxyMode.Proxy)
             {
                 bool isdown = false;
 
                 try
                 {
-                    proxyResponse = await _proxyService.ProxyRequestToMicroserviceAsync(tenant, environment, microservice, restType, context, endpointPath);
+                    proxyResponse = await _proxyService.ProxyRequestToMicroserviceAsync(matchingEndpoints, restType, context, endpointPath);
                 }
                 catch (HttpRequestException ex) when (ex.InnerException is TimeoutException)
                 {
@@ -93,26 +94,27 @@ namespace Mockbench.Server.Services
                     proxyResponse = new ObjectResult(ex.Message) { StatusCode = 500 };
                 }
 
-                shouldFallback = microservice.ProxyMode == ProxyMode.FailOver && (isdown || IsRemoteServiceDown(proxyResponse));
+                shouldFallback = matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver && (isdown || IsRemoteServiceDown(proxyResponse));
 
                 // If the proxy request succeeded or proxy mode is not failover, return the response
-                if (microservice.ProxyMode == ProxyMode.Proxy)
+                if (matchingEndpoints.Microservice.ProxyMode == ProxyMode.Proxy)
                 {
                     return proxyResponse;
                 }
 
                 // If failover mode is enabled and the proxy response failed due to service being down, proceed to mock response
-                if (microservice.ProxyMode == ProxyMode.FailOver)
+                if (matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver)
                 {
                     // Log that we are falling back to mock response due to proxy failure
                     _logger.LogWarning("Proxy request failed, falling back to mock response in failover mode.");
-                }
+                }               
             }
 
             // If mock mode or simulation time applied
-            if (microservice.ProxyMode == ProxyMode.None ||
+            if (matchingEndpoints.Microservice == null ||
+                matchingEndpoints.Microservice.ProxyMode == ProxyMode.None ||
                 shouldFallback ||
-                HasSimulationApplied(tenant, environment, microservice, foundRequest))
+                HasSimulationApplied(matchingEndpoints, foundRequest))
             {
                 // To handle rereading the content better this is handled in the proxy service separately
                 // Here we send the message with a fresh httpclient as it will only be sent once
@@ -125,11 +127,11 @@ namespace Mockbench.Server.Services
                         return new UnauthorizedResult();
                     }
 
-                    var existingResponse = await _mockService.GetMockResponseAsync(tenant, environment, microservice, restType, context, endpointPath);
+                    var existingResponse = await _mockService.GetMockResponseAsync(matchingEndpoints, restType, context, endpointPath);
 
                     if (existingResponse != null)
                     {
-                        var headersToAdd = HttpHelpers.GetResponseHeadersToAdd(microservice,
+                        var headersToAdd = HttpHelpers.GetResponseHeadersToAdd(matchingEndpoints.Microservice,
                                                                                                  existingResponse.Headers
                                                                                                  .Where(h => h.Name.ToLower() != "host" &&
                                                                                                                          h.Name.ToLower() != "transfer-encoding")
@@ -152,11 +154,11 @@ namespace Mockbench.Server.Services
                 }
 
                 // if here we found no mock response so either return null or if in failover return the proxy response instead as has more details
-                return microservice.ProxyMode == ProxyMode.FailOver ? proxyResponse : null;
+                return matchingEndpoints.Microservice != null && matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver ? proxyResponse : null;
             }
 
             // If none of the above conditions matched, return a proxy response as a fallback
-            return await _proxyService.ProxyRequestToMicroserviceAsync(tenant, environment, microservice, restType, context, endpointPath);
+            return await _proxyService.ProxyRequestToMicroserviceAsync(matchingEndpoints, restType, context, endpointPath);
         }
 
         private static void RestoreHeaderTypes(HttpContext context)
@@ -234,32 +236,33 @@ namespace Mockbench.Server.Services
             };
         }
 
-        private async Task SendLiveFeedMessageAsync(HttpContext context, string endpointPath, int microserviceId)
-        {
-            var request = new HttpRequestDto()
-            {
-                Timestamp = DateTime.Now,
-                HttpMethod = context.Request.Method,
-                Endpoint = endpointPath,
-                QueryString = context.Request.QueryString.ToString(),
-                Body = await GeneralHelpers.RequestBodyToStringAsync(context.Request),
-                Headers = context.Request.Headers.ToDictionary(
-                    a => a.Key,
-                    a => string.Join(";", a.Value.ToArray())
-                )
-            };
+        // TODO fix live feed
+        //private async Task SendLiveFeedMessageAsync(HttpContext context, string endpointPath, int microserviceId)
+        //{
+        //    var request = new HttpRequestDto()
+        //    {
+        //        Timestamp = DateTime.Now,
+        //        HttpMethod = context.Request.Method,
+        //        Endpoint = endpointPath,
+        //        QueryString = context.Request.QueryString.ToString(),
+        //        Body = await GeneralHelpers.RequestBodyToStringAsync(context.Request),
+        //        Headers = context.Request.Headers.ToDictionary(
+        //            a => a.Key,
+        //            a => string.Join(";", a.Value.ToArray())
+        //        )
+        //    };
 
-            await _hubcontext.Clients.All.SendAsync($"{microserviceId}/SendRequest", request);
-        }
+        //    await _hubcontext.Clients.All.SendAsync($"{microserviceId}/SendRequest", request);
+        //}
 
         private static bool IsAuthHeaderPresent(IHeaderDictionary headers)
         {
             return headers?.Any(h => h.Key.ToLower().Equals("authorization")) ?? false;
         }
 
-        private bool HasSimulationApplied(TenantBase tenant, EnvironmentDto environment, FullMicroserviceDto matchingRequestMicroserviceDetails, EndpointDto endpointDto)
+        private bool HasSimulationApplied(MatchingEndpoints matchingEndpoints, EndpointDto endpointDto)
         {
-            return matchingRequestMicroserviceDetails.SimulateTime != null || environment?.SimulateTime != null || tenant?.SimulateTime != null || endpointDto?.SimulateTime != null;
+            return matchingEndpoints.Microservice?.SimulateTime != null || matchingEndpoints?.Environment?.SimulateTime != null || matchingEndpoints?.Tenant?.SimulateTime != null || endpointDto?.SimulateTime != null;
         }
 
         private bool IsRemoteServiceDown(IActionResult proxyResponse)

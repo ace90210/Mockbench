@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Mockbench.Abstractions.MockServices;
-using Mockbench.Abstractions.ProxyServices;
+using Mockbench.Abstractions.services;
 using Mockbench.Services.Helpers;
 using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Configuration;

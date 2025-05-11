@@ -159,34 +159,6 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<MicroserviceResultDto> FindMatchingRequest(string tenantPath, string environmentPath, string path)
-        {
-            if (string.IsNullOrWhiteSpace(tenantPath) || string.IsNullOrWhiteSpace(environmentPath) || string.IsNullOrWhiteSpace(path))
-                return null;
-
-            var microservice = await _context.Microservices.Include(m => m.Headers).FirstOrDefaultAsync();
-
-            if (microservice == null) return null;
-
-            return new MicroserviceResultDto()
-                {
-                    Id = microservice.Id,
-                    Name = microservice.Name,
-                    Path = microservice.Path,
-                    Enabled = microservice.Enabled,
-                    PassThroughTenant = microservice.PassThroughTenant,
-                    FakeDelay = microservice.FakeDelay,
-                    TargetUrl = microservice.TargetUrl,
-                    ProxyMode = microservice.ProxyMode,
-                    RandomiseMockResult = microservice.RandomiseMockResult,
-                    Headers = microservice.Headers.ToDtos(),
-                    HeadersMode = microservice.HeadersMode,
-                    InjectForwardingHeadersOnRequest = microservice.InjectForwardingHeadersOnRequest,
-                    SimulateTime = microservice.SimulateTime
-                
-            };
-        }
-
         public async Task<MicroserviceResultDto> CreateMicroservice(MicroserviceResultDto newMicroserviceDto)
         {
             if (newMicroserviceDto == null)
