@@ -2,16 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
-using Mockbench.Abstractions.MockServices;
-using Mockbench.Abstractions.services;
+using Mockbench.Abstractions.Services;
 using Mockbench.Services.Helpers;
 using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Configuration;
+using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Enum;
-using Mockbench.Shared.Models.Environment;
 using Mockbench.Shared.Models.General;
 using Mockbench.Shared.Models.Microservice;
-using Mockbench.Shared.Models.Tenant;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
@@ -28,9 +26,11 @@ namespace Mockbench.Services.ProxyServices
             _deploymentConfiguration = deploymentConfigurationOptions?.Value ?? throw new ArgumentNullException(nameof(deploymentConfigurationOptions));
         }
                
-        public async Task<IActionResult> ProxyRequestToMicroserviceAsync(TenantBase tenant, EnvironmentDto environment, FullMicroserviceDto microservice, RestType restType, HttpContext context, string endpointPath)
+        public async Task<IActionResult> ProxyRequestToMicroserviceAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string endpointPath)
         {
-            if (!string.IsNullOrWhiteSpace(microservice.TargetUrl))
+            if(matchingEndpoints == null) throw new ArgumentNullException(nameof(matchingEndpoints));
+
+            if (!string.IsNullOrWhiteSpace(matchingEndpoints.Microservice.TargetUrl))
             {
                 string queryString = context.Request.QueryString.ToString();
 
@@ -42,9 +42,9 @@ namespace Mockbench.Services.ProxyServices
                     contentType = context.Request?.ContentType;
                 }
 
-                var resolvedEndpoint = microservice.PassThroughTenant ? $"{tenant.Path}/{endpointPath}" : endpointPath;
+                var resolvedEndpoint = matchingEndpoints.Microservice != null && !string.IsNullOrWhiteSpace(matchingEndpoints.TenantPath) && matchingEndpoints.Microservice.PassThroughTenant ? $"{matchingEndpoints.TenantPath}/{endpointPath}" : endpointPath;
 
-                var matchingRequest = await _mockService.FindMatchingEndpointAsync(tenant?.Path, environment?.Path, microservice?.Path, context,
+                var matchingRequest = await _mockService.FindExactEndpointAsync(matchingEndpoints, context,
                                                                         restType, $"{resolvedEndpoint}{queryString}", requestBody );
 
                 if (matchingRequest != null && matchingRequest.MockBehaviour == MockBehaviour.MockOnly)
@@ -54,10 +54,10 @@ namespace Mockbench.Services.ProxyServices
                 
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                var response = await SendRequestAsync(microservice, restType, context, requestBody, contentType, $"{resolvedEndpoint}{queryString}");
+                var response = await SendRequestAsync(matchingEndpoints, restType, context, requestBody, contentType, $"{resolvedEndpoint}{queryString}");
                 stopWatch.Stop();
 
-                await _mockService.CreateMockResponseIfNotExistAsync(tenant, environment, microservice, context, restType, endpointPath, requestBody, response, stopWatch.Elapsed);
+                await _mockService.CreateMockResponseIfNotExistAsync(matchingEndpoints, context, restType, endpointPath, requestBody, response, stopWatch.Elapsed);
 
                 
                 if (response != null)
@@ -87,17 +87,17 @@ namespace Mockbench.Services.ProxyServices
             return new BadRequestObjectResult("Mock Microservice in Proxy mode but no target url is set");
         }
 
-        private async Task<HttpResponseMessage> SendRequestAsync(MicroserviceResultDto microservice, RestType restType, HttpContext context, string requestBody, string contentType, string endpointPath)
+        private async Task<HttpResponseMessage> SendRequestAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string requestBody, string contentType, string endpointPath)
         {
-            if (microservice != null)
+            if (matchingEndpoints.Microservice != null)
             {
                 var httpRequestMessage = new HttpRequestMessage();
                 try
                 {
-                    Console.WriteLine("Headers Mode: " + microservice.HeadersMode);
-                    Console.WriteLine("Microservice Headers: " + JsonConvert.SerializeObject(microservice.Headers));
+                    Console.WriteLine("Headers Mode: " + matchingEndpoints.Microservice.HeadersMode);
+                    Console.WriteLine("Microservice Headers: " + JsonConvert.SerializeObject(matchingEndpoints.Microservice.Headers));
                     
-                    SetRequestHeaders(microservice, context, httpRequestMessage);
+                    SetRequestHeaders(matchingEndpoints.Microservice, context, httpRequestMessage);
 
                     switch (restType)
                     {
@@ -114,10 +114,10 @@ namespace Mockbench.Services.ProxyServices
                     }
                     
                     using var client = new HttpClient();
-                    httpRequestMessage.RequestUri = new Uri(microservice.TargetUrl + endpointPath);
+                    httpRequestMessage.RequestUri = new Uri(matchingEndpoints.Microservice.TargetUrl + endpointPath);
 
 
-                    if(microservice.InjectForwardingHeadersOnRequest) 
+                    if(matchingEndpoints.Microservice.InjectForwardingHeadersOnRequest) 
                     {
                         // setting standard forwarding headers to Mockbenchs values
 
@@ -147,7 +147,7 @@ namespace Mockbench.Services.ProxyServices
 
                     var response = await client.SendAsync(httpRequestMessage);
 
-                    var headersToAdd = HttpHelpers.GetResponseHeadersToAdd(microservice,
+                    var headersToAdd = HttpHelpers.GetResponseHeadersToAdd(matchingEndpoints.Microservice,
                             context.Request.Headers.Where(h => h.Key.ToLower() != "host" &&
                                                                h.Key.ToLower() != "transfer-encoding")
                             .Select(h => new HeaderItem(h.Key, h.Value)));

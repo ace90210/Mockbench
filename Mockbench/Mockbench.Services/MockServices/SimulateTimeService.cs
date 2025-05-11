@@ -1,4 +1,4 @@
-﻿using Mockbench.Abstractions.MockServices;
+﻿using Mockbench.Abstractions.Services;
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Shared;
 using Mockbench.Shared.Models.Timetravel;

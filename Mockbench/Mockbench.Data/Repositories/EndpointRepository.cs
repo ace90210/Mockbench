@@ -78,18 +78,11 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<EndpointDto> CreateEndpointAsync(int microserviceId, EndpointDto endpointDto)
+        public async Task<EndpointDto> CreateEndpointAsync(EndpointDto endpointDto)
         {
             if (endpointDto == null)
                 throw new Exception("No endpoint provided");
-
-            var microserviceExists = _context.Microservices.Any(m => m.Id == microserviceId);
-
-            if (!microserviceExists)
-                return null;
             
-            endpointDto.MicroserviceId = microserviceId;
-
             var endpoint = endpointDto.ToEntity(createNew: true, createChecksumOnResponses: true);
 
             _context.Endpoints.Add(endpoint);

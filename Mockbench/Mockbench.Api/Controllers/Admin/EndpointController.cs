@@ -79,7 +79,7 @@ namespace Mockbench.Api.Controllers.Admin
                 return BadRequest(results.ToBadRequestResult());
             
             var createdRequest =
-                await _endpointRepository.CreateEndpointAsync(microserviceId, endpointDto);
+                await _endpointRepository.CreateEndpointAsync(endpointDto);
 
             if (createdRequest == null)
                 return NotFound(ErrorMessageConstants.MicroserviceNotFound);
