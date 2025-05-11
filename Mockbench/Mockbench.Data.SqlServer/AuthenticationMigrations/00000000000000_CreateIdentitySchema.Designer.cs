@@ -9,7 +9,7 @@ using Mockbench.Data;
 
 #nullable disable
 
-namespace Mockbench.Migrations
+namespace Mockbench.Data.AuthenticationMigrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("00000000000000_CreateIdentitySchema")]

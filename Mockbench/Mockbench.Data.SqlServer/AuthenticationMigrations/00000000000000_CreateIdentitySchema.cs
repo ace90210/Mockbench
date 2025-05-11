@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Mockbench.Migrations
+namespace Mockbench.Data.AuthenticationMigrations
 {
     /// <inheritdoc />
     public partial class CreateIdentitySchema : Migration

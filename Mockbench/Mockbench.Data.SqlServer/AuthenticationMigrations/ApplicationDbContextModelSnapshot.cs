@@ -8,7 +8,7 @@ using Mockbench.Data;
 
 #nullable disable
 
-namespace Mockbench.Migrations
+namespace Mockbench.Data.AuthenticationMigrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot

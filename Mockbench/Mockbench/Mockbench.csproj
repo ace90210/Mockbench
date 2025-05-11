@@ -28,5 +28,5 @@
 		<ProjectReference Include="..\Mockbench.Services\Mockbench.Services.csproj" />
 		<ProjectReference Include="..\Mockbench.Shared\Mockbench.Shared.csproj" />
 	</ItemGroup>
-
+	
 </Project>
