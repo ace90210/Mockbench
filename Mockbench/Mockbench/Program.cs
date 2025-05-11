@@ -26,11 +26,35 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
+
+var dbProvider = builder.Configuration.GetValue<string>("DatabaseProvider") ?? "SqlServer";
+var connectionStrings = builder.Configuration.GetSection("ConnectionStrings");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(connectionString, sql => sql.MigrationsAssembly("Mockbench.Data.SqlServer"));
+    switch (dbProvider.ToLowerInvariant())
+    {
+        case "sqlite":
+            var sqliteConn = connectionStrings.GetValue<string>("Sqlite")
+                ?? throw new InvalidOperationException("Missing Sqlite connection string.");
+            options.UseSqlite(sqliteConn, sqlite =>
+                sqlite.MigrationsAssembly("Mockbench.Data.Sqlite"));
+            break;
+
+        case "inmemory":
+            options.UseInMemoryDatabase("InMemoryDb");
+            break;
+
+        default: // "sqlserver"
+            var sqlConn = connectionStrings.GetValue<string>("SqlServer")
+                ?? throw new InvalidOperationException("Missing SqlServer connection string.");
+            options.UseSqlServer(sqlConn, sql =>
+                sql.MigrationsAssembly("Mockbench.Data.SqlServer"));
+            break;
+    }
 });
+
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
