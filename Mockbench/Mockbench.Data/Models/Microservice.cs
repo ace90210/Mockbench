@@ -60,8 +60,8 @@ namespace Mockbench.Data.Models
 
         public bool InjectForwardingHeadersOnRequest { get; set; }
 
-        public List<ServiceHeader> Headers { get; set; }
+        public List<ServiceHeader>? Headers { get; set; }
 
-        public List<Endpoint> Endpoints { get; set; }
+        public List<Endpoint>? Endpoints { get; set; }
     }
 }

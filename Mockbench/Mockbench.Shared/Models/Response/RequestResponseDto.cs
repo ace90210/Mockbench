@@ -14,20 +14,20 @@ namespace Mockbench.Shared.Models.Response
         public int Id { get; set; }
 
         [MaxLength(250, ErrorMessage = "Description too long. Maximum length is 250")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public HttpStatusCode Code { get; set; } = HttpStatusCode.OK;
 
         public SupportedEncodingType Encoding { get; set; } = SupportedEncodingType.UTF8;
 
         [MaxLength(50, ErrorMessage = "Content type too long. Maximum length is 50")]
-        public string ContentType { get; set; } = "text/plain";
+        public string? ContentType { get; set; } = "text/plain";
 
         [MaxLength(10_000_000, ErrorMessage = "Response body exceeded max length {0}")]
-        public string Body { get; set; }
+        public string? Body { get; set; }
 
         [MaxLength(64)]
-        public string Checksum { get; set; }
+        public string? Checksum { get; set; }
 
         public string UniqueChecksum => ChecksumHelpers.CreateUniqueDefaultChecksum(this);
 

@@ -1,25 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Mockbench.Shared.Models.Enum;
+using Mockbench.Shared.Models.Headers;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
-using Mockbench.Shared.Models.Enum;
-using Mockbench.Shared.Models.Headers;
 
 namespace Mockbench.Shared.Models.Response
 {
     public class UpdateMockResponseDto
     {
         [MaxLength(250, ErrorMessage = "Description too long. Maximum length is 250")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public HttpStatusCode Code { get; set; }
 
         public SupportedEncodingType Encoding { get; set; } = SupportedEncodingType.UTF8;
 
         [MaxLength(50, ErrorMessage = "Content type too long. Maximum length is 50")]
-        public string ContentType { get; set; } = "text/plain";
+        public string? ContentType { get; set; } = "text/plain";
 
-        public string Body { get; set; }
+        public string? Body { get; set; }
 
         public int Priority { get; set; } = 100;
 

@@ -14,16 +14,16 @@ namespace Mockbench.Data.Models
         public int ID { get; set; }
 
         [MaxLength(250)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public HttpStatusCode Code { get; set; }
 
         public SupportedEncodingType Encoding { get; set; } = SupportedEncodingType.UTF8;
 
         [MaxLength(50)]
-        public string ContentType { get; set; } = "text/plain";
+        public string? ContentType { get; set; } = "text/plain";
 
-        public string Body { get; set; }
+        public string? Body { get; set; }
 
         public int EndpointId { get; set; }
 
@@ -31,7 +31,7 @@ namespace Mockbench.Data.Models
         [Required(AllowEmptyStrings = false)]
         [MaxLength(64)]
         [Column(TypeName = "varchar(64)")]
-        public string Checksum { get; set; }
+        public string? Checksum { get; set; }
 
         public int Priority { get; set; } = 100;
 
@@ -45,7 +45,7 @@ namespace Mockbench.Data.Models
 
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public Endpoint Endpoint { get; set; }
+        public Endpoint? Endpoint { get; set; }
 
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once UnusedAutoPropertyAccessor.Global

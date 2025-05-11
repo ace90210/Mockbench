@@ -45,12 +45,12 @@ namespace Mockbench.Data.Models
         public bool Enabled { get; set; } = true;
 
         [MaxLength(500)]
-        public string DefaultHealthCheckUrl { get; set; }
+        public string? DefaultHealthCheckUrl { get; set; }
 
         public DateTime? SimulateTime { get; set; }
 
-        public List<EnvironmentVariable> Variables { get; set; }
+        public List<EnvironmentVariable>? Variables { get; set; }
 
-        public List<Endpoint> Endpoints { get; set; }
+        public List<Endpoint>? Endpoints { get; set; }
     }
 }

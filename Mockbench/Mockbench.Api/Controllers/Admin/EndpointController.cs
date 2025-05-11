@@ -60,7 +60,7 @@ namespace Mockbench.Api.Controllers.Admin
                 {
                     Enabled = true,
                     CreatedUtc = DateTime.Now,
-                    FromUrl = "posts",
+                    FromUrl = "test",
                     MockBehaviour = MockBehaviour.MockOnly,
                     RestType = RestType.GET,
                     QueryParameters = new List<QueryParameterDto>()
@@ -77,6 +77,26 @@ namespace Mockbench.Api.Controllers.Admin
                         {
                             Name = "Authorization",
                             Value = "ey..."
+                        }
+                    },
+                    MockResponses = new List<MockResponseDto>()
+                    {
+                        new MockResponseDto()
+                        {
+                            Code = System.Net.HttpStatusCode.OK,
+                            Body = "test response",
+                            Headers = new List<MockResponseHeaderDto>()
+                            {
+                                new MockResponseHeaderDto()
+                                {
+                                    Name = "Content-Type",
+                                    Value = "plain/text"
+                                }
+                            },
+                            Enabled = true,
+                            ContentType = "text/plain",
+                            CreatedUtc = DateTime.Now,
+                            Encoding = SupportedEncodingType.UTF8
                         }
                     }
                 });
@@ -111,11 +131,15 @@ namespace Mockbench.Api.Controllers.Admin
 
             bool isValid = GeneralHelper.TryValidateFullObject(endpointDto, new ValidationContext(endpointDto, null), results);
 
-            await _endpointRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(tenantPath, environmentPath, microservicePath);
+            (bool created, MatchingEndpoints tem) = await _endpointRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(tenantPath, environmentPath, microservicePath);
 
-            if (!isValid)
+            if (!isValid && created)
                 return BadRequest(results.ToBadRequestResult());
-            
+
+            endpointDto.TenantId = tem.Tenant?.Id;
+            endpointDto.EnvironmentId = tem.Environment?.Id;
+            endpointDto.MicroserviceId = tem.Microservice?.Id;
+
             var createdRequest =
                 await _endpointRepository.CreateEndpointAsync(endpointDto);
 

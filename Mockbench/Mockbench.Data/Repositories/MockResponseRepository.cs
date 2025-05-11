@@ -102,7 +102,7 @@ namespace Mockbench.Data.Repositories
             }
         }
 
-        public async Task<(bool success, MockResponseDto result)> CreateAsync(int endpointId, MockResponseDto response)
+        public async Task<(bool success, MockResponseDto? result)> CreateAsync(int endpointId, MockResponseDto response)
         {
             if (response == null)
             {
@@ -113,7 +113,7 @@ namespace Mockbench.Data.Repositories
 
             if (existingRequest == null)
             {
-                throw new Exception("Error endpoint does not exist");
+                return (false, null);
             }
             
             var model = response.ToEntity(true);

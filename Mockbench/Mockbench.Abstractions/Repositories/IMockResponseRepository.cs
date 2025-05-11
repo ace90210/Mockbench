@@ -4,7 +4,7 @@ namespace Mockbench.Abstractions.Repositories
 {
     public interface IMockResponseRepository : IBaseRepository
     {
-        Task<(bool success, MockResponseDto result)> CreateAsync(int endpointId, MockResponseDto response);
+        Task<(bool success, MockResponseDto? result)> CreateAsync(int endpointId, MockResponseDto response);
         Task<(bool success, List<MockResponseDto> result)> CreateBulkAsync(int endpointId, List<MockResponseDto> responses);
         Task<bool> DeleteAsync(int responseId);
         Task<bool> DeleteBulkAsync(int endpointId, List<MockResponseDto> responses);

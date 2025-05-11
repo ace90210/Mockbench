@@ -23,7 +23,7 @@ namespace Mockbench.Shared.Models.Microservice
 
         [OptionalUrl(ErrorMessage = "target url must be a valid url")]
         [MaxLength(250, ErrorMessage = "field exceeded max length {0}")]
-        public string TargetUrl { get; set; }
+        public string? TargetUrl { get; set; }
 
         [Range(0, 6000, ErrorMessage = "Must be between 0 and 6000 milliseconds")]
         public int FakeDelay { get; set; }
@@ -38,7 +38,7 @@ namespace Mockbench.Shared.Models.Microservice
 
         public bool PassThroughTenant { get; set; }
 
-        public List<ServiceHeaderDto> Headers { get; set; } = new ();
+        public List<ServiceHeaderDto>? Headers { get; set; } = new ();
 
         public bool InjectForwardingHeadersOnRequest { get; set; }
 

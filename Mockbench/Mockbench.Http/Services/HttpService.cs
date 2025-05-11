@@ -49,7 +49,7 @@ namespace Mockbench.Server.Services
             IActionResult proxyResponse = null;
 
             // If proxy mode is enabled, try to proxy the request first
-            if (matchingEndpoints.Microservice != null && matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver || matchingEndpoints.Microservice.ProxyMode == ProxyMode.Proxy)
+            if (matchingEndpoints.Microservice != null && (matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver || matchingEndpoints.Microservice.ProxyMode == ProxyMode.Proxy))
             {
                 bool isdown = false;
 

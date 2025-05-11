@@ -5,6 +5,6 @@ namespace Mockbench.Shared.Models.Microservice
 {
     public class FullMicroserviceDto : MicroserviceResultDto
     {
-        public List<EndpointDto> Endpoints { get; set; }
+        public List<EndpointDto>? Endpoints { get; set; }
     }
 }
