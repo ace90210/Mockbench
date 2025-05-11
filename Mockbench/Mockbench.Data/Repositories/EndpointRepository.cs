@@ -8,7 +8,7 @@ using Mockbench.Shared.Models.Response;
 
 namespace Mockbench.Data.Repositories
 {
-    public class EndpointRepository : IEndpointRepository
+    public class EndpointRepository : BaseRepository, IEndpointRepository
     {
         private readonly MockbenchMainContext _context;
 
@@ -16,7 +16,7 @@ namespace Mockbench.Data.Repositories
         private readonly EnvironmentMapper environmentMapper = new();
         private readonly MicroserviceMapper _microserviceMapper = new();
 
-        public EndpointRepository(MockbenchMainContext context)
+        public EndpointRepository(MockbenchMainContext context) : base(context)
         {
             _context = context;
         }

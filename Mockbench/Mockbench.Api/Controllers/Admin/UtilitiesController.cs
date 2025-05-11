@@ -23,10 +23,10 @@ namespace Mockbench.Api.Controllers.Admin
         private const int TimeoutLimit = 3000;
 
         private readonly ILogger<UtilitiesController> _logger;
-        private readonly IBaseRepository _baseRepository;
+        private readonly ICommonRepository _baseRepository;
         private readonly ITenantRepository _tenantRepository;
 
-        public UtilitiesController(ILogger<UtilitiesController> logger, IBaseRepository baseRepository, ITenantRepository tenantRepository)
+        public UtilitiesController(ILogger<UtilitiesController> logger, ICommonRepository baseRepository, ITenantRepository tenantRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _baseRepository = baseRepository ?? throw new ArgumentNullException(nameof(baseRepository));

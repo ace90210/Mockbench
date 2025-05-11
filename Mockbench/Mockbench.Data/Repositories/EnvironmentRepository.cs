@@ -9,16 +9,15 @@ using Mockbench.Shared.Models.Tenant;
 
 namespace Mockbench.Data.Repositories
 {
-    public class EnvironmentRepository : IEnvironmentRepository
+    public class EnvironmentRepository : BaseRepository, IEnvironmentRepository
     {
         private readonly MockbenchMainContext _context;
 
-        private readonly EnvironmentMapper _environmentMapper;
+        private readonly EnvironmentMapper _environmentMapper = new EnvironmentMapper();
 
-        public EnvironmentRepository(MockbenchMainContext context, EnvironmentMapper environmentMapper)
+        public EnvironmentRepository(MockbenchMainContext context) : base(context)
         {
             _context = context;
-            _environmentMapper = environmentMapper;
         }
 
         public async Task<IEnumerable<EnvironmentDto>> GetEnvironments()

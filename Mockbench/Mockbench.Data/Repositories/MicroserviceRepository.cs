@@ -5,15 +5,14 @@ using Mockbench.Data.Mappers;
 using Mockbench.Data.Models;
 using Mockbench.Shared.Models.General;
 using Mockbench.Shared.Models.Microservice;
-using Mockbench.Shared.Models.Utility;
 
 namespace Mockbench.Data.Repositories
 {
-    public class MicroserviceRepository : IMicroserviceRepository
+    public class MicroserviceRepository : BaseRepository, IMicroserviceRepository
     {
         private readonly MockbenchMainContext _context;
 
-        public MicroserviceRepository(MockbenchMainContext context)
+        public MicroserviceRepository(MockbenchMainContext context) : base(context)
         {
             _context = context;
         }

@@ -4,7 +4,7 @@ using Mockbench.Shared.Models.Microservice;
 
 namespace Mockbench.Abstractions.Repositories
 {
-    public interface IMicroserviceRepository
+    public interface IMicroserviceRepository : IBaseRepository
     {
         Task<MicroserviceResultDto> CreateMicroservice(MicroserviceResultDto newMicroserviceDto);
         Task<bool> DeleteMicroservice(int id);

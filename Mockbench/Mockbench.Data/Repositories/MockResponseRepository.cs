@@ -7,11 +7,11 @@ using Mockbench.Shared.Models.Response;
 
 namespace Mockbench.Data.Repositories
 {
-    public class MockResponseRepository : IMockResponseRepository
+    public class MockResponseRepository : BaseRepository, IMockResponseRepository
     {
         private readonly MockbenchMainContext _context;
 
-        public MockResponseRepository(MockbenchMainContext context)
+        public MockResponseRepository(MockbenchMainContext context) : base(context)
         {
             _context = context;
         }

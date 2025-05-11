@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using Mockbench.Shared.Models.Enum;
+﻿using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.Headers;
 using Mockbench.Shared.Models.QueryParameters;
 using Mockbench.Shared.Models.Response;
+using System.ComponentModel.DataAnnotations;
 
 namespace Mockbench.Shared.Models.Endpoint
 {
@@ -47,6 +44,7 @@ namespace Mockbench.Shared.Models.Endpoint
         public List<EndpointHeaderDto> EndpointHeaders { get; set; }
 
         public List<QueryParameterDto> QueryParameters { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             return Enumerable.Empty<ValidationResult>();

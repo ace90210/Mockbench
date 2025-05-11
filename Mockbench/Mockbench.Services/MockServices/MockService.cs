@@ -19,11 +19,11 @@ namespace Mockbench.Services.MockServices
     {
         private static readonly Random RandomNumberGenerator = new();
 
-        private readonly IBaseRepository _baseRepository;
+        private readonly ICommonRepository _baseRepository;
 
         private readonly IEndpointRepository _endpointRepository;
 
-        public MockService(IEndpointRepository endpointRepository, IBaseRepository baseRepository)
+        public MockService(IEndpointRepository endpointRepository, ICommonRepository baseRepository)
         {
             _endpointRepository = endpointRepository;
             _baseRepository = baseRepository;
@@ -65,7 +65,7 @@ namespace Mockbench.Services.MockServices
 
         public async Task CreateMockResponseIfNotExistAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointPath, string requestBody, HttpResponseMessage response, TimeSpan latency)
         {
-            await _baseRepository.CreateTenantEnvironmentMicroserviceIfNotExists(matchingEndpoints);
+            await _baseRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(matchingEndpoints);
 
             var exactEndpoint = await FindExactEndpointAsync(matchingEndpoints, context, restType, endpointPath, requestBody);
 

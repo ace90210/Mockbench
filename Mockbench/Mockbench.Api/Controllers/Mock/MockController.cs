@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Abstractions.Services;
+using Mockbench.Api.Helpers;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Enum;
@@ -27,11 +28,11 @@ namespace Mockbench.Server.Controllers.MockControllers
         //  ONE route handles every verb + every 1–3-letter combination
         //------------------------------------------------------------------
         [AcceptVerbs("GET", "POST", "PUT", "PATCH", "DELETE")]
-        [Route("{code:regex(^[tgm]{1,3}$)}/{**rest}")]
+        [Route("api/[controller]/{code:regex(^[[tem]]{{1,3}}$)}/{**rest}")]
         public async Task<IActionResult> ProxyAsync(string code, string rest)
         {
             _logger.LogTrace("Call to mock  microservice");
-            if (!TryParse(code, rest,
+            if (!HelperExtensions.TryParseParamCodes(code, rest,
                       out var tenantPath, out var environmentPath,
                       out var microservicePath, out var endpointUrl, out var error))
             {
@@ -61,48 +62,7 @@ namespace Mockbench.Server.Controllers.MockControllers
             
             return response ?? NotFound();
         }
-
-        //------------------------------------------------------------------
-        //  Helpers
-        //------------------------------------------------------------------
-        private static bool TryParse(
-            string code,
-            string rest,
-            out string? tenant,
-            out string? group,
-            out string? micro,
-            out string endpoint,
-            out string? error)
-        {
-            tenant = group = micro = null;
-            endpoint = string.Empty;
-            error = null;
-
-            var parts = rest.Split('/', StringSplitOptions.RemoveEmptyEntries);
-
-            if (parts.Length < code.Length)
-            {
-                error = $"Expected {code.Length} path segment(s) " +
-                        $"after '{code}', got {parts.Length}.";
-                return false;
-            }
-
-            for (int i = 0; i < code.Length; i++)
-            {
-                switch (code[i])
-                {
-                    case 't': tenant = parts[i]; break;
-                    case 'g': group = parts[i]; break;
-                    case 'm': micro = parts[i]; break;
-                }
-            }
-
-            if (parts.Length > code.Length)
-                endpoint = string.Join('/', parts.Skip(code.Length));
-
-            return true;
-        }
-
+                
         /// <summary>
         /// Check Microservice is valid and enabled
         /// </summary>

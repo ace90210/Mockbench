@@ -7,9 +7,9 @@ namespace Mockbench.Services.MockServices
 {
     public class SimulateTimeService : ISimulateTimeService
     {
-        private readonly IBaseRepository _baseRepository;
+        private readonly ICommonRepository _baseRepository;
 
-        public SimulateTimeService(IBaseRepository baseRepository)
+        public SimulateTimeService(ICommonRepository baseRepository)
         {
             _baseRepository = baseRepository ?? throw new ArgumentNullException(nameof(baseRepository));
         }

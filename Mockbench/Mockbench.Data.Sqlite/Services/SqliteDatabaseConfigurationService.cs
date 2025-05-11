@@ -7,12 +7,12 @@ using Mockbench.Shared.Models.Utility;
 
 namespace Mockbench.Data.Sqlite.Services
 {
-    public class SqliteDatabaseConnectionService : IDatabaseConfigurationService
+    public class SqliteDatabaseConfigurationService : IDatabaseConfigurationService
     {
         private readonly MockbenchMainContext _mainContext;
-        private readonly ILogger<SqliteDatabaseConnectionService> _logger;
+        private readonly ILogger<SqliteDatabaseConfigurationService> _logger;
 
-        public SqliteDatabaseConnectionService(MockbenchMainContext mainContext, ILogger<SqliteDatabaseConnectionService> logger)
+        public SqliteDatabaseConfigurationService(MockbenchMainContext mainContext, ILogger<SqliteDatabaseConfigurationService> logger)
         {
             _mainContext = mainContext ?? throw new ArgumentNullException(nameof(mainContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

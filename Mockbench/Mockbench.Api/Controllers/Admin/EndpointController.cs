@@ -3,9 +3,13 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Mockbench.Abstractions.Repositories;
+using Mockbench.Api.Helpers;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Endpoint;
+using Mockbench.Shared.Models.Enum;
+using Mockbench.Shared.Models.Headers;
+using Mockbench.Shared.Models.QueryParameters;
 using Mockbench.Shared.Models.Response;
 using Mockbench.Shared.Models.Utility;
 using System.ComponentModel.DataAnnotations;
@@ -52,28 +56,58 @@ namespace Mockbench.Api.Controllers.Admin
             var endpoint = await _endpointRepository.GetEndpoint(endpointId);
 
             if (endpoint == null)
-                return NotFound(ErrorMessageConstants.EndpointNotFound);
+                return Ok(new EndpointDto()
+                {
+                    Enabled = true,
+                    CreatedUtc = DateTime.Now,
+                    FromUrl = "posts",
+                    MockBehaviour = MockBehaviour.MockOnly,
+                    RestType = RestType.GET,
+                    QueryParameters = new List<QueryParameterDto>()
+                    {
+                        new QueryParameterDto()
+                        {
+                            Name = "test",
+                            Value = "123"
+                        }
+                    },
+                    EndpointHeaders = new List<EndpointHeaderDto>()
+                    {
+                        new EndpointHeaderDto()
+                        {
+                            Name = "Authorization",
+                            Value = "ey..."
+                        }
+                    }
+                });
+                //return NotFound(ErrorMessageConstants.EndpointNotFound);
             
             return Ok(endpoint);
         }
 
 
-        [HttpPost("{microserviceId}")]
+        [Route("{code:regex(^[[tgm]]{{1,3}}$)}/{**rest}")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(EndpointDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        public async Task<ActionResult<EndpointDto>> CreateRequest(int microserviceId, [FromBody] EndpointDto? endpointDto)
+        public async Task<ActionResult<EndpointDto>> CreateRequest(string code, string rest, [FromBody] EndpointDto? endpointDto)
         {
-            if (microserviceId <= 0)
-                return BadRequest(ErrorMessageConstants.MicroserviceId);
-            
+            if (!HelperExtensions.TryParseParamCodes(code, rest,
+                      out var tenantPath, out var environmentPath,
+                      out var microservicePath, out var endpointUrl, out var error))
+            {
+                return BadRequest(error);
+            }
+                        
             if (endpointDto == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
 
             var results = new List<ValidationResult>();
 
             bool isValid = GeneralHelper.TryValidateFullObject(endpointDto, new ValidationContext(endpointDto, null), results);
+
+            await _endpointRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(tenantPath, environmentPath, microservicePath);
 
             if (!isValid)
                 return BadRequest(results.ToBadRequestResult());

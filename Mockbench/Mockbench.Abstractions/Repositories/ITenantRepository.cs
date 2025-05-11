@@ -3,7 +3,7 @@ using Mockbench.Shared.Models.Tenant;
 
 namespace Mockbench.Abstractions.Repositories
 {
-    public interface ITenantRepository
+    public interface ITenantRepository : IBaseRepository
     {
         Task<TenantBase> CreateTenantAsync(TenantBase newTenantDto);
         Task<bool> DeleteTenantAsync(int id);

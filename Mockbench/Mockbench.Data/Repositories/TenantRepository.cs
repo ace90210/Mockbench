@@ -7,11 +7,11 @@ using Mockbench.Shared.Models.Tenant;
 
 namespace Mockbench.Data.Repositories
 {
-    public class TenantRepository : ITenantRepository
+    public class TenantRepository : BaseRepository, ITenantRepository
     {
         private readonly MockbenchMainContext _context;
 
-        public TenantRepository(MockbenchMainContext context)
+        public TenantRepository(MockbenchMainContext context) : base(context)
         {
             _context = context;
         }

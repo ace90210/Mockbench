@@ -3,7 +3,7 @@ using Mockbench.Shared.Models.General;
 
 namespace Mockbench.Abstractions.Repositories
 {
-    public interface IEnvironmentRepository
+    public interface IEnvironmentRepository : IBaseRepository
     {
         Task<EnvironmentDto> CreateEnvironment(EnvironmentDto newEnvironmentDto);
         Task<bool> DeleteEnvironment(int id);

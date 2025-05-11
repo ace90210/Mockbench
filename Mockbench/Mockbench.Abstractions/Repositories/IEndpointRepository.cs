@@ -3,7 +3,7 @@ using Mockbench.Shared.Models.Response;
 
 namespace Mockbench.Abstractions.Repositories
 {
-    public interface IEndpointRepository
+    public interface IEndpointRepository: IBaseRepository
     {
         Task AddResponseToEndpointAsync(int endpointId, MockResponseDto mockResponseDto);
         Task<EndpointDto> CreateEndpointAsync(EndpointDto endpointDto);
