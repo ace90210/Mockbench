@@ -85,21 +85,25 @@ namespace Mockbench.Api.Controllers.Admin
             return Ok(endpoint);
         }
 
-
-        [Route("{code:regex(^[[tgm]]{{1,3}}$)}/{**rest}")]
+        [Route("{code:regex(^$|^[[tem]]{{1,3}}$)}/{**rest}")]
+        [Route("{**rest}")]                              
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(EndpointDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))] // Potentially for other bad request types
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        public async Task<ActionResult<EndpointDto>> CreateRequest(string code, string rest, [FromBody] EndpointDto? endpointDto)
+        public async Task<ActionResult<EndpointDto>> CreateEndpoint(string? code, string? rest, [FromBody] EndpointDto? endpointDto)
         {
-            if (!HelperExtensions.TryParseParamCodes(code, rest,
-                      out var tenantPath, out var environmentPath,
-                      out var microservicePath, out var endpointUrl, out var error))
+            // Ensure 'code' is treated as empty string if null for TryParseParamCodes logic
+            string currentCode = code ?? string.Empty;
+            string currentRest = rest ?? string.Empty;
+
+            if (!HelperExtensions.TryParseParamCodes(currentCode, currentRest,
+                                     out var tenantPath, out var environmentPath,
+                                     out var microservicePath, out var endpointUrl, out var error))
             {
                 return BadRequest(error);
             }
-                        
+
             if (endpointDto == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
 

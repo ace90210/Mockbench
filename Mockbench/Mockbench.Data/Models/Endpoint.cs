@@ -30,7 +30,7 @@ namespace Mockbench.Data.Models
 
         public DateTime? SimulateTime { get; set; }
 
-        public string FromBody { get; set; }
+        public string? FromBody { get; set; }
 
         [Obsolete("Property 'Duration' should be used instead.")]
         [Browsable(false)]

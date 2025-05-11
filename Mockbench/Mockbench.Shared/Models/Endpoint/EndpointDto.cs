@@ -22,16 +22,16 @@ namespace Mockbench.Shared.Models.Endpoint
 
         public bool Enabled { get; set; } = true;
 
-        public RestType RestType { get; set; }
+        public RestType? RestType { get; set; } = Mockbench.Shared.Models.Enum.RestType.GET;
 
         public TimeSpan? Ttl { get; set; }
         
         [MaxLength(10_000_000, ErrorMessage = "Body exceeded max length {0}")]
-        public string FromBody { get; set; }
+        public string? FromBody { get; set; }
 
         public DateTime? SimulateTime { get; set; }
 
-        public List<MockResponseDto> MockResponses { get; set; }
+        public List<MockResponseDto>? MockResponses { get; set; }
 
         public DateTime CreatedUtc { get; set; }
 

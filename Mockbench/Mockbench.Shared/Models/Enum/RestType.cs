@@ -2,7 +2,7 @@
 {
     public enum RestType
     {
-        GET,
+        GET, // this will be 0
         POST,
         PUT,
         PATCH,

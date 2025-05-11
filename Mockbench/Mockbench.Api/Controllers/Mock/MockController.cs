@@ -28,13 +28,19 @@ namespace Mockbench.Server.Controllers.MockControllers
         //  ONE route handles every verb + every 1–3-letter combination
         //------------------------------------------------------------------
         [AcceptVerbs("GET", "POST", "PUT", "PATCH", "DELETE")]
-        [Route("api/[controller]/{code:regex(^[[tem]]{{1,3}}$)}/{**rest}")]
-        public async Task<IActionResult> ProxyAsync(string code, string rest)
+        [Route("{code:regex(^$|^[[tem]]{{1,3}}$)}/{**rest}")]
+        [Route("{**rest}")]
+        public async Task<IActionResult> ProxyAsync(string? code, string? rest)
         {
             _logger.LogTrace("Call to mock  microservice");
-            if (!HelperExtensions.TryParseParamCodes(code, rest,
-                      out var tenantPath, out var environmentPath,
-                      out var microservicePath, out var endpointUrl, out var error))
+
+            // Ensure 'code' is treated as empty string if null for TryParseParamCodes logic
+            string currentCode = code ?? string.Empty;
+            string currentRest = rest ?? string.Empty;
+
+            if (!HelperExtensions.TryParseParamCodes(currentCode, currentRest,
+                                     out var tenantPath, out var environmentPath,
+                                     out var microservicePath, out var endpointUrl, out var error))
             {
                 return BadRequest(error);
             }
