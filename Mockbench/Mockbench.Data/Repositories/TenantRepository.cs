@@ -118,7 +118,7 @@ namespace Mockbench.Data.Repositories
 
             var existingTenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Path.ToLower() == newTenantDto.Path.ToLower());
 
-            if (existingTenant != null)
+            if (existingTenant is not null)
                 throw new Exception("tenant with same path already exists. Tenant paths MUST be unique");
 
             var newTenant = new Tenant()
@@ -191,7 +191,7 @@ namespace Mockbench.Data.Repositories
             foreach (var variable in updatedTenant.Variables)
             {
                 var existingVariable = existingTenant.Variables.FirstOrDefault(v => v.Key == variable.Key);
-                if (existingVariable != null)
+                if (existingVariable is not null)
                 {
                     existingVariable.Value = variable.Value;
                 }

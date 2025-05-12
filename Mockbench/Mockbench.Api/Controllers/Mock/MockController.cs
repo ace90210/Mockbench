@@ -49,7 +49,7 @@ namespace Mockbench.Server.Controllers.MockControllers
 
             var (isValid, result) = ValidateMatchingResults(matchingEndpoint);
 
-            if (!isValid && result != null)
+            if (!isValid && result is not null)
                 return result;
 
             var restType = HttpContext.Request.Method switch

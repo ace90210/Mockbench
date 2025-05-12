@@ -25,7 +25,7 @@ namespace Mockbench.Shared
         {
             _currentEntity = entity;
 
-            if (initialisePrevious && _currentEntity != null)
+            if (initialisePrevious && _currentEntity is not null)
             {
                 _previousEntity = new SnapshotEntity<T>(_currentEntity.CopyTo(new()), false);
             }
@@ -43,7 +43,7 @@ namespace Mockbench.Shared
 
         public void CommitChanges()
         {
-            if (_currentEntity != null)
+            if (_currentEntity is not null)
             {
                 _currentEntity.CopyTo(_previousEntity.GetValue());
             }
@@ -76,7 +76,7 @@ namespace Mockbench.Shared
 
         private void DisposePrevious()
         {
-            if (_previousEntity != null)
+            if (_previousEntity is not null)
             {
                 ((IDisposable)_previousEntity).Dispose();
                 _previousEntity = null;
@@ -85,7 +85,7 @@ namespace Mockbench.Shared
 
         public override string ToString()
         {
-            if (_previousEntity != null)
+            if (_previousEntity is not null)
                 return $"\nCurrent: {_currentEntity?.ToString() ?? "[[Empty]]"}\nPrevious: {_previousEntity.GetValue()?.ToString() ?? "[[Empty]]"}\n";
 
             return $"\nCurrent: {_currentEntity?.ToString() ?? "[[Empty]]"}\nPrevious: [[Empty]]\n";

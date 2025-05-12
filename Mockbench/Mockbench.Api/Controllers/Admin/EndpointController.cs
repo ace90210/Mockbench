@@ -87,14 +87,17 @@ namespace Mockbench.Api.Controllers.Admin
 
             bool isValid = GeneralHelper.TryValidateFullObject(endpointDto, new ValidationContext(endpointDto, null), results);
 
-            (bool created, MatchingEndpoints tem) = await _endpointRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(tenantPath, environmentPath, microservicePath);
+            (bool created, MatchingEndpoints? tem) = await _endpointRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(tenantPath, environmentPath, microservicePath);
 
             if (!isValid && created)
                 return BadRequest(results.ToBadRequestResult());
 
-            endpointDto.TenantId = tem.Tenant?.Id;
-            endpointDto.EnvironmentId = tem.Environment?.Id;
-            endpointDto.MicroserviceId = tem.Microservice?.Id;
+            if (tem is not null)
+            {
+                endpointDto.TenantId = tem.Tenant?.Id;
+                endpointDto.EnvironmentId = tem.Environment?.Id;
+                endpointDto.MicroserviceId = tem.Microservice?.Id;
+            }
 
             var createdRequest =
                 await _endpointRepository.CreateEndpointAsync(endpointDto);

@@ -133,7 +133,7 @@ namespace Mockbench.Services.MockServices
                 QueryParameters = queryParams.AllKeys.Select((k, i) => new QueryParameterDto() { Name = k, Value = queryParams[k], OrderIndex = i }).ToList()
             };
 
-            if (matchingEndpoints.Microservice?.Headers != null && matchingEndpoints?.Microservice.Headers.Count > 0)
+            if (matchingEndpoints.Microservice?.Headers is not null && matchingEndpoints?.Microservice.Headers.Count > 0)
             {
                 endpoint.ExpectAuthHeader = endpoint.EndpointHeaders?.Any(h => h.Name.ToLower() == "authorization") ?? false;
             }
@@ -223,7 +223,7 @@ namespace Mockbench.Services.MockServices
 
         private MockResponseDto InnerGetMockResponse(EndpointDto endpoint, bool pickRandom, DateTime? simulateTime)
         {
-            if (endpoint != null && endpoint.MockBehaviour != MockBehaviour.ProxyOnly)
+            if (endpoint is not null && endpoint.MockBehaviour != MockBehaviour.ProxyOnly)
             {
                 var resolvedSimulateTime = endpoint.SimulateTime?.AddMicroseconds(1) ?? simulateTime?.AddMicroseconds(1);
 
@@ -237,7 +237,7 @@ namespace Mockbench.Services.MockServices
 
                 if (filteredAndOrderedResponses.Count > 0)
                 {
-                    if (!pickRandom || resolvedSimulateTime != null)
+                    if (!pickRandom || resolvedSimulateTime is not null)
                     {
                         return filteredAndOrderedResponses.First();
                     }

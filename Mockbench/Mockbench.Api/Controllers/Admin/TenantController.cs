@@ -60,7 +60,7 @@ namespace Mockbench.Api.Controllers.Admin
             
             var tenant = await _tenantRepository.GetTenantByIdAsync(id);
 
-            return tenant != null ? Ok(tenant) : NotFound();
+            return tenant is not null ? Ok(tenant) : NotFound();
         }
 
         [HttpGet("findbyname/{tenantName}")]
@@ -75,7 +75,7 @@ namespace Mockbench.Api.Controllers.Admin
             
             var tenant = await _tenantRepository.GetTenantByNameAsync(tenantName);
 
-            return tenant != null ? Ok(tenant) : NotFound();
+            return tenant is not null ? Ok(tenant) : NotFound();
         }
 
         [HttpGet("findbypath/{path}")]
@@ -90,7 +90,7 @@ namespace Mockbench.Api.Controllers.Admin
             
             var tenant = await _tenantRepository.GetTenantByPathAsync(path);
 
-            return tenant != null ? Ok(tenant) : NotFound();
+            return tenant is not null ? Ok(tenant) : NotFound();
         }
 
         [HttpPost]

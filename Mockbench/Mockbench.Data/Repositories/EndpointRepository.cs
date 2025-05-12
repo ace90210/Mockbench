@@ -68,9 +68,9 @@ namespace Mockbench.Data.Repositories
             var microservice = _context.Microservices.FirstOrDefault(m => m.Path == microservicePath);
 
             return new MatchingEndpoints() {
-                Tenant = tenant != null ? _tenantMapper.ToTenantDto(tenant) : null,
-                Environment = environment != null ? environmentMapper.ToEnvironmentDto(environment) : null,
-                Microservice = microservice != null ? _microserviceMapper.ToMicroserviceDto(microservice) : null,
+                Tenant = tenant is not null ? _tenantMapper.ToTenantDto(tenant) : null,
+                Environment = environment is not null ? environmentMapper.ToEnvironmentDto(environment) : null,
+                Microservice = microservice is not null ? _microserviceMapper.ToMicroserviceDto(microservice) : null,
                 TenantPath = tenantPath,
                 EnvironmentPath = environmentPath,
                 MicroservicePath = microservicePath,

@@ -33,7 +33,7 @@ namespace Mockbench.Shared.Helper
         {
             var stringContent = new StringContent(content);
 
-            if (contentType != null)
+            if (contentType is not null)
             {
                 //workaround to bug where utf-8 added to content type and breaking forwarded requests
                 if (contentType.Contains("utf-8"))

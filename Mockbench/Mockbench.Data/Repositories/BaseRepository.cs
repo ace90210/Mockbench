@@ -89,9 +89,9 @@ namespace Mockbench.Data.Repositories
                 await _context.SaveChangesAsync();
             }
 
-            matchingEndpoints.Tenant = existingTenant != null ? _tenantMapper.ToTenantDto(existingTenant) : null;
-            matchingEndpoints.Environment = existingEnvironment != null ? _environmentMapper.ToEnvironmentDto(existingEnvironment) : null;
-            matchingEndpoints.Microservice = existingMicroservice != null ? _microserviceMapper.ToMicroserviceDto(existingMicroservice) : null;
+            matchingEndpoints.Tenant = existingTenant is not null ? _tenantMapper.ToTenantDto(existingTenant) : null;
+            matchingEndpoints.Environment = existingEnvironment is not null ? _environmentMapper.ToEnvironmentDto(existingEnvironment) : null;
+            matchingEndpoints.Microservice = existingMicroservice is not null ? _microserviceMapper.ToMicroserviceDto(existingMicroservice) : null;
 
             return (true, matchingEndpoints);
         }
@@ -164,9 +164,9 @@ namespace Mockbench.Data.Repositories
             {
                 await _context.SaveChangesAsync();
             }
-            matchingEndpoints.Tenant = existingTenant != null ? _tenantMapper.ToTenantDto(existingTenant) : null;
-            matchingEndpoints.Environment = existingEnvironment != null ? _environmentMapper.ToEnvironmentDto(existingEnvironment) : null;
-            matchingEndpoints.Microservice = existingMicroservice != null ? _microserviceMapper.ToMicroserviceDto(existingMicroservice) : null;
+            matchingEndpoints.Tenant = existingTenant is not null ? _tenantMapper.ToTenantDto(existingTenant) : null;
+            matchingEndpoints.Environment = existingEnvironment is not null ? _environmentMapper.ToEnvironmentDto(existingEnvironment) : null;
+            matchingEndpoints.Microservice = existingMicroservice is not null ? _microserviceMapper.ToMicroserviceDto(existingMicroservice) : null;
             return (true, matchingEndpoints);
         }
 

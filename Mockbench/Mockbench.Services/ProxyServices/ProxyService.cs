@@ -42,12 +42,12 @@ namespace Mockbench.Services.ProxyServices
                     contentType = context.Request?.ContentType;
                 }
 
-                var resolvedEndpoint = matchingEndpoints.Microservice != null && !string.IsNullOrWhiteSpace(matchingEndpoints.TenantPath) && matchingEndpoints.Microservice.PassThroughTenant ? $"{matchingEndpoints.TenantPath}/{endpointPath}" : endpointPath;
+                var resolvedEndpoint = matchingEndpoints.Microservice is not null && !string.IsNullOrWhiteSpace(matchingEndpoints.TenantPath) && matchingEndpoints.Microservice.PassThroughTenant ? $"{matchingEndpoints.TenantPath}/{endpointPath}" : endpointPath;
 
                 var matchingRequest = await _mockService.FindExactEndpointAsync(matchingEndpoints, context,
                                                                         restType, $"{resolvedEndpoint}{queryString}", requestBody );
 
-                if (matchingRequest != null && matchingRequest.MockBehaviour == MockBehaviour.MockOnly)
+                if (matchingRequest is not null && matchingRequest.MockBehaviour == MockBehaviour.MockOnly)
                 {
                     return new NotFoundResult();
                 }
@@ -60,10 +60,10 @@ namespace Mockbench.Services.ProxyServices
                 await _mockService.CreateMockResponseIfNotExistAsync(matchingEndpoints, context, restType, endpointPath, requestBody, response, stopWatch.Elapsed);
 
                 
-                if (response != null)
+                if (response is not null)
                 {                
                     if (matchingRequest is { MockBehaviour: MockBehaviour.ProxyOnly } && 
-                        response.Content.Headers.ContentType?.MediaType != null &&
+                        response.Content.Headers.ContentType?.MediaType is not null &&
                         response.Content.Headers.ContentType.MediaType.ToUpper().Contains("IMAGE"))
                     {
                         var contentReturnedBytes = await response.Content.ReadAsByteArrayAsync();
@@ -89,7 +89,7 @@ namespace Mockbench.Services.ProxyServices
 
         private async Task<HttpResponseMessage> SendRequestAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string requestBody, string contentType, string endpointPath)
         {
-            if (matchingEndpoints.Microservice != null)
+            if (matchingEndpoints.Microservice is not null)
             {
                 var httpRequestMessage = new HttpRequestMessage();
                 try

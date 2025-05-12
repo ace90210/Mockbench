@@ -153,7 +153,7 @@ namespace Mockbench.Data.SqlServer.Services
             sb.AppendLine(ex.Message);
 
             var inner = ex.InnerException;
-            while (inner != null)
+            while (inner is not null)
             {
                 sb.AppendLine("Inner Exception:");
                 sb.AppendLine(inner.Message);

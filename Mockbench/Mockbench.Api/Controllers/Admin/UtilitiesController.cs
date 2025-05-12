@@ -105,7 +105,7 @@ namespace Mockbench.Api.Controllers.Admin
 
                 string errorMessage = pex.Message;
 
-                if(pex.InnerException != null)
+                if(pex.InnerException is not null)
                 {
                     errorMessage = pex.InnerException.Message;
                 }

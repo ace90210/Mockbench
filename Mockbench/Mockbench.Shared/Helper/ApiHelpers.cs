@@ -56,7 +56,7 @@ namespace Mockbench.Shared.Helper
             var errors = new Dictionary<string, List<string>>();
 
            
-            if (ex != null)
+            if (ex is not null)
             {
                 errors.Add("Reason", new List<string>() { ex.Message });
             }

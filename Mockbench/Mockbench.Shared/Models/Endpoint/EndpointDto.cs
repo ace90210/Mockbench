@@ -76,10 +76,10 @@ namespace Mockbench.Shared.Models.Endpoint
                 target.MockResponses.Add(response.CopyTo(new MockResponseDto()));
             }
             
-            if(target.EndpointHeaders == null && EndpointHeaders != null && EndpointHeaders.Count > 0)
+            if(target.EndpointHeaders == null && EndpointHeaders is not null && EndpointHeaders.Count > 0)
                 throw new ArgumentNullException($"{nameof(EndpointDto)} Headers: Cannot copy to a null target");
 
-            if (EndpointHeaders != null && EndpointHeaders.Count > 0)
+            if (EndpointHeaders is not null && EndpointHeaders.Count > 0)
             {
                 if (target.EndpointHeaders == null)
                 {
@@ -92,10 +92,10 @@ namespace Mockbench.Shared.Models.Endpoint
                 }
             }
             
-            if(target.QueryParameters == null && QueryParameters != null && QueryParameters.Count > 0)
+            if(target.QueryParameters == null && QueryParameters is not null && QueryParameters.Count > 0)
                 throw new ArgumentNullException($"{nameof(EndpointDto)} Query Parameters: Cannot copy to a null target");
 
-            if (QueryParameters != null && QueryParameters.Count > 0)
+            if (QueryParameters is not null && QueryParameters.Count > 0)
             {
                 if (target.QueryParameters == null)
                 {

@@ -70,10 +70,10 @@ namespace Mockbench.Shared.Models.Response
             target.Latency = Latency;
             target.CreatedUtc = CreatedUtc;
 
-            if(target.Headers == null && Headers != null && Headers.Count > 0)
+            if(target.Headers == null && Headers is not null && Headers.Count > 0)
                 throw new ArgumentNullException($"{nameof(MockResponseDto)} Headers: Cannot copy to a null target");
 
-            if (Headers != null && Headers.Count > 0)
+            if (Headers is not null && Headers.Count > 0)
             {
                 if (target.Headers == null)
                 {

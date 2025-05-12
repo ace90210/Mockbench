@@ -49,7 +49,7 @@ namespace Mockbench.Server.Services
             IActionResult proxyResponse = null;
 
             // If proxy mode is enabled, try to proxy the request first
-            if (matchingEndpoints.Microservice != null && (matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver || matchingEndpoints.Microservice.ProxyMode == ProxyMode.Proxy))
+            if (matchingEndpoints.Microservice is not null && (matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver || matchingEndpoints.Microservice.ProxyMode == ProxyMode.Proxy))
             {
                 bool isdown = false;
 
@@ -114,7 +114,7 @@ namespace Mockbench.Server.Services
                 // To handle rereading the content better this is handled in the proxy service separately
                 // Here we send the message with a fresh httpclient as it will only be sent once
                 await SendDebuggerMessageAsync(restType, context, endpointPath);
-                if (foundRequest != null)
+                if (foundRequest is not null)
                 {
                     //check auth header
                     if (foundRequest.ExpectAuthHeader && !IsAuthHeaderPresent(context.Request.Headers))
@@ -124,7 +124,7 @@ namespace Mockbench.Server.Services
 
                     var existingResponse = await _mockService.GetMockResponseAsync(matchingEndpoints, restType, context, endpointPath);
 
-                    if (existingResponse != null)
+                    if (existingResponse is not null)
                     {
                         var headersToAdd = HttpHelpers.GetResponseHeadersToAdd(matchingEndpoints.Microservice,
                                                                                                  existingResponse.Headers
@@ -149,7 +149,7 @@ namespace Mockbench.Server.Services
                 }
 
                 // if here we found no mock response so either return null or if in failover return the proxy response instead as has more details
-                return matchingEndpoints.Microservice != null && matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver ? proxyResponse : null;
+                return matchingEndpoints.Microservice is not null && matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver ? proxyResponse : null;
             }
 
             // If none of the above conditions matched, return a proxy response as a fallback
@@ -201,7 +201,7 @@ namespace Mockbench.Server.Services
                         Method = GetHttpMethod(restType)
                     };
 
-                    if (context?.Request.Headers != null)
+                    if (context?.Request.Headers is not null)
                     {
                         foreach (var (key, value) in context.Request.Headers)
                         {
@@ -257,7 +257,7 @@ namespace Mockbench.Server.Services
 
         private bool HasSimulationApplied(MatchingEndpoints matchingEndpoints, EndpointDto endpointDto)
         {
-            return matchingEndpoints.Microservice?.SimulateTime != null || matchingEndpoints?.Environment?.SimulateTime != null || matchingEndpoints?.Tenant?.SimulateTime != null || endpointDto?.SimulateTime != null;
+            return matchingEndpoints.Microservice?.SimulateTime is not null || matchingEndpoints?.Environment?.SimulateTime is not null || matchingEndpoints?.Tenant?.SimulateTime is not null || endpointDto?.SimulateTime is not null;
         }
 
         private bool IsRemoteServiceDown(IActionResult proxyResponse)

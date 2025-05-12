@@ -121,7 +121,7 @@ namespace Mockbench.Data.Repositories
             foreach (var variable in updatedEnvironment.Variables)
             {
                 var existingVariable = existingEnvironment.Variables.FirstOrDefault(v => v.Key == variable.Key);
-                if (existingVariable != null)
+                if (existingVariable is not null)
                 {
                     existingVariable.Value = variable.Value;
                 }

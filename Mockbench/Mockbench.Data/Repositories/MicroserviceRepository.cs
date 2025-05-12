@@ -251,7 +251,7 @@ namespace Mockbench.Data.Repositories
                                         .Where(eh => !updatedMicroservice.Headers?.Any(uh => uh.Name == eh.Name) ?? false)
                                         .Select(eh => eh.ID).ToList();
 
-                    if (headersToDelete != null && headersToDelete.Any())
+                    if (headersToDelete is not null && headersToDelete.Any())
                     {
                         existingMicroservice.Headers.RemoveAll(eh => headersToDelete.Any(htd => htd == eh.ID));
                     }
@@ -262,7 +262,7 @@ namespace Mockbench.Data.Repositories
                                             .Select(h => h.ToEntity())
                                             .ToList();
 
-                    if (headersToAdd != null && headersToAdd.Any())
+                    if (headersToAdd is not null && headersToAdd.Any())
                     {
                         if (existingMicroservice.Headers == null)
                         {

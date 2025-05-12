@@ -116,7 +116,7 @@ namespace Mockbench.Api.Controllers.Admin
         public async Task<ActionResult<MockResponseDto>> UpdateResponse(int responseId, [FromBody] MockResponseDto? response)
         {
             if (responseId <= 0)
-                return BadRequest(ErrorMessageConstants.EndpointId);
+                return BadRequest(ErrorMessageConstants.ResponseId);
             
             if (response == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
