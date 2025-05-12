@@ -1,0 +1,588 @@
+type: collection.insomnia.rest/5.0
+name: Scratch Pad
+meta:
+  id: wrk_scratchpad
+  created: 1746713238663
+  modified: 1746713238663
+collection:
+  - name: Basic endpoint and response
+    meta:
+      id: fld_de19abb0729f4a5f8efbd0ce8210e932
+      created: 1746992636368
+      modified: 1746992669097
+      sortKey: -1746992662142
+    children:
+      - url: https://localhost:7240/api/endpoint/1
+        name: Get endpoint
+        meta:
+          id: req_c76387056d294585b068de2ebe69cf7c
+          created: 1746713276274
+          modified: 1746992874947
+          isPrivate: false
+          sortKey: -1746992641827
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/endpoint
+        name: Create endpoint
+        meta:
+          id: req_5f67c0271fdf4284ae64ad4026dbb04c
+          created: 1746973976729
+          modified: 1746992868693
+          isPrivate: false
+          sortKey: -1746992641927
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"fromUrl": "posts",
+            	"exactUrlMatch": false,
+            	"expectAuthHeader": false,
+            	"mockBehaviour": 2,
+            	"enabled": true,
+            	"restType": 0,
+            	"ttl": null,
+            	"fromBody": null,
+            	"simulateTime": null,
+            	"mockResponses": null,
+            	"createdUtc": "2025-05-11T15:32:10.3715887+01:00",
+            	"tenantId": null,
+            	"environmentId": null,
+            	"microserviceId": null,
+            	"endpointHeaders": [
+            		{
+            			"name": "Authorization",
+            			"value": "ey..."
+            		}
+            	],
+            	"queryParameters": [
+            		{
+            			"name": "test",
+            			"value": "123",
+            			"orderIndex": 0,
+            			"ignore": false,
+            			"endpointId": 0
+            		}
+            	]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/mock/posts
+        name: test mock
+        meta:
+          id: req_fdc6d86693fe4355aeef00d343fec0e3
+          created: 1746975660896
+          modified: 1746992880407
+          isPrivate: false
+          sortKey: -1746992641627
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/mockresponse/1
+        name: add responses
+        meta:
+          id: req_62ce222a1d2947859d0f86dfa7f4fae4
+          created: 1746977653877
+          modified: 1746992872692
+          isPrivate: false
+          sortKey: -1746992641877
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            			"description": null,
+            			"code": 200,
+            			"encoding": 0,
+            			"contentType": "text/plain",
+            			"body": "test response",
+            			"checksum": null,
+            			"uniqueChecksum": "d0e60b5899f3dd1f7e224ccf4d0aaf3619d211da",
+            			"priority": 100,
+            			"fakeDelay": 0,
+            			"enabled": true,
+            			"createdUtc": "2025-05-11T20:12:40.6359847+01:00",
+            			"endpointId": 0,
+            			"latency": "00:00:00",
+            			"headers": [
+            				{
+            					"name": "Content-Type",
+            					"value": "plain/text"
+            				}
+            			]
+            		}
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: microservice
+    meta:
+      id: fld_c2eb2343e45f4b288a1cdf4cff92537c
+      created: 1746992662042
+      modified: 1746992855384
+      sortKey: -1746992662117
+    children:
+      - url: https://localhost:7240/api/microservice/1
+        name: Get microservice
+        meta:
+          id: req_2d6b4af1eaf04e6ea43d3bcf5679f16d
+          created: 1746992679159
+          modified: 1746992975509
+          isPrivate: false
+          sortKey: -1746992661343
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/microservice
+        name: create microservice
+        meta:
+          id: req_2340e6e4552447d6967b3be0f3b331c1
+          created: 1746992811682
+          modified: 1747038922924
+          isPrivate: false
+          sortKey: -1746992661443
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"path": "testms",
+            	"name": "Test Microservice",
+            	"enabled": true,
+            	"targetUrl": "https://jsonplaceholder.typicode.com/",
+            	"fakeDelay": 0,
+            	"proxyMode": 100,
+            	"randomiseMockResult": false,
+            	"simulateTime": null,
+            	"headersMode": 2,
+            	"passThroughTenant": false,
+            	"headers": [],
+            	"injectForwardingHeadersOnRequest": false
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: microservice endpoint and response
+    meta:
+      id: fld_f3a7ebfa6c074407a1999d0931e2d67f
+      created: 1746992842365
+      modified: 1746992853344
+      sortKey: -1746992662092
+    children:
+      - url: https://localhost:7240/api/endpoint/1
+        name: Get endpoint
+        meta:
+          id: req_8b09c5f228914d49a5a3d4f145d8244e
+          created: 1746992842367
+          modified: 1747039004035
+          isPrivate: false
+          sortKey: -1746992641889.5
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/endpoint/m//testms
+        name: Create endpoint
+        meta:
+          id: req_9b4ac208f3d7485480c23df8fdb4213a
+          created: 1746992842367
+          modified: 1747038004713
+          isPrivate: false
+          sortKey: -1746992641927
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"fromUrl": "postms",
+            	"exactUrlMatch": false,
+            	"expectAuthHeader": false,
+            	"mockBehaviour": 2,
+            	"enabled": true,
+            	"restType": 0,
+            	"ttl": null,
+            	"fromBody": null,
+            	"simulateTime": null,
+            	"mockResponses": null,
+            	"createdUtc": "2025-05-11T15:32:10.3715887+01:00",
+            	"tenantId": null,
+            	"environmentId": null,
+            	"microserviceId": null,
+            	"endpointHeaders": [
+            		{
+            			"name": "Authorization",
+            			"value": "ey..."
+            		}
+            	],
+            	"queryParameters": [
+            		{
+            			"name": "test",
+            			"value": "123",
+            			"orderIndex": 0,
+            			"ignore": false,
+            			"endpointId": 0
+            		}
+            	]
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/mockresponse/2
+        name: add responses
+        meta:
+          id: req_b61866daf6604d9d9ead9b290009ef52
+          created: 1746992842368
+          modified: 1747038015803
+          isPrivate: false
+          sortKey: -1746992641877
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            			"description": null,
+            			"code": 200,
+            			"encoding": 0,
+            			"contentType": "text/plain",
+            			"body": "test response ms",
+            			"checksum": null,
+            			"uniqueChecksum": "d0e60b5899f3dd1f7e224ccf4d0aaf3619d211da",
+            			"priority": 100,
+            			"fakeDelay": 0,
+            			"enabled": true,
+            			"createdUtc": "2025-05-11T20:12:40.6359847+01:00",
+            			"endpointId": 0,
+            			"latency": "00:00:00",
+            			"headers": [
+            				{
+            					"name": "Content-Type",
+            					"value": "plain/text"
+            				}
+            			]
+            		}
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/mock/m/testms/posts
+        name: test mock
+        meta:
+          id: req_da47d33fe6024b86bdab8dc35d6ca4e0
+          created: 1746992842368
+          modified: 1746993222595
+          isPrivate: false
+          sortKey: -1746992642027
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/endpoint/2
+        name: Get endpoint
+        meta:
+          id: req_d6faabfbfa69468c80d07c7015941cff
+          created: 1746993000477
+          modified: 1746993002443
+          isPrivate: false
+          sortKey: -1746992641777
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/microservice/1
+        name: update microservice
+        meta:
+          id: req_21775cfb88b3490683bd60872815f72f
+          created: 1747037905002
+          modified: 1747037969051
+          isPrivate: false
+          sortKey: -1746992641977
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"path": "testms",
+            	"name": "Test Microservice",
+            	"enabled": true,
+            	"targetUrl": "https://jsonplaceholder.typicode.com/",
+            	"fakeDelay": 0,
+            	"proxyMode": 0,
+            	"randomiseMockResult": false,
+            	"simulateTime": null,
+            	"headersMode": 2,
+            	"passThroughTenant": false,
+            	"headers": [],
+            	"injectForwardingHeadersOnRequest": false
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/mock/m/testms/posts
+        name: test mock
+        meta:
+          id: req_cf610bc1c4d448668279454112b75f8a
+          created: 1747037974207
+          modified: 1747037976337
+          isPrivate: false
+          sortKey: -1746992641952
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/mockresponse/1
+        name: update response
+        meta:
+          id: req_4ec2cdcf47374eb793e7331420751fe4
+          created: 1747038024588
+          modified: 1747038068877
+          isPrivate: false
+          sortKey: -1746992641939.5
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            			"description": null,
+            			"code": 200,
+            			"encoding": 0,
+            			"contentType": "text/plain",
+            			"body": "changed jsonp response",
+            			"checksum": null,
+            			"uniqueChecksum": "d0e60b5899f3dd1f7e224ccf4d0aaf3619d211da",
+            			"priority": 100,
+            			"fakeDelay": 0,
+            			"enabled": true,
+            			"createdUtc": "2025-05-11T20:12:40.6359847+01:00",
+            			"endpointId": 0,
+            			"latency": "00:00:00",
+            			"headers": [
+            				{
+            					"name": "Content-Type",
+            					"value": "plain/text"
+            				}
+            			]
+            		}
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/mock/m/testms/posts
+        name: test mock
+        meta:
+          id: req_2a88220876ef44ecbb15660b7d0326c5
+          created: 1747038035115
+          modified: 1747038036842
+          isPrivate: false
+          sortKey: -1746992641933.25
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/microservice/1
+        name: update microservice enable proxy
+        meta:
+          id: req_733bf4a7c2d84486876019c1ce84d928
+          created: 1747038968223
+          modified: 1747038977099
+          isPrivate: false
+          sortKey: -1746992641930.125
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"path": "testms",
+            	"name": "Test Microservice",
+            	"enabled": true,
+            	"targetUrl": "https://jsonplaceholder.typicode.com/",
+            	"fakeDelay": 0,
+            	"proxyMode": 100,
+            	"randomiseMockResult": false,
+            	"simulateTime": null,
+            	"headersMode": 2,
+            	"passThroughTenant": false,
+            	"headers": [],
+            	"injectForwardingHeadersOnRequest": false
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://localhost:7240/api/mock/m/testms/posts
+        name: test mock
+        meta:
+          id: req_b8020676521e455baeb5796ef09dd3d4
+          created: 1747038987202
+          modified: 1747038988991
+          isPrivate: false
+          sortKey: -1746992641928.5625
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_99d30891da4bdcebc63947a8fc17f076de878684
+    created: 1746713247081
+    modified: 1746713247081
+environments:
+  name: Base Environment
+  meta:
+    id: env_99d30891da4bdcebc63947a8fc17f076de878684
+    created: 1746713247028
+    modified: 1746713247028
+    isPrivate: false
