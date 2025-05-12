@@ -15,6 +15,6 @@ namespace Mockbench.Abstractions.Repositories
         Task<IEnumerable<MicroserviceResultDto>> GetAllMicroserviceSearchResults();
         Task<MicroserviceResultDto> GetMicroserviceById(int id);
         Task<MicroserviceResultDto> GetMicroservice(string microservicePath);
-        Task<bool> UpdateMicroservice(MicroserviceResultDto updatedMicroservice);
+        Task<bool> UpdateMicroservice(int id, MicroserviceResultDto updatedMicroservice);
     }
 }

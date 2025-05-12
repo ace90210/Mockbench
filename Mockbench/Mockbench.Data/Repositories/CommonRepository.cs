@@ -257,7 +257,7 @@ namespace Mockbench.Data.Repositories
                     //clear ids to zero
                     endpoint.MockResponses.ForEach(mr =>
                     {
-                        mr.ID = 0;
+                        mr.Id = 0;
                         mr.Headers?.ForEach(h => h.ID = 0);
                     });
                 }

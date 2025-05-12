@@ -23,7 +23,7 @@ public static class ResponseMappers
                     : ChecksumHelpers.CreateDefaultChecksum(mockResponseDto),
                 Headers = mockResponseDto.Headers.ToEntities(),
                 EndpointId = mockResponseDto.EndpointId,
-                ID = mockResponseDto.Id,
+                Id = mockResponseDto.Id,
                 Enabled = mockResponseDto.Enabled,
                 CreatedUtc = mockResponseDto.CreatedUtc,
                 Priority = mockResponseDto.Priority,
@@ -43,7 +43,7 @@ public static class ResponseMappers
             ? null
             : new MockResponseDto()
             {
-                Id = mockResponse.ID,
+                Id = mockResponse.Id,
                 Description = mockResponse.Description,
                 Body = mockResponse.Body,
                 Code = mockResponse.Code,

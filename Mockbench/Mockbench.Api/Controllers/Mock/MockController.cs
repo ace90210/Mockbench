@@ -76,11 +76,6 @@ namespace Mockbench.Server.Controllers.MockControllers
         /// <returns>return false and bad request if validation fails</returns>
         private (bool isValid, IActionResult? result) ValidateMatchingResults(MatchingEndpoints matchingEndpoint)
         {
-            if (matchingEndpoint.Endpoints?.Count == 0)
-            {
-                return (false, NotFound());
-            }
-
             if (!matchingEndpoint.Environment?.Enabled ?? false)
                 return (false, BadRequest(ErrorMessageConstants.EnvironmentDisabled));
 

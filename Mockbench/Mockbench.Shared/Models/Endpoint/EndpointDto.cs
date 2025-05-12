@@ -18,7 +18,7 @@ namespace Mockbench.Shared.Models.Endpoint
 
         public bool ExpectAuthHeader { get; set; }
 
-        public MockBehaviour MockBehaviour { get; set; }
+        public MockBehaviour MockBehaviour { get; set; } = MockBehaviour.AutoMockWithProxy;
 
         public bool Enabled { get; set; } = true;
 

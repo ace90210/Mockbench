@@ -107,21 +107,21 @@ namespace Mockbench.Api.Controllers.Admin
             }
         }
 
-        [HttpPut("{endpointId}")]
+        [HttpPut("{responseId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MockResponseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MockResponseDto>> UpdateResponseForRequest(int endpointId, [FromBody] MockResponseDto? response)
+        public async Task<ActionResult<MockResponseDto>> UpdateResponse(int responseId, [FromBody] MockResponseDto? response)
         {
-            if (endpointId <= 0)
+            if (responseId <= 0)
                 return BadRequest(ErrorMessageConstants.EndpointId);
             
             if (response == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
             
-            var updatedResponse = await _mockResponseRepository.UpdateMockResponseAsync(endpointId, response);
+            var updatedResponse = await _mockResponseRepository.UpdateMockResponseAsync(responseId, response);
 
             if (updatedResponse == null)
             {

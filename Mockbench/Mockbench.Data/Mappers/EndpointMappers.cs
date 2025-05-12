@@ -168,10 +168,10 @@ namespace Mockbench.Data.Mappers
 
         public static Endpoint MergeResponses(this Endpoint baseEndpoint, List<MockResponseDto> responses)
         {
-            var responsesToAdd = responses.Where(sr => (baseEndpoint.MockResponses?.All(rr => sr.Id != rr.ID) ?? false)|| sr.Id == 0).ToList();
-            var responsesToUpdate = baseEndpoint.MockResponses.Where(rr => responses.Any(sr => sr.Id == rr.ID && sr.Id > 0));
+            var responsesToAdd = responses.Where(sr => (baseEndpoint.MockResponses?.All(rr => sr.Id != rr.Id) ?? false)|| sr.Id == 0).ToList();
+            var responsesToUpdate = baseEndpoint.MockResponses.Where(rr => responses.Any(sr => sr.Id == rr.Id && sr.Id > 0));
 
-            baseEndpoint.MockResponses.RemoveAll(rr => !responses.Any(sr => sr.Id == rr.ID && sr.Id > 0));
+            baseEndpoint.MockResponses.RemoveAll(rr => !responses.Any(sr => sr.Id == rr.Id && sr.Id > 0));
 
             if (responsesToAdd.Any())
             {
@@ -180,7 +180,7 @@ namespace Mockbench.Data.Mappers
 
             foreach(var baseResponse in responsesToUpdate)
             {
-                var updatedResponse = responses.First(r => r.Id == baseResponse.ID);
+                var updatedResponse = responses.First(r => r.Id == baseResponse.Id);
                 baseResponse.Body = updatedResponse.Body;
                 baseResponse.Encoding = updatedResponse.Encoding;
                 baseResponse.Code = updatedResponse.Code;

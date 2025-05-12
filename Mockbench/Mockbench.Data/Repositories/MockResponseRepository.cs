@@ -18,7 +18,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<MockResponseDto> GetMockResponseAsync(int id)
         {
-            var response = await _context.MockResponses.Include(mr => mr.Headers).FirstOrDefaultAsync(rr => rr.ID == id);
+            var response = await _context.MockResponses.Include(mr => mr.Headers).FirstOrDefaultAsync(rr => rr.Id == id);
 
             if (response == null)
                 return null;
@@ -38,7 +38,7 @@ namespace Mockbench.Data.Repositories
             if (updateMockResponse == null)
                 throw new Exception("No response provided");
 
-            var existingMockResponse = await _context.MockResponses.FirstOrDefaultAsync(t => t.ID == mockResponseId);
+            var existingMockResponse = await _context.MockResponses.FirstOrDefaultAsync(t => t.Id == mockResponseId);
 
             if (existingMockResponse == null)
                 return null;
@@ -62,44 +62,33 @@ namespace Mockbench.Data.Repositories
                 throw new Exception("No endpoint id provided");
             }
 
-            var endpoint = _context.Endpoints.Include(sr => sr.MockResponses).FirstOrDefault(sr => sr.Id == mockResponseId);
+            var endpoint = _context.MockResponses.FirstOrDefault(sr => sr.Id == mockResponseId);
 
             if (endpoint == null)
                 return null;
 
-            if (updatedResponse.Id > 0)
-            {
-                var existingMockResponse = await _context.MockResponses.FirstOrDefaultAsync(t => t.ID == updatedResponse.Id);
+            var existingMockResponse = await _context.MockResponses.FirstOrDefaultAsync(t => t.Id == mockResponseId);
 
-                if (existingMockResponse == null)
-                    throw new Exception("Error response does not exist");
+            if (existingMockResponse == null)
+                throw new Exception("Error response does not exist");
 
-                existingMockResponse.Enabled = updatedResponse.Enabled;
-                existingMockResponse.Description = updatedResponse.Description;
-                existingMockResponse.Body = updatedResponse.Body;
-                existingMockResponse.Encoding = updatedResponse.Encoding;
-                existingMockResponse.ContentType = updatedResponse.ContentType;
-                existingMockResponse.Code = updatedResponse.Code;
-                existingMockResponse.Priority = updatedResponse.Priority;
-                existingMockResponse.FakeDelay = updatedResponse.FakeDelay;
-                existingMockResponse.Checksum = ChecksumHelpers.CreateDefaultChecksum(updatedResponse);
-                existingMockResponse.CreatedUtc = updatedResponse.CreatedUtc;
+            existingMockResponse.Enabled = updatedResponse.Enabled;
+            existingMockResponse.Description = updatedResponse.Description;
+            existingMockResponse.Body = updatedResponse.Body;
+            existingMockResponse.Encoding = updatedResponse.Encoding;
+            existingMockResponse.ContentType = updatedResponse.ContentType;
+            existingMockResponse.Code = updatedResponse.Code;
+            existingMockResponse.Priority = updatedResponse.Priority;
+            existingMockResponse.FakeDelay = updatedResponse.FakeDelay;
+            existingMockResponse.Checksum = ChecksumHelpers.CreateDefaultChecksum(updatedResponse);
+            existingMockResponse.CreatedUtc = updatedResponse.CreatedUtc;
 
-                _context.MockResponses.Update(existingMockResponse);
+            _context.MockResponses.Update(existingMockResponse);
 
-                await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-                return existingMockResponse.ToDto(false);
-            }
-            else
-            {
-                var newModel = updatedResponse.ToEntity(true);
-                endpoint.MockResponses.Add(newModel);
-
-                await _context.SaveChangesAsync();
-
-                return newModel.ToDto(false);
-            }
+            return existingMockResponse.ToDto(false);
+            
         }
 
         public async Task<(bool success, MockResponseDto? result)> CreateAsync(int endpointId, MockResponseDto response)
@@ -176,7 +165,7 @@ namespace Mockbench.Data.Repositories
 
             foreach (var responseToDelete in responses)
             {
-                existingRequest.MockResponses.RemoveAll(response => response.ID == responseToDelete.Id);
+                existingRequest.MockResponses.RemoveAll(response => response.Id == responseToDelete.Id);
                 await _context.SaveChangesAsync();
             }
             return true;
@@ -189,7 +178,7 @@ namespace Mockbench.Data.Repositories
                 return false;
             }
 
-            var existingResponse = _context.MockResponses.FirstOrDefault(r => r.ID == responseId);
+            var existingResponse = _context.MockResponses.FirstOrDefault(r => r.Id == responseId);
 
             if (existingResponse == null)
             {

@@ -11,7 +11,7 @@ namespace Mockbench.Data.Models
         [Key]
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public int ID { get; set; }
+        public int Id { get; set; }
 
         [MaxLength(250)]
         public string? Description { get; set; }

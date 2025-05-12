@@ -56,51 +56,7 @@ namespace Mockbench.Api.Controllers.Admin
             var endpoint = await _endpointRepository.GetEndpoint(endpointId);
 
             if (endpoint == null)
-                return Ok(new EndpointDto()
-                {
-                    Enabled = true,
-                    CreatedUtc = DateTime.Now,
-                    FromUrl = "test",
-                    MockBehaviour = MockBehaviour.MockOnly,
-                    RestType = RestType.GET,
-                    QueryParameters = new List<QueryParameterDto>()
-                    {
-                        new QueryParameterDto()
-                        {
-                            Name = "test",
-                            Value = "123"
-                        }
-                    },
-                    EndpointHeaders = new List<EndpointHeaderDto>()
-                    {
-                        new EndpointHeaderDto()
-                        {
-                            Name = "Authorization",
-                            Value = "ey..."
-                        }
-                    },
-                    MockResponses = new List<MockResponseDto>()
-                    {
-                        new MockResponseDto()
-                        {
-                            Code = System.Net.HttpStatusCode.OK,
-                            Body = "test response",
-                            Headers = new List<MockResponseHeaderDto>()
-                            {
-                                new MockResponseHeaderDto()
-                                {
-                                    Name = "Content-Type",
-                                    Value = "plain/text"
-                                }
-                            },
-                            Enabled = true,
-                            ContentType = "text/plain",
-                            CreatedUtc = DateTime.Now,
-                            Encoding = SupportedEncodingType.UTF8
-                        }
-                    }
-                });
-                //return NotFound(ErrorMessageConstants.EndpointNotFound);
+                return NotFound(ErrorMessageConstants.EndpointNotFound);
             
             return Ok(endpoint);
         }

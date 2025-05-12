@@ -82,7 +82,7 @@ namespace Mockbench.Api.Controllers.Admin
             return Ok(await _microserviceRepository.GetAllMicroserviceSearchResults());
         }
 
-        [HttpPost("{environmentId}")]
+        [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MicroserviceResultDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
@@ -141,7 +141,7 @@ namespace Mockbench.Api.Controllers.Admin
             if (updatedMicroservice == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
             
-            if (updatedMicroservice.Id != microserviceId)
+            if (updatedMicroservice.Id != 0 && updatedMicroservice.Id != microserviceId)
                 return BadRequest(ErrorMessageConstants.IdMissMatch);
 
             if (string.IsNullOrWhiteSpace(updatedMicroservice.Name))
@@ -167,7 +167,7 @@ namespace Mockbench.Api.Controllers.Admin
             if (!isValid)
                 return BadRequest(results.ToBadRequestResult());
 
-            return await _microserviceRepository.UpdateMicroservice(updatedMicroservice) ? Ok() : NotFound();
+            return await _microserviceRepository.UpdateMicroservice(microserviceId, updatedMicroservice) ? Ok() : NotFound();
         }
 
         [HttpDelete("{id}")]

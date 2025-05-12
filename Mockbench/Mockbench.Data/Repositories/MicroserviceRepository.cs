@@ -204,7 +204,7 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<bool> UpdateMicroservice(MicroserviceResultDto updatedMicroservice)
+        public async Task<bool> UpdateMicroservice(int id, MicroserviceResultDto updatedMicroservice)
         {
             if (updatedMicroservice == null)
                 return false;
@@ -212,7 +212,7 @@ namespace Mockbench.Data.Repositories
             if (string.IsNullOrWhiteSpace(updatedMicroservice.Path))
                 return false;
 
-            var existingMicroservice = await _context.Microservices.Include(m => m.Headers).FirstOrDefaultAsync(t => t.Id == updatedMicroservice.Id);
+            var existingMicroservice = await _context.Microservices.Include(m => m.Headers).FirstOrDefaultAsync(t => t.Id == id);
 
             if (existingMicroservice == null)
                 return false;
