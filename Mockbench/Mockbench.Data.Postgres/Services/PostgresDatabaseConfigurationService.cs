@@ -9,9 +9,9 @@ namespace Mockbench.Data.PostgresProvider.Services
 {
     public class PostgresDatabaseConfigurationService : IDatabaseConfigurationService
     {
-        private readonly PostgresMockbenchContext _mainContext; // Inject the Postgres-specific context
+        private readonly PostgresMockbenchDbContext _mainContext; // Inject the Postgres-specific context
 
-        public PostgresDatabaseConfigurationService(PostgresMockbenchContext mainContext)
+        public PostgresDatabaseConfigurationService(PostgresMockbenchDbContext mainContext)
         {
             _mainContext = mainContext;
         }

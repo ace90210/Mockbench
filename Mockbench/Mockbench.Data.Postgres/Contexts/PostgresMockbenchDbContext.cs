@@ -5,67 +5,67 @@ using Mockbench.Data.Models;
 using Mockbench.Data.Models.Headers;
 using Mockbench.Shared.Models.Configuration;
 
-namespace Mockbench.Data.SqlServer.Contexts
+namespace Mockbench.Data.Postgres.Contexts
 {
-    public class SqlServerMockbenchContext : MockbenchDbContext
+    public class PostgresMockbenchDbContext : MockbenchDbContext
     {
-        public SqlServerMockbenchContext(
-            DbContextOptions<SqlServerMockbenchContext> options, 
+        public PostgresMockbenchDbContext(
+            DbContextOptions<PostgresMockbenchDbContext> options, 
             IOptions<DeploymentConfiguration> deploymentConfigurationOptions)
             : base(options, deploymentConfigurationOptions)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {           
+        {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Endpoint>(entity =>
             {
                 entity.Property(e => e.Enabled)
-                    .HasColumnType("bit")
+                    .HasColumnType("boolean") 
                     .HasDefaultValue(true);
 
                 entity.Property(e => e.CreatedUtc)
-                    .HasColumnType("datetime2")
-                    .HasDefaultValueSql("GETDATE()");
+                    .HasColumnType("timestamp with time zone")
+                    .HasDefaultValueSql("NOW()"); 
             });
 
             modelBuilder.Entity<ServiceHeader>(entity =>
             {
                 entity.Property(e => e.Enabled)
-                    .HasColumnType("bit")
+                    .HasColumnType("boolean")
                     .HasDefaultValue(true);
             });
 
-            modelBuilder.Entity<Models.Environment>(entity => 
+            modelBuilder.Entity<Models.Environment>(entity =>
             {
                 entity.Property(e => e.Enabled)
-                    .HasColumnType("bit")
+                    .HasColumnType("boolean")
                     .HasDefaultValue(true);
             });
 
             modelBuilder.Entity<MockResponse>(entity =>
             {
                 entity.Property(e => e.Priority)
-                        .HasColumnType("int"); 
+                      .HasColumnType("integer"); 
 
                 entity.Property(e => e.Enabled)
-                    .HasColumnType("bit")
+                    .HasColumnType("boolean")
                     .HasDefaultValue(true);
 
                 entity.Property(e => e.CreatedUtc)
-                    .HasColumnType("datetime2")
-                    .HasDefaultValueSql("GETDATE()");
+                    .HasColumnType("timestamp with time zone")
+                    .HasDefaultValueSql("NOW()");
             });
 
             modelBuilder.Entity<Microservice>(entity =>
             {
                 entity.Property(e => e.PassThroughTenant)
-                    .HasColumnType("bit");
+                    .HasColumnType("boolean");
 
                 entity.Property(e => e.Enabled)
-                    .HasColumnType("bit")
+                    .HasColumnType("boolean")
                     .HasDefaultValue(true);
             });
 
