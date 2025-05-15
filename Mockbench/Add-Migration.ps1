@@ -7,7 +7,8 @@
     It then iterates through a list of predefined database providers. For each provider,
     it sets an environment variable, determines the correct DbContext class name (which can
     be provider-specific for Mockbench), sets the correct output directory for migrations,
-    runs 'dotnet ef migrations add', and logs any errors.
+    runs 'dotnet ef migrations add' (now with project and startup project options),
+    and logs any errors.
     It supports an automated mode to skip interactive pauses.
 .PARAMETER Automated
     If specified, the script runs in non-interactive mode, skipping pauses
@@ -26,7 +27,16 @@ param (
 # --- Configuration ---
 # **TODO: Customize these values to match your project setup!**
 $ErrorLogFile = "migration_error.log"
-$EnvVarName = "MOCKBENCH_DB_PROVIDER" # The environment variable your application uses
+$EnvVarName = "DeploymentConfiguration__DatabaseConfig_Provider" # The environment variable your application uses
+
+# **TODO: SET THESE PATHS to your project files!**
+# Path to the .csproj file of the project containing your DbContexts and Migrations folder
+# Example: $DataProjectFilePath = ".\MyProject.Data\MyProject.Data.csproj"
+$DataProjectFilePath = ".\Mockbench.Data\Mockbench.Data.csproj" 
+
+# Path to the .csproj file of your startup/executable project (e.g., API or Web project)
+# Example: $StartupProjectFilePath = ".\MyProject.Api\MyProject.Api.csproj"
+$StartupProjectFilePath = ".\Mockbench\Mockbench.csproj"
 
 $Providers = @(
     @{ Name = "SQL Server"; EnvValue = "SqlServer";  MockbenchContextPrefix = "SqlServer" }, # Used to form e.g., SqlServerMockbenchContext
@@ -64,6 +74,17 @@ function Write-Log {
 }
 
 # --- Main Script ---
+# Validate required project path configurations
+if ([string]::IsNullOrWhiteSpace($DataProjectFilePath)) {
+    Write-Error "ERROR: \$DataProjectFilePath is not set in the script. Please configure the path to your data project's .csproj file."
+    exit 1
+}
+if ([string]::IsNullOrWhiteSpace($StartupProjectFilePath)) {
+    Write-Error "ERROR: \$StartupProjectFilePath is not set in the script. Please configure the path to your startup project's .csproj file."
+    exit 1
+}
+
+
 Clear-Content $ErrorLogFile -ErrorAction SilentlyContinue
 Write-Host "--- Entity Framework Core Multi-Provider Migration Script ---"
 
@@ -118,54 +139,46 @@ try {
 
         # Determine the actual DbContext class name and Output Path for the command
         $actualDbContextForCommand = ""
-        $actualMigrationOutputPath = $SelectedContextConfig.OutputDirName # This is now fixed per conceptual context
+        $actualMigrationOutputPath = $SelectedContextConfig.OutputDirName 
 
         if ($SelectedContextConfig.BaseClassName -eq "ApplicationDbContext") {
             $actualDbContextForCommand = "ApplicationDbContext"
         }
         elseif ($SelectedContextConfig.BaseClassName -eq "MockbenchDbContext") {
-            # Construct provider-specific DbContext name, e.g., SqlServerMockbenchContext
             $actualDbContextForCommand = "$($provider.MockbenchContextPrefix)$($SelectedContextConfig.BaseClassName)"
         }
         else {
             Write-Log "ERROR: Unknown BaseClassName '$($SelectedContextConfig.BaseClassName)' configured." -Level "ERROR" -ForegroundColor Red
             $anyErrorOccurred = $true
-            continue # Skip to next provider
+            continue 
         }
 
         Write-Log "Using DbContext: '$actualDbContextForCommand'"
         Write-Log "Migration output path will be: '$actualMigrationOutputPath'"
 
         try {
-            # Set environment variable
-            $env:$EnvVarName = $provider.EnvValue
-            Write-Log "Set environment variable '$EnvVarName' to '$($env:$EnvVarName)'"
+            Set-Item -Path "Env:\$($EnvVarName)" -Value $provider.EnvValue
+            $currentEnvValue = (Get-Item -Path "Env:\$($EnvVarName)").Value
+            Write-Log "Set environment variable '$EnvVarName' to '$currentEnvValue'"
 
             # Construct dotnet ef command arguments
-            # TODO: If you need to specify --project or --startup-project, add them here.
-            # Example:
-            # $arguments = @(
-            #     "ef", "migrations", "add", $MigrationName,
-            #     "-c", $actualDbContextForCommand,
-            #     "-o", $actualMigrationOutputPath,
-            #     "--project", "Path/To/YourDataProject.csproj",
-            #     "--startup-project", "Path/To/YourStartupApiProject.csproj"
-            # )
             $arguments = @(
                 "ef", "migrations", "add", $MigrationName,
-                "-c", $actualDbContextForCommand,
-                "-o", $actualMigrationOutputPath
+                "--context", $actualDbContextForCommand,
+                "--output-dir", $actualMigrationOutputPath,
+                "--project", $DataProjectFilePath,
+                "--startup-project", $StartupProjectFilePath
             )
+            # Note: EF Core tools use --context and --output-dir, not -c and -o for full names.
+            # Changed -c to --context and -o to --output-dir for clarity and consistency.
 
             Write-Log "Executing: dotnet $($arguments -join ' ')"
 
-            # Execute the command and capture output
             $process = Start-Process dotnet -ArgumentList $arguments -Wait -NoNewWindow -PassThru -RedirectStandardError "ef_error.tmp" -RedirectStandardOutput "ef_output.tmp"
             
             $stdOut = Get-Content "ef_output.tmp" -Raw -ErrorAction SilentlyContinue
             $stdErr = Get-Content "ef_error.tmp" -Raw -ErrorAction SilentlyContinue
             Remove-Item "ef_output.tmp", "ef_error.tmp" -ErrorAction SilentlyContinue
-
 
             if ($process.ExitCode -eq 0) {
                 Write-Log "Migration for $($provider.Name) (Context: $actualDbContextForCommand) succeeded." -ForegroundColor Green
@@ -177,12 +190,16 @@ try {
                     Read-Host "Press Enter to continue to the next migration..."
                 }
             } else {
-                # Throw an exception to be caught by the outer catch block for this provider
                 throw "dotnet ef command failed with exit code $($process.ExitCode)." 
             }
         } catch {
             $anyErrorOccurred = $true
-            $errorMessage = "ERROR: Migration for $($provider.Name) (Context: $actualDbContextForCommand) failed.`nEnvironment: $EnvVarName=$($provider.EnvValue)`nCommand: dotnet $($arguments -join ' ')`nException: $($_.Exception.Message)`nStderr: $stdErr`nStdout: $stdOut"
+            $envValueForErrorLog = ""
+            try {
+                $envValueForErrorLog = (Get-Item -Path "Env:\$($EnvVarName)" -ErrorAction SilentlyContinue).Value
+            } catch {} 
+
+            $errorMessage = "ERROR: Migration for $($provider.Name) (Context: $actualDbContextForCommand) failed.`nEnvironment: $EnvVarName=$envValueForErrorLog`nCommand: dotnet $($arguments -join ' ')`nException: $($_.Exception.Message)`nStderr: $stdErr`nStdout: $stdOut"
             Write-Log $errorMessage -Level "ERROR" -ForegroundColor Red
             
             if (-not $runAutomated) {
@@ -192,13 +209,11 @@ try {
     }
 }
 finally {
-    # --- Cleanup ---
     Write-Host ""
     Write-Log "Removing environment variable '$EnvVarName'..."
-    Remove-Item "Env:\$EnvVarName" -ErrorAction SilentlyContinue
+    Remove-Item "Env:\$($EnvVarName)" -ErrorAction SilentlyContinue 
     Write-Log "Environment variable '$EnvVarName' removed."
 
-    # --- Summary ---
     Write-Host ""
     if ($anyErrorOccurred) {
         Write-Log "One or more migrations failed. Please check '$ErrorLogFile' for details." -Level "WARNING" -ForegroundColor Yellow
