@@ -76,7 +76,7 @@ switch (deploymentConfiguration.DatabaseConfig.Provider)
 
     case DatabaseProvider.Postgres:
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Postgres")));
-        builder.Services.AddDbContext<SqliteMockbenchContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Postgres")));
+        builder.Services.AddDbContext<PostgresMockbenchContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Postgres")));
         builder.Services.AddScoped<MockbenchMainContext, PostgresMockbenchContext>();
         builder.Services.AddScoped<IDatabaseConfigurationService, PostgresDatabaseConfigurationService>();
         break;
