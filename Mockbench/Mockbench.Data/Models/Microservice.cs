@@ -41,7 +41,7 @@ namespace Mockbench.Data.Models
         public string Path { get; set; }
 
         [MaxLength(450)]
-        public string TargetUrl { get; set; } = string.Empty;
+        public string? TargetUrl { get; set; } = string.Empty;
 
         public int FakeDelay { get; set; }
 

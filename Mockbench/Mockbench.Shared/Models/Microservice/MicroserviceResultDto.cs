@@ -1,5 +1,6 @@
 ﻿using Mockbench.Shared.Constants;
 using Mockbench.Shared.Helper;
+using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.Headers;
 using System.ComponentModel.DataAnnotations;
@@ -39,6 +40,8 @@ namespace Mockbench.Shared.Models.Microservice
         public bool PassThroughTenant { get; set; }
 
         public List<ServiceHeaderDto>? Headers { get; set; } = new ();
+
+        public List<EndpointDto>? Endpoints { get; set; }
 
         public bool InjectForwardingHeadersOnRequest { get; set; }
 

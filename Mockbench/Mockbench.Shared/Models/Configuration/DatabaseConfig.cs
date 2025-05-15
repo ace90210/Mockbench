@@ -1,12 +1,12 @@
-﻿using System;
-
-namespace Mockbench.Shared.Models.Configuration
+﻿namespace Mockbench.Shared.Models.Configuration
 {
     public class DatabaseConfig : ICopyTo<DatabaseConfig>
     {
-        public DatabaseProvider Provider { get; set; } = DatabaseProvider.Sqlite;
+        public DatabaseProvider Provider { get; set; } = DatabaseProvider.InMemory;
 
-        public string ConnectionString { get; set; } = "Data Source= Mockbench.db;";
+        public string MainConnectionString { get; set; } = "Data Source= Mockbench.Main.db;";
+
+        public string AuthenticationConnectionString { get; set; } = "Data Source= Mockbench.Authentication.db;";
 
         public int GetId()
         {
@@ -19,8 +19,9 @@ namespace Mockbench.Shared.Models.Configuration
                 throw new NotSupportedException($"{nameof(DatabaseConfig)}: Cannot copy to a null target");
             
             target.Provider = Provider;
-            target.ConnectionString = ConnectionString;
-             
+            target.MainConnectionString = MainConnectionString;
+            target.AuthenticationConnectionString = AuthenticationConnectionString;
+
             return target;
         }
     }

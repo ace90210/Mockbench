@@ -6,7 +6,7 @@ namespace Mockbench.Data.Models.Headers
     {
         [Key]
         // ReSharper disable once InconsistentNaming
-        public int ID { get; set; }
+        public int Id { get; set; }
 
         [MaxLength(150)]
         public string Name { get; set; }

@@ -21,7 +21,8 @@ namespace Mockbench.Data.Mappers
                 PassThroughTenant = microservice.PassThroughTenant,
                 HeadersMode = microservice.HeadersMode,
                 InjectForwardingHeadersOnRequest = microservice.InjectForwardingHeadersOnRequest,
-                Headers = microservice.Headers?.ToDtos()
+                Headers = microservice.Headers?.ToDtos(),
+                Endpoints = microservice.Endpoints?.ToDtos(false, false)
             };
         }
 

@@ -33,7 +33,7 @@ namespace Mockbench.Data.Mappers
             };
         }
 
-        public static List<ServiceHeader> ToModels(this List<ServiceHeaderDto> serviceHeaderDtos)
+        public static List<ServiceHeader> ToEntities(this List<ServiceHeaderDto> serviceHeaderDtos)
         {
             return serviceHeaderDtos?.Select(sh => sh.ToEntity()).ToList();
         }
@@ -65,7 +65,7 @@ namespace Mockbench.Data.Mappers
         #region Request Response Headers
         public static MockResponseHeaderDto ToDto(this ResponseHeader responseHeader)
         {
-            return new MockResponseHeaderDto() { Id = responseHeader.ID, Name = responseHeader.Name, Value = responseHeader.Value };
+            return new MockResponseHeaderDto() { Id = responseHeader.Id, Name = responseHeader.Name, Value = responseHeader.Value };
         }
 
         public static List<MockResponseHeaderDto> ToDtos(this List<ResponseHeader> responseHeaders)
@@ -75,7 +75,7 @@ namespace Mockbench.Data.Mappers
 
         public static ResponseHeader ToEntity(this MockResponseHeaderDto responseHeaderDto)
         {
-            return new ResponseHeader() { ID = responseHeaderDto.Id, Name = responseHeaderDto.Name, Value = responseHeaderDto.Value };
+            return new ResponseHeader() { Id = responseHeaderDto.Id, Name = responseHeaderDto.Name, Value = responseHeaderDto.Value };
         }
 
         public static List<ResponseHeader> ToEntities(this List<MockResponseHeaderDto> responseHeaderDtos)

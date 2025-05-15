@@ -33,7 +33,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<MicroserviceResultDto> GetMicroservice(string microservicePath)
         {
-            var ms = await _context.Microservices.FirstOrDefaultAsync(ms => ms.Path == microservicePath);
+            var ms = await _context.Microservices.Include(ms => ms.Headers).Include(ms => ms.Endpoints).AsSplitQuery().FirstOrDefaultAsync(ms => ms.Path == microservicePath);
 
             return new MicroserviceResultDto()
             {
@@ -49,13 +49,14 @@ namespace Mockbench.Data.Repositories
                 HeadersMode = ms.HeadersMode,
                 InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
                 SimulateTime = ms.SimulateTime,
-                Headers = ms.Headers.ToDtos()
+                Headers = ms.Headers.ToDtos(),
+                Endpoints = ms.Endpoints.ToDtos(false, false)
             };
         }
 
         public async Task<MicroserviceResultDto> GetMicroserviceById(int id)
         {
-            var ms = await _context.Microservices.Include(m => m.Headers).FirstOrDefaultAsync(ms => ms.Id == id);
+            var ms = await _context.Microservices.Include(m => m.Headers).Include(ms => ms.Endpoints).AsSplitQuery().FirstOrDefaultAsync(ms => ms.Id == id);
 
             if (ms == null)
                 return null;
@@ -74,13 +75,14 @@ namespace Mockbench.Data.Repositories
                 HeadersMode = ms.HeadersMode,
                 InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
                 SimulateTime = ms.SimulateTime,
-                Headers = ms.Headers.ToDtos()
+                Headers = ms.Headers.ToDtos(),
+                Endpoints = ms.Endpoints.ToDtos(false, false)
             };
         }
 
         public async Task<IEnumerable<MicroserviceResultDto>> GetAllMicroservices()
         {
-            var microservices = await _context.Microservices.ToListAsync();
+            var microservices = await _context.Microservices.Include(m => m.Headers).Include(ms => ms.Endpoints).AsSplitQuery().ToListAsync();
 
             return microservices.Select(ms => new MicroserviceResultDto()
             {
@@ -96,13 +98,15 @@ namespace Mockbench.Data.Repositories
                 HeadersMode = ms.HeadersMode,
                 InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
                 SimulateTime = ms.SimulateTime,
-                Headers = ms.Headers.ToDtos()
+                Headers = ms.Headers.ToDtos(),
+                Endpoints = ms.Endpoints.ToDtos(false, false)
             });
         }
 
         public async Task<IEnumerable<MicroserviceResultDto>> GetAllMicroserviceSearchResults()
         {
             var microservices = await _context.Microservices
+                                                            .Include(m => m.Headers)
                                                             .Include(m => m.Endpoints)
                                                             .AsSplitQuery()
                                                             .ToListAsync();
@@ -121,7 +125,8 @@ namespace Mockbench.Data.Repositories
                 HeadersMode = ms.HeadersMode,
                 InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
                 SimulateTime = ms.SimulateTime,
-                Headers = ms.Headers.ToDtos()
+                Headers = ms.Headers.ToDtos(),
+                Endpoints = ms.Endpoints.ToDtos(false, false)
             });
             
         }
@@ -153,8 +158,9 @@ namespace Mockbench.Data.Repositories
                 RandomiseMockResult = microservice.RandomiseMockResult,
                 HeadersMode = microservice.HeadersMode,
                 InjectForwardingHeadersOnRequest = microservice.InjectForwardingHeadersOnRequest,
-                Headers = microservice.Headers.ToDtos(),
-                SimulateTime = microservice.SimulateTime
+                Headers = microservice.Headers?.ToDtos(),
+                SimulateTime = microservice.SimulateTime,
+                Endpoints = microservice.Endpoints?.ToDtos(false, false)
             };
         }
 
@@ -176,10 +182,11 @@ namespace Mockbench.Data.Repositories
                 FakeDelay = newMicroserviceDto.FakeDelay,
                 ProxyMode = newMicroserviceDto.ProxyMode,
                 RandomiseMockResult = newMicroserviceDto.RandomiseMockResult,
-                Headers = newMicroserviceDto.Headers.ToModels(),
+                Headers = newMicroserviceDto.Headers?.ToEntities(),
                 HeadersMode = newMicroserviceDto.HeadersMode,
                 InjectForwardingHeadersOnRequest = newMicroserviceDto.InjectForwardingHeadersOnRequest,
-                SimulateTime = newMicroserviceDto.SimulateTime
+                SimulateTime = newMicroserviceDto.SimulateTime,
+                Endpoints = newMicroserviceDto.Endpoints?.ToEntities(false, false)
             };
 
             _context.Microservices.Add(newMicroservice);
@@ -197,10 +204,11 @@ namespace Mockbench.Data.Repositories
                 FakeDelay = newMicroservice.FakeDelay,
                 ProxyMode = newMicroservice.ProxyMode,
                 RandomiseMockResult = newMicroservice.RandomiseMockResult,
-                Headers = newMicroservice.Headers.ToDtos(),                
+                Headers = newMicroservice.Headers?.ToDtos(),                
                 HeadersMode = newMicroserviceDto.HeadersMode,
                 InjectForwardingHeadersOnRequest = newMicroserviceDto.InjectForwardingHeadersOnRequest,
-                SimulateTime = newMicroserviceDto.SimulateTime
+                SimulateTime = newMicroserviceDto.SimulateTime,
+                Endpoints = newMicroserviceDto.Endpoints
             };
         }
 
@@ -240,7 +248,7 @@ namespace Mockbench.Data.Repositories
                 if (existingMicroservice.Headers == null || existingMicroservice.Headers.Count == 0)
                 {
                     // Adding headers to empty list
-                    existingMicroservice.Headers = updatedMicroservice.Headers.ToModels();
+                    existingMicroservice.Headers = updatedMicroservice.Headers.ToEntities();
                 }
                 else
                 {
@@ -249,11 +257,11 @@ namespace Mockbench.Data.Repositories
                     // delete headers not in updated list
                     var headersToDelete = existingMicroservice.Headers?
                                         .Where(eh => !updatedMicroservice.Headers?.Any(uh => uh.Name == eh.Name) ?? false)
-                                        .Select(eh => eh.ID).ToList();
+                                        .Select(eh => eh.Id).ToList();
 
                     if (headersToDelete is not null && headersToDelete.Any())
                     {
-                        existingMicroservice.Headers.RemoveAll(eh => headersToDelete.Any(htd => htd == eh.ID));
+                        existingMicroservice.Headers.RemoveAll(eh => headersToDelete.Any(htd => htd == eh.Id ));
                     }
 
                     // add headers missing from current list

@@ -35,7 +35,7 @@ namespace Mockbench.Api.Controllers.Admin
         {
             _deploymentConfiguration.SqlConnectionStatus =
                 await _databaseConfigurationService.DoesConnectionStringWorkAsync(_deploymentConfiguration
-                    .DatabaseConfig.ConnectionString);
+                    .DatabaseConfig.MainConnectionString);
 
             if (_deploymentConfiguration.SqlConnectionStatus == ConnectionStringStatus.Success)
                 _deploymentConfiguration.PendingMigrations =
@@ -45,9 +45,9 @@ namespace Mockbench.Api.Controllers.Admin
             
             var response = _deploymentConfiguration.CopyTo(new DeploymentConfiguration());
             
-            if (!string.IsNullOrWhiteSpace(response.DatabaseConfig?.ConnectionString) && !(response.Debug ?? true))
+            if (!string.IsNullOrWhiteSpace(response.DatabaseConfig?.MainConnectionString) && !(response.Debug ?? true))
             {
-                response.DatabaseConfig.ConnectionString = "*****";
+                response.DatabaseConfig.MainConnectionString = "*****";
             }
 
             return Ok(response);
@@ -89,7 +89,7 @@ namespace Mockbench.Api.Controllers.Admin
             try
             {
                 await _databaseConfigurationService.ApplyMigrationsAsync(_deploymentConfiguration
-                    .DatabaseConfig.ConnectionString);
+                    .DatabaseConfig.MainConnectionString);
             }
             catch (SqlException sqlException)
             {

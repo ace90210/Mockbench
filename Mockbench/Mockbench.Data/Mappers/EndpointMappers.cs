@@ -224,10 +224,10 @@ namespace Mockbench.Data.Mappers
             if (headers == null)
                 headers = new List<EndpointHeaderDto>();
             
-            var headersToAdd = headers.Where(h => baseEndpoint.EndpointHeaders.All(rr => h.Id != rr.ID)|| h.Id == 0).ToList();
-            var headersToUpdate = baseEndpoint.EndpointHeaders.Where(rr => headers.Any(h => h.Id == rr.ID && h.Id > 0));
+            var headersToAdd = headers.Where(h => baseEndpoint.EndpointHeaders.All(rr => h.Id != rr.Id)|| h.Id == 0).ToList();
+            var headersToUpdate = baseEndpoint.EndpointHeaders.Where(rr => headers.Any(h => h.Id == rr.Id && h.Id > 0));
 
-            baseEndpoint.EndpointHeaders.RemoveAll(rr => !headers.Any(sr => sr.Id == rr.ID && sr.Id > 0));
+            baseEndpoint.EndpointHeaders.RemoveAll(rr => !headers.Any(sr => sr.Id == rr.Id && sr.Id > 0));
 
             if (headersToAdd.Any())
             {
@@ -236,7 +236,7 @@ namespace Mockbench.Data.Mappers
 
             foreach(var baseHeader in headersToUpdate)
             {
-                var updatedHeader = headers.First(h => h.Id == baseHeader.ID);
+                var updatedHeader = headers.First(h => h.Id == baseHeader.Id);
                 baseHeader.Name = updatedHeader.Name;
                 baseHeader.Value = string.Join(';', updatedHeader.Value);
             }
@@ -250,10 +250,10 @@ namespace Mockbench.Data.Mappers
             if (headers == null)
                 headers = new List<MockResponseHeaderDto>();
             
-            var headersToAdd = headers.Where(h => baseMockResponse.Headers.All(rr => h.Id != rr.ID)|| h.Id == 0).ToList();
-            var headersToUpdate = baseMockResponse.Headers.Where(rr => headers.Any(h => h.Id == rr.ID && h.Id > 0));
+            var headersToAdd = headers.Where(h => baseMockResponse.Headers.All(rr => h.Id != rr.Id)|| h.Id == 0).ToList();
+            var headersToUpdate = baseMockResponse.Headers.Where(rr => headers.Any(h => h.Id == rr.Id && h.Id > 0));
 
-            baseMockResponse.Headers.RemoveAll(rr => !headers.Any(sr => sr.Id == rr.ID && sr.Id > 0));
+            baseMockResponse.Headers.RemoveAll(rr => !headers.Any(sr => sr.Id == rr.Id && sr.Id > 0));
 
             if (headersToAdd.Any())
             {
@@ -262,7 +262,7 @@ namespace Mockbench.Data.Mappers
 
             foreach(var baseHeader in headersToUpdate)
             {
-                var updatedHeader = headers.First(h => h.Id == baseHeader.ID);
+                var updatedHeader = headers.First(h => h.Id == baseHeader.Id);
                 baseHeader.Name = updatedHeader.Name;
                 baseHeader.Value = string.Join(';', updatedHeader.Value);
             }

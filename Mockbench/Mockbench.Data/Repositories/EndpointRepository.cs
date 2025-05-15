@@ -63,8 +63,8 @@ namespace Mockbench.Data.Repositories
                                                              .AsSplitQuery()
                                                              .ToListAsync();
 
-            var tenant = _context.Tenants.FirstOrDefault(t => t.Path == tenantPath);
-            var environment = _context.Environments.FirstOrDefault(e => e.Path == environmentPath);
+            var tenant = _context.Tenants.Include(t => t.Variables).FirstOrDefault(t => t.Path == tenantPath);
+            var environment = _context.Environments.Include(t => t.Variables).FirstOrDefault(e => e.Path == environmentPath);
             var microservice = _context.Microservices.FirstOrDefault(m => m.Path == microservicePath);
 
             return new MatchingEndpoints() {

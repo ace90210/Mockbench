@@ -258,7 +258,7 @@ namespace Mockbench.Data.Repositories
                     endpoint.MockResponses.ForEach(mr =>
                     {
                         mr.Id = 0;
-                        mr.Headers?.ForEach(h => h.ID = 0);
+                        mr.Headers?.ForEach(h => h.Id = 0);
                     });
                 }
                         
@@ -266,7 +266,7 @@ namespace Mockbench.Data.Repositories
                 microservice.Endpoints.ForEach(mr =>
                 {
                     mr.Id = 0;
-                    mr.EndpointHeaders?.ForEach(h => h.ID = 0);
+                    mr.EndpointHeaders?.ForEach(h => h.Id = 0);
                     mr.QueryParameters?.ForEach(h => h.Id = 0);
                 });
             }
@@ -275,7 +275,7 @@ namespace Mockbench.Data.Repositories
             microservices.ForEach(mr =>
             {
                 mr.Id = 0;
-                mr.Headers?.ForEach(h => h.ID = 0);
+                mr.Headers?.ForEach(h => h.Id = 0);
                 mr.Endpoints?.ForEach(e => e.Id = 0);
             });            
             

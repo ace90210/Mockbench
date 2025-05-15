@@ -20,6 +20,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<ProjectReference Include="..\..\Mockbench.Data.Postgres\Mockbench.Data.Postgres.csproj" />
 		<ProjectReference Include="..\Mockbench.Abstractions\Mockbench.Abstractions.csproj" />
 		<ProjectReference Include="..\Mockbench.Api\Mockbench.Api.csproj" />
 		<ProjectReference Include="..\Mockbench.Client\Mockbench.Client.csproj" />

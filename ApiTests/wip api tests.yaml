@@ -9,15 +9,15 @@ collection:
     meta:
       id: fld_de19abb0729f4a5f8efbd0ce8210e932
       created: 1746992636368
-      modified: 1746992669097
+      modified: 1747062090986
       sortKey: -1746992662142
     children:
-      - url: https://localhost:7240/api/endpoint/1
+      - url: https://localhost:7240/api/endpoint/{{ _.endpoint1_id }}
         name: Get endpoint
         meta:
           id: req_c76387056d294585b068de2ebe69cf7c
           created: 1746713276274
-          modified: 1746992874947
+          modified: 1747061869723
           isPrivate: false
           sortKey: -1746992641827
         method: GET
@@ -33,11 +33,11 @@ collection:
             store: true
           rebuildPath: true
       - url: https://localhost:7240/api/endpoint
-        name: Create endpoint
+        name: Create endpoint 1
         meta:
           id: req_5f67c0271fdf4284ae64ad4026dbb04c
           created: 1746973976729
-          modified: 1746992868693
+          modified: 1747060100474
           isPrivate: false
           sortKey: -1746992641927
         method: POST
@@ -80,6 +80,22 @@ collection:
             value: application/json
           - name: User-Agent
             value: insomnia/11.1.0
+        scripts:
+          afterResponse: |+
+            insomnia.test('Check if status is 201', () => {
+                insomnia.expect(insomnia.response.code).to.eql(201);
+            });
+
+            const jsonBody = insomnia.response.json();
+
+            insomnia.test('check url', () => {
+                insomnia.expect(jsonBody.fromUrl).to.eql("posts");
+            });
+
+            // ✅ Set the variable outside the test block
+            insomnia.environment.set("endpoint1_id", jsonBody.id);
+
+
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -108,12 +124,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: https://localhost:7240/api/mockresponse/1
+      - url: https://localhost:7240/api/mockresponse/{{ endpoint1_id }}
         name: add responses
         meta:
           id: req_62ce222a1d2947859d0f86dfa7f4fae4
           created: 1746977653877
-          modified: 1746992872692
+          modified: 1747062065741
           isPrivate: false
           sortKey: -1746992641877
         method: POST
@@ -140,12 +156,28 @@ collection:
             					"value": "plain/text"
             				}
             			]
-            		}
+            }
         headers:
           - name: Content-Type
             value: application/json
           - name: User-Agent
             value: insomnia/11.1.0
+        scripts:
+          afterResponse: |+
+            insomnia.test('Check if status is 201', () => {
+                insomnia.expect(insomnia.response.code).to.eql(201);
+            });
+
+            const jsonBody = insomnia.response.json();
+
+            insomnia.test('check url', () => {
+                insomnia.expect(jsonBody.body).to.eql("test response");
+            });
+
+            // ✅ Set the variable outside the test block
+            insomnia.environment.set("response1_id", jsonBody.id);
+
+
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -158,15 +190,15 @@ collection:
     meta:
       id: fld_c2eb2343e45f4b288a1cdf4cff92537c
       created: 1746992662042
-      modified: 1746992855384
+      modified: 1747062740626
       sortKey: -1746992662117
     children:
-      - url: https://localhost:7240/api/microservice/1
+      - url: https://localhost:7240/api/microservice/{{ _.microservice1_id }}
         name: Get microservice
         meta:
           id: req_2d6b4af1eaf04e6ea43d3bcf5679f16d
           created: 1746992679159
-          modified: 1746992975509
+          modified: 1747061951274
           isPrivate: false
           sortKey: -1746992661343
         method: GET
@@ -186,7 +218,7 @@ collection:
         meta:
           id: req_2340e6e4552447d6967b3be0f3b331c1
           created: 1746992811682
-          modified: 1747038922924
+          modified: 1747061934340
           isPrivate: false
           sortKey: -1746992661443
         method: POST
@@ -212,6 +244,26 @@ collection:
             value: application/json
           - name: User-Agent
             value: insomnia/11.1.0
+        scripts:
+          afterResponse: >+
+            insomnia.test('Check if status is 201', () => {
+                insomnia.expect(insomnia.response.code).to.eql(201);
+            });
+
+
+            const jsonBody = insomnia.response.json();
+
+
+            insomnia.test('check target url', () => {
+                insomnia.expect(jsonBody.targetUrl).to.eql("https://jsonplaceholder.typicode.com/");
+            });
+
+
+            // ✅ Set the variable outside the test block
+
+            insomnia.environment.set("microservice1_id", jsonBody.id);
+
+
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -224,7 +276,7 @@ collection:
     meta:
       id: fld_f3a7ebfa6c074407a1999d0931e2d67f
       created: 1746992842365
-      modified: 1746992853344
+      modified: 1747061862561
       sortKey: -1746992662092
     children:
       - url: https://localhost:7240/api/endpoint/1
@@ -389,12 +441,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: https://localhost:7240/api/microservice/1
+      - url: https://localhost:7240/api/microservice/{{ _.microservice1_id }}
         name: update microservice
         meta:
           id: req_21775cfb88b3490683bd60872815f72f
           created: 1747037905002
-          modified: 1747037969051
+          modified: 1747062115839
           isPrivate: false
           sortKey: -1746992641977
         method: PUT
@@ -448,12 +500,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: https://localhost:7240/api/mockresponse/1
+      - url: https://localhost:7240/api/mockresponse/2
         name: update response
         meta:
           id: req_4ec2cdcf47374eb793e7331420751fe4
           created: 1747038024588
-          modified: 1747038068877
+          modified: 1747062153292
           isPrivate: false
           sortKey: -1746992641939.5
         method: PUT
@@ -578,11 +630,15 @@ cookieJar:
   meta:
     id: jar_99d30891da4bdcebc63947a8fc17f076de878684
     created: 1746713247081
-    modified: 1746713247081
+    modified: 1747062740623
 environments:
   name: Base Environment
   meta:
     id: env_99d30891da4bdcebc63947a8fc17f076de878684
     created: 1746713247028
-    modified: 1746713247028
+    modified: 1747062740625
     isPrivate: false
+  data:
+    endpoint1_id: 1
+    microservice1_id: 1
+    response1_id: 1
