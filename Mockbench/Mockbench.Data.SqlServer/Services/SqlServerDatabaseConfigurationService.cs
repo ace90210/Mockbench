@@ -8,9 +8,9 @@ namespace Mockbench.Data.SqlServer.Services
 {
     public class SqlServerDatabaseConfigurationService : IDatabaseConfigurationService
     {
-        private readonly MockbenchMainContext _mainContext;
+        private readonly MockbenchDbContext _mainContext;
 
-        public SqlServerDatabaseConfigurationService(MockbenchMainContext mainContext)
+        public SqlServerDatabaseConfigurationService(MockbenchDbContext mainContext)
         {
             _mainContext = mainContext;
         }

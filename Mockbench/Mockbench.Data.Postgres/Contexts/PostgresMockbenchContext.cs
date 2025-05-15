@@ -7,7 +7,7 @@ using Mockbench.Shared.Models.Configuration;
 
 namespace Mockbench.Data.Postgres.Contexts
 {
-    public class PostgresMockbenchContext : MockbenchMainContext
+    public class PostgresMockbenchContext : MockbenchDbContext
     {
         public PostgresMockbenchContext(
             DbContextOptions<PostgresMockbenchContext> options, 

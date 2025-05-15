@@ -11,11 +11,11 @@ namespace Mockbench.Data.Repositories
 {
     public class EnvironmentRepository : BaseRepository, IEnvironmentRepository
     {
-        private readonly MockbenchMainContext _context;
+        private readonly MockbenchDbContext _context;
 
         private readonly EnvironmentMapper _environmentMapper = new EnvironmentMapper();
 
-        public EnvironmentRepository(MockbenchMainContext context) : base(context)
+        public EnvironmentRepository(MockbenchDbContext context) : base(context)
         {
             _context = context;
         }

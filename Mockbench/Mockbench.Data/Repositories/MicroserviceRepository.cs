@@ -10,9 +10,9 @@ namespace Mockbench.Data.Repositories
 {
     public class MicroserviceRepository : BaseRepository, IMicroserviceRepository
     {
-        private readonly MockbenchMainContext _context;
+        private readonly MockbenchDbContext _context;
 
-        public MicroserviceRepository(MockbenchMainContext context) : base(context)
+        public MicroserviceRepository(MockbenchDbContext context) : base(context)
         {
             _context = context;
         }

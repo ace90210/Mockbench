@@ -6,11 +6,11 @@ using Mockbench.Shared.Models.Configuration;
 
 namespace Mockbench.Data.Contexts
 {
-    public class MockbenchMainContext : DbContext
+    public class MockbenchDbContext : DbContext
     {
         private readonly DeploymentConfiguration _deploymentConfiguration;
 
-        public MockbenchMainContext(DbContextOptions options, IOptions<DeploymentConfiguration> deploymentConfigurationOptions) : base(options)
+        public MockbenchDbContext(DbContextOptions options, IOptions<DeploymentConfiguration> deploymentConfigurationOptions) : base(options)
         {
             _deploymentConfiguration = deploymentConfigurationOptions?.Value ?? throw new ArgumentNullException(nameof(_deploymentConfiguration));
         }

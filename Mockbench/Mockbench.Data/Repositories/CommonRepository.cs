@@ -15,7 +15,7 @@ namespace Mockbench.Data.Repositories
 {
     public class CommonRepository : BaseRepository, ICommonRepository
     {
-        private readonly MockbenchMainContext _context;
+        private readonly MockbenchDbContext _context;
         private readonly DeploymentConfiguration _deploymentConfiguration;
         private readonly TenantMapper _tenantMapper = new TenantMapper();
         private readonly TenantClonerMapper _tenantClonerMapper = new TenantClonerMapper();
@@ -27,7 +27,7 @@ namespace Mockbench.Data.Repositories
         private readonly MicroserviceClonerMapper _microserviceClonerMapper = new MicroserviceClonerMapper();
 
 
-        public CommonRepository(MockbenchMainContext context, IOptions<DeploymentConfiguration> deploymentOptions) : base(context)
+        public CommonRepository(MockbenchDbContext context, IOptions<DeploymentConfiguration> deploymentOptions) : base(context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _deploymentConfiguration = deploymentOptions?.Value ?? throw new ArgumentNullException(nameof(deploymentOptions));

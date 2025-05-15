@@ -7,7 +7,7 @@ using Mockbench.Shared.Models.Configuration;
 
 namespace Mockbench.Data.SqlServer.Contexts
 {
-    public class SqlServerMockbenchContext : MockbenchMainContext
+    public class SqlServerMockbenchContext : MockbenchDbContext
     {
         public SqlServerMockbenchContext(
             DbContextOptions<SqlServerMockbenchContext> options, 

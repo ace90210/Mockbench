@@ -7,7 +7,7 @@ using Mockbench.Shared.Models.Configuration;
 
 namespace Mockbench.Data.Sqlite.Contexts
 {
-    public class SqliteMockbenchContext : MockbenchMainContext
+    public class SqliteMockbenchContext : MockbenchDbContext
     {
         public SqliteMockbenchContext(
             DbContextOptions<SqliteMockbenchContext> options, 

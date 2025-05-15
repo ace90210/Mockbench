@@ -67,24 +67,24 @@ builder.Services.Configure<DeploymentConfiguration>(builder.Configuration.GetSec
 
 switch (deploymentConfiguration.DatabaseConfig.Provider)
 {
-    case DatabaseProvider.Sqlite:
+    case DatabaseProvider.SQLite:
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString ?? deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Sqlite")));
         builder.Services.AddDbContext<SqliteMockbenchContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Sqlite")));
-        builder.Services.AddScoped<MockbenchMainContext, SqliteMockbenchContext>();
+        builder.Services.AddScoped<MockbenchDbContext, SqliteMockbenchContext>();
         builder.Services.AddScoped<IDatabaseConfigurationService, SqliteDatabaseConfigurationService>();
         break;
 
     case DatabaseProvider.Postgres:
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Postgres")));
         builder.Services.AddDbContext<PostgresMockbenchContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Postgres")));
-        builder.Services.AddScoped<MockbenchMainContext, PostgresMockbenchContext>();
+        builder.Services.AddScoped<MockbenchDbContext, PostgresMockbenchContext>();
         builder.Services.AddScoped<IDatabaseConfigurationService, PostgresDatabaseConfigurationService>();
         break;
     case DatabaseProvider.SqlServer:
         {
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.SqlServer")));
             builder.Services.AddDbContext<SqlServerMockbenchContext>(options => options.UseSqlServer(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.SqlServer")));
-            builder.Services.AddScoped<MockbenchMainContext, SqlServerMockbenchContext>();
+            builder.Services.AddScoped<MockbenchDbContext, SqlServerMockbenchContext>();
             builder.Services.AddScoped<IDatabaseConfigurationService, SqlServerDatabaseConfigurationService>();
         }
         break;
@@ -92,7 +92,7 @@ switch (deploymentConfiguration.DatabaseConfig.Provider)
     case DatabaseProvider.InMemory:
     default:
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("InMemoryApplicationDb"));
-        builder.Services.AddDbContext<MockbenchMainContext>(options => options.UseInMemoryDatabase("InMemoryMockbenchDb"));
+        builder.Services.AddDbContext<MockbenchDbContext>(options => options.UseInMemoryDatabase("InMemoryMockbenchDb"));
         builder.Services.AddScoped<IDatabaseConfigurationService, InMemoryDatabaseConfigurationService>();
         break;
 }

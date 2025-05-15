@@ -8,7 +8,7 @@ namespace Mockbench.Data.Repositories
 {
     public class BaseRepository : IBaseRepository
     {
-        private readonly MockbenchMainContext _context;
+        private readonly MockbenchDbContext _context;
         private readonly TenantMapper _tenantMapper = new TenantMapper();
         private readonly TenantClonerMapper _tenantClonerMapper = new TenantClonerMapper();
 
@@ -19,7 +19,7 @@ namespace Mockbench.Data.Repositories
         private readonly MicroserviceClonerMapper _microserviceClonerMapper = new MicroserviceClonerMapper();
 
 
-        public BaseRepository(MockbenchMainContext context)
+        public BaseRepository(MockbenchDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }

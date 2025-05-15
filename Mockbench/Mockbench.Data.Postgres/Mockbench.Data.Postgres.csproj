@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Mockbench\Mockbench.Abstractions\Mockbench.Abstractions.csproj" />
-    <ProjectReference Include="..\Mockbench\Mockbench.Data\Mockbench.Data.csproj" />
-    <ProjectReference Include="..\Mockbench\Mockbench.Shared\Mockbench.Shared.csproj" />
+    <ProjectReference Include="..\Mockbench.Abstractions\Mockbench.Abstractions.csproj" />
+    <ProjectReference Include="..\Mockbench.Data\Mockbench.Data.csproj" />
+    <ProjectReference Include="..\Mockbench.Shared\Mockbench.Shared.csproj" />
   </ItemGroup>
 
 </Project>

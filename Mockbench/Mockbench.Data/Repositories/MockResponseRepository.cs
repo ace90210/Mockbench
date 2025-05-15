@@ -9,9 +9,9 @@ namespace Mockbench.Data.Repositories
 {
     public class MockResponseRepository : BaseRepository, IMockResponseRepository
     {
-        private readonly MockbenchMainContext _context;
+        private readonly MockbenchDbContext _context;
 
-        public MockResponseRepository(MockbenchMainContext context) : base(context)
+        public MockResponseRepository(MockbenchDbContext context) : base(context)
         {
             _context = context;
         }

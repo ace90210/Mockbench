@@ -26,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockbench.Services", "Mockb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockbench.Http", "Mockbench\Mockbench.Http\Mockbench.Http.csproj", "{D6732182-DB7E-438F-ADBC-6B07E2069F48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockbench.Data.Postgres", "Mockbench.Data.Postgres\Mockbench.Data.Postgres.csproj", "{408458A8-1073-4E15-B878-1BD50012D1A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockbench.Data.Postgres", "Mockbench\Mockbench.Data.Postgres\Mockbench.Data.Postgres.csproj", "{97713BB3-BA28-8FD5-25A5-4FCDA083B4CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,10 +74,10 @@ Global
 		{D6732182-DB7E-438F-ADBC-6B07E2069F48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6732182-DB7E-438F-ADBC-6B07E2069F48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6732182-DB7E-438F-ADBC-6B07E2069F48}.Release|Any CPU.Build.0 = Release|Any CPU
-		{408458A8-1073-4E15-B878-1BD50012D1A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{408458A8-1073-4E15-B878-1BD50012D1A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{408458A8-1073-4E15-B878-1BD50012D1A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{408458A8-1073-4E15-B878-1BD50012D1A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97713BB3-BA28-8FD5-25A5-4FCDA083B4CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97713BB3-BA28-8FD5-25A5-4FCDA083B4CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97713BB3-BA28-8FD5-25A5-4FCDA083B4CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97713BB3-BA28-8FD5-25A5-4FCDA083B4CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,7 +91,7 @@ Global
 		{E269DF6A-8625-4E20-9108-AED64F5D30D3} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{ACAE5D3E-619A-9A95-6FE0-406CD20474BA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{D6732182-DB7E-438F-ADBC-6B07E2069F48} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{408458A8-1073-4E15-B878-1BD50012D1A1} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{97713BB3-BA28-8FD5-25A5-4FCDA083B4CA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A9CD1156-DB5A-420C-A807-6FE3963CC411}

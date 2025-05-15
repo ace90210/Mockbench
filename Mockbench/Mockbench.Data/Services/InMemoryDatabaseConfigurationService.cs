@@ -6,9 +6,9 @@ namespace Mockbench.Data.Services
 {
     public class InMemoryDatabaseConfigurationService : IDatabaseConfigurationService
     {
-        private readonly MockbenchMainContext _mainContext;
+        private readonly MockbenchDbContext _mainContext;
 
-        public InMemoryDatabaseConfigurationService(MockbenchMainContext mainContext)
+        public InMemoryDatabaseConfigurationService(MockbenchDbContext mainContext)
         {
             _mainContext = mainContext;
         }

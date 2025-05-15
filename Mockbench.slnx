@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Libraries/">
+    <Project Path="Mockbench/Mockbench.Api/Mockbench.Api.csproj" />
+    <Project Path="Mockbench/Mockbench.Data.Postgres/Mockbench.Data.Postgres.csproj" />
+    <Project Path="Mockbench/Mockbench.Data.Sqlite/Mockbench.Data.Sqlite.csproj" />
+    <Project Path="Mockbench/Mockbench.Data.SqlServer/Mockbench.Data.SqlServer.csproj" />
+    <Project Path="Mockbench/Mockbench.Data/Mockbench.Data.csproj" />
+    <Project Path="Mockbench/Mockbench.Http/Mockbench.Http.csproj" />
+    <Project Path="Mockbench/Mockbench.Services/Mockbench.Services.csproj" />
+  </Folder>
+  <Folder Name="/Shared/">
+    <Project Path="Mockbench/Mockbench.Abstractions/Mockbench.Abstractions.csproj" />
+    <Project Path="Mockbench/Mockbench.Shared/Mockbench.Shared.csproj" />
+  </Folder>
+  <Project Path="Mockbench/Mockbench.Client/Mockbench.Client.csproj" />
+  <Project Path="Mockbench/Mockbench/Mockbench.csproj" />
+</Solution>
