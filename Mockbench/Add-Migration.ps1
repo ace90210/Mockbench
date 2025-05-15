@@ -3,11 +3,10 @@
 .SYNOPSIS
     Automates adding Entity Framework Core migrations for multiple database providers.
 .DESCRIPTION
-    This script prompts for a migration name and DbContext type (Authentication or Mockbench).
-    It then iterates through a list of predefined database providers. For each provider,
-    it sets an environment variable, determines the correct DbContext class name and --project path
-    (which can be provider-specific for Mockbench), sets the correct output directory for migrations,
-    runs 'dotnet ef migrations add' with verbose output, and logs any errors.
+    This script prompts for a migration name and DbContext type.
+    For each provider, it sets an environment variable, determines the correct DbContext class name,
+    and uses the provider-specific data project for generating migrations.
+    The output directory for migrations is context-specific (e.g., AuthenticationMigrations).
     It supports an automated mode to skip interactive pauses.
 .PARAMETER Automated
     If specified, the script runs in non-interactive mode, skipping pauses
@@ -24,12 +23,18 @@ param (
 )
 
 # --- Configuration ---
+# **TODO: Customize these values to match your project setup!**
 $ErrorLogFile = "migration_error.log"
 $EnvVarName = "DeploymentConfiguration__DatabaseConfig__Provider" 
 
-$CommonDataProjectFilePath = ".\Mockbench.Data\Mockbench.Data.csproj"
-$StartupProjectFilePath = ".\Mockbench\Mockbench.csproj" 
+# $CommonDataProjectFilePath is no longer directly used for the --project argument in 'dotnet ef migrations add'
+# if all contexts now target provider-specific projects for migrations.
+# It's kept here in case it's needed for other purposes or future context types.
+$CommonDataProjectFilePath = ".\Mockbench.Data\Mockbench.Data.csproj" # TODO: Verify this path if still needed for other logic
 
+$StartupProjectFilePath = ".\Mockbench\Mockbench.csproj" # TODO: Verify this path
+
+# Provider order updated: Postgres is now first
 $Providers = @(  
 	@{ Name = "Postgres"; EnvValue = "Postgres"; MockbenchContextPrefix = "Postgres"; ProviderDataProjectFolder = "Mockbench.Data.Postgres" },
     @{ Name = "SQL Server"; EnvValue = "SqlServer";  MockbenchContextPrefix = "SqlServer"; ProviderDataProjectFolder = "Mockbench.Data.SqlServer" },
@@ -37,6 +42,8 @@ $Providers = @(
 )
 
 $ContextChoices = @{
+    # IsProviderSpecific now primarily controls if the DbContext name gets a provider prefix.
+    # The --project path for migrations will always be the provider-specific project.
     "1" = @{ Name = "Authentication Context"; BaseClassName = "ApplicationDbContext"; OutputDirName = "AuthenticationMigrations"; IsProviderSpecific = $false }
     "2" = @{ Name = "Mockbench Context";    BaseClassName = "MockbenchDbContext";   OutputDirName = "MockbenchMigrations";    IsProviderSpecific = $true  }
 }
@@ -64,14 +71,12 @@ function Write-Log {
 }
 
 # --- Main Script ---
-if ([string]::IsNullOrWhiteSpace($CommonDataProjectFilePath)) {
-    Write-Error "ERROR: \$CommonDataProjectFilePath is not set. Configure common data project .csproj path."
-    exit 1
-}
+# Validate required project path configurations
 if ([string]::IsNullOrWhiteSpace($StartupProjectFilePath)) {
     Write-Error "ERROR: \$StartupProjectFilePath is not set. Configure startup project .csproj path."
     exit 1
 }
+# Validation for $CommonDataProjectFilePath removed as it's not directly used for the EF command path anymore.
 
 Clear-Content $ErrorLogFile -ErrorAction SilentlyContinue
 Write-Host "--- Entity Framework Core Multi-Provider Migration Script ---"
@@ -123,30 +128,25 @@ try {
 
         $actualDbContextForCommand = ""
         $actualMigrationOutputPath = $SelectedContextConfig.OutputDirName
-        $projectPathForCommand = $CommonDataProjectFilePath 
-
-        if ($SelectedContextConfig.IsProviderSpecific) {
+        
+        # Determine DbContext name for the command
+        if ($SelectedContextConfig.IsProviderSpecific) { # e.g., MockbenchContext
             $actualDbContextForCommand = "$($provider.MockbenchContextPrefix)$($SelectedContextConfig.BaseClassName)"
-            if ([string]::IsNullOrWhiteSpace($provider.ProviderDataProjectFolder)) {
-                Write-Log "ERROR: ProviderDataProjectFolder not configured for provider '$($provider.Name)'." -Level "ERROR" -ForegroundColor Red
-                $anyErrorOccurred = $true
-                continue
-            }
-            $projectPathForCommand = ".\$($provider.ProviderDataProjectFolder)\$($provider.ProviderDataProjectFolder).csproj"
-            Write-Log "Using provider-specific data project: '$projectPathForCommand'"
-        }
-        elseif ($SelectedContextConfig.BaseClassName -eq "ApplicationDbContext") { 
-            $actualDbContextForCommand = "ApplicationDbContext"
-            Write-Log "Using common data project: '$projectPathForCommand'"
-        }
-        else {
-            Write-Log "ERROR: Unknown BaseClassName '$($SelectedContextConfig.BaseClassName)' or context config error." -Level "ERROR" -ForegroundColor Red
-            $anyErrorOccurred = $true
-            continue 
+        } else { # e.g., ApplicationDbContext - name is not prefixed
+            $actualDbContextForCommand = $SelectedContextConfig.BaseClassName
         }
 
+        # Project path for migrations is ALWAYS the provider-specific project
+        if ([string]::IsNullOrWhiteSpace($provider.ProviderDataProjectFolder)) {
+            Write-Log "ERROR: ProviderDataProjectFolder not configured for provider '$($provider.Name)'." -Level "ERROR" -ForegroundColor Red
+            $anyErrorOccurred = $true
+            continue # Skip to the next provider
+        }
+        $projectPathForCommand = ".\$($provider.ProviderDataProjectFolder)\$($provider.ProviderDataProjectFolder).csproj"
+        
         Write-Log "Using DbContext: '$actualDbContextForCommand'"
-        Write-Log "Migration output path will be: '$actualMigrationOutputPath'"
+        Write-Log "Using data project for migrations: '$projectPathForCommand'" # Clarified log message
+        Write-Log "Migration output directory will be: '$actualMigrationOutputPath' (within the project above)"
 
         try {
             Set-Item -Path "Env:\$($EnvVarName)" -Value $provider.EnvValue
@@ -156,25 +156,24 @@ try {
             $arguments = @(
                 "ef", "migrations", "add", $MigrationName,
                 "--context", $actualDbContextForCommand,
-                "--output-dir", $actualMigrationOutputPath,
+                "--output-dir", $actualMigrationOutputPath, # This is relative to the --project path
                 "--project", $projectPathForCommand, 
                 "--startup-project", $StartupProjectFilePath,
-                "--verbose" # Added verbose flag for more detailed EF Core output
+                "--verbose" 
             )
             
             Write-Log "Executing: dotnet $($arguments -join ' ')"
-            Write-Log "About to call Start-Process..." # New log message
+            Write-Log "About to call Start-Process..." 
 
             $process = Start-Process dotnet -ArgumentList $arguments -Wait -NoNewWindow -PassThru -RedirectStandardError "ef_error.tmp" -RedirectStandardOutput "ef_output.tmp"
             
-            # New log message - this will tell us if Start-Process -Wait returned
             Write-Log "Start-Process call returned. Process ID: $($process.Id). Checking Exit Code..." 
             
             $stdOut = Get-Content "ef_output.tmp" -Raw -ErrorAction SilentlyContinue
             $stdErr = Get-Content "ef_error.tmp" -Raw -ErrorAction SilentlyContinue
             Remove-Item "ef_output.tmp", "ef_error.tmp" -ErrorAction SilentlyContinue
 
-            Write-Log "Process Exit Code: $($process.ExitCode)" # Log the actual exit code received
+            Write-Log "Process Exit Code: $($process.ExitCode)" 
 
             if ($process.ExitCode -eq 0) {
                 Write-Log "Migration for $($provider.Name) (Context: $actualDbContextForCommand) succeeded." -ForegroundColor Green
