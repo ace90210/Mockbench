@@ -5,101 +5,100 @@ using Mockbench.Abstractions.ConfigurationServices;
 using Mockbench.Data.Contexts;
 using Mockbench.Shared.Models.Utility;
 
-namespace Mockbench.Data.Sqlite.Services
+namespace Mockbench.Data.Sqlite.Services;
+
+public class SqliteDatabaseConfigurationService : IDatabaseConfigurationService
 {
-    public class SqliteDatabaseConfigurationService : IDatabaseConfigurationService
+    private readonly MockbenchDbContext _mainContext;
+    private readonly ILogger<SqliteDatabaseConfigurationService> _logger;
+
+    public SqliteDatabaseConfigurationService(MockbenchDbContext mainContext, ILogger<SqliteDatabaseConfigurationService> logger)
     {
-        private readonly MockbenchDbContext _mainContext;
-        private readonly ILogger<SqliteDatabaseConfigurationService> _logger;
+        _mainContext = mainContext ?? throw new ArgumentNullException(nameof(mainContext));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public SqliteDatabaseConfigurationService(MockbenchDbContext mainContext, ILogger<SqliteDatabaseConfigurationService> logger)
+    public async Task<IEnumerable<string>> GetPendingMigrationsAsync()
+    {
+        return await _mainContext.Database.GetPendingMigrationsAsync();
+    }
+
+    public async Task<ConnectionStringStatus> DoesConnectionStringWorkAsync(string connectionString)
+    {
+        _mainContext.Database.GetDbConnection().ConnectionString = connectionString;
+        try
         {
-            _mainContext = mainContext ?? throw new ArgumentNullException(nameof(mainContext));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            if (await TimeoutConnect())
+                return ConnectionStringStatus.Success;
+
+            return ConnectionStringStatus.ConnectNoDatabase;
         }
-
-        public async Task<IEnumerable<string>> GetPendingMigrationsAsync()
+        catch (Exception)
         {
-            return await _mainContext.Database.GetPendingMigrationsAsync();
+            return ConnectionStringStatus.Failed;
         }
+    }
 
-        public async Task<ConnectionStringStatus> DoesConnectionStringWorkAsync(string connectionString)
+    private async Task<bool> TimeoutConnect()
+    {
+        try
         {
-            _mainContext.Database.GetDbConnection().ConnectionString = connectionString;
-            try
-            {
-                if (await TimeoutConnect())
-                    return ConnectionStringStatus.Success;
-
-                return ConnectionStringStatus.ConnectNoDatabase;
-            }
-            catch (Exception)
-            {
-                return ConnectionStringStatus.Failed;
-            }
+            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            return await _mainContext.Database.CanConnectAsync(cancellationTokenSource.Token);
         }
-
-        private async Task<bool> TimeoutConnect()
+        catch (Exception)
         {
-            try
+            return false;
+        }
+    }
+
+    public async Task ApplyMigrationsAsync(string connectionString)
+    {
+        var sqliteFilePath = GetFilePathFromConnectionString(connectionString);
+
+        if (!string.IsNullOrWhiteSpace(sqliteFilePath))
+        {
+            // check directory exists
+            if (!Directory.Exists(sqliteFilePath))
             {
-                var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                return await _mainContext.Database.CanConnectAsync(cancellationTokenSource.Token);
-            }
-            catch (Exception)
-            {
-                return false;
+                Directory.CreateDirectory(sqliteFilePath);
             }
         }
+        
+        await _mainContext.Database.MigrateAsync();
 
-        public async Task ApplyMigrationsAsync(string connectionString)
+        await _mainContext.SeedConfigurationAsync();
+    }
+
+    private string GetFilePathFromConnectionString(string connectionString)
+    {
+        DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+        builder.ConnectionString = connectionString;
+        string filePath = ((string)builder["Data Source"]).Trim();
+
+        return Path.GetDirectoryName(filePath);
+    }
+
+    public async Task<ConnectionStringTestResult> TestConnectionStringWorkAsync(string connectionString)
+    {
+            var result = new ConnectionStringTestResult();
+        try
         {
-            var sqliteFilePath = GetFilePathFromConnectionString(connectionString);
 
-            if (!string.IsNullOrWhiteSpace(sqliteFilePath))
-            {
-                // check directory exists
-                if (!Directory.Exists(sqliteFilePath))
-                {
-                    Directory.CreateDirectory(sqliteFilePath);
-                }
-            }
-            
-            await _mainContext.Database.MigrateAsync();
-
-            await _mainContext.SeedConfigurationAsync();
-        }
-
-        private string GetFilePathFromConnectionString(string connectionString)
+            result.ConnectionStringStatus = ConnectionStringStatus.Success;
+            result.PendingMigrations = await _mainContext.Database.GetPendingMigrationsAsync();
+        }catch(Exception ex)
         {
-            DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
-            builder.ConnectionString = connectionString;
-            string filePath = ((string)builder["Data Source"]).Trim();
-
-            return Path.GetDirectoryName(filePath);
-        }
-
-        public async Task<ConnectionStringTestResult> TestConnectionStringWorkAsync(string connectionString)
-        {
-                var result = new ConnectionStringTestResult();
-            try
-            {
-
-                result.ConnectionStringStatus = ConnectionStringStatus.Success;
-                result.PendingMigrations = await _mainContext.Database.GetPendingMigrationsAsync();
-            }catch(Exception ex)
-            {
-                _logger.LogError(ex, $"test failed");
-                result.ConnectionStringStatus = ConnectionStringStatus.Failed;
-                result.Message = ex.Message;
-                return result;
-            }
+            _logger.LogError(ex, $"test failed");
+            result.ConnectionStringStatus = ConnectionStringStatus.Failed;
+            result.Message = ex.Message;
             return result;
         }
+        return result;
+    }
 
-        public IEnumerable<string> GetAllMigrations()
-        {
-            return _mainContext.Database.GetMigrations();
-        }
+    public IEnumerable<string> GetAllMigrations()
+    {
+        return _mainContext.Database.GetMigrations();
     }
 }
