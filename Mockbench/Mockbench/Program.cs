@@ -65,24 +65,62 @@ var deploymentConfiguration =
 
 builder.Services.Configure<DeploymentConfiguration>(builder.Configuration.GetSection("DeploymentConfiguration"));
 
+#region development helper(s)
+
+// In development, override with BU (Back Up) connection strings
+if (builder.Environment.IsDevelopment())
+{
+    switch (deploymentConfiguration.DatabaseConfig.Provider)
+    {
+        case DatabaseProvider.SQLite:
+            deploymentConfiguration.DatabaseConfig.MainConnectionString =
+                builder.Configuration["BUSqliteDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
+            deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
+                builder.Configuration["BUSqliteDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
+            break;
+
+        case DatabaseProvider.Postgres:
+            deploymentConfiguration.DatabaseConfig.MainConnectionString =
+                builder.Configuration["BUPostgresDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
+            deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
+                builder.Configuration["BUPostgresDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
+            break;
+
+        case DatabaseProvider.SqlServer:
+            deploymentConfiguration.DatabaseConfig.MainConnectionString =
+                builder.Configuration["BUSqlServerDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
+            deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
+                builder.Configuration["BUSqlServerDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
+            break;
+    }
+}
+#endregion
+
+
 switch (deploymentConfiguration.DatabaseConfig.Provider)
 {
     case DatabaseProvider.SQLite:
-        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString ?? deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Sqlite")));
+        var authenticationConnectionString = deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString ?? deploymentConfiguration.DatabaseConfig.MainConnectionString;
+
+        EnsureDbFolderCreated(builder, authenticationConnectionString);
+        EnsureDbFolderCreated(builder, deploymentConfiguration.DatabaseConfig.MainConnectionString);
+
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(authenticationConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Sqlite")));
         builder.Services.AddDbContext<SqliteMockbenchDbContext>(options => options.UseSqlite(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Sqlite")));
         builder.Services.AddScoped<MockbenchDbContext, SqliteMockbenchDbContext>();
         builder.Services.AddScoped<IDatabaseConfigurationService, SqliteDatabaseConfigurationService>();
+
         break;
 
     case DatabaseProvider.Postgres:
-        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Postgres")));
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString ?? deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Postgres")));
         builder.Services.AddDbContext<PostgresMockbenchDbContext>(options => options.UseNpgsql(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.Postgres")));
         builder.Services.AddScoped<MockbenchDbContext, PostgresMockbenchDbContext>();
         builder.Services.AddScoped<IDatabaseConfigurationService, PostgresDatabaseConfigurationService>();
         break;
     case DatabaseProvider.SqlServer:
         {
-            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.SqlServer")));
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString ?? deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.SqlServer")));
             builder.Services.AddDbContext<SqlServerMockbenchDbContext>(options => options.UseSqlServer(deploymentConfiguration.DatabaseConfig.MainConnectionString, b => b.MigrationsAssembly("Mockbench.Data.SqlServer")));
             builder.Services.AddScoped<MockbenchDbContext, SqlServerMockbenchDbContext>();
             builder.Services.AddScoped<IDatabaseConfigurationService, SqlServerDatabaseConfigurationService>();
@@ -138,3 +176,29 @@ app.MapControllers();
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+
+static void EnsureDbFolderCreated(WebApplicationBuilder builder, string connectionString)
+{
+    try
+    {
+        // Extract path from Data Source= path
+        var dataSourcePrefix = "Data Source=";
+        var startIndex = connectionString.IndexOf(dataSourcePrefix, StringComparison.OrdinalIgnoreCase);
+        if (startIndex >= 0)
+        {
+            var path = connectionString.Substring(startIndex + dataSourcePrefix.Length).Trim();
+            var fullPath = Path.IsPathRooted(path) ? path : Path.Combine(builder.Environment.ContentRootPath, path);
+            var directory = Path.GetDirectoryName(fullPath);
+
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // Optionally log or handle exception (e.g. log to Debug output)
+        Console.WriteLine($"[SQLite Init] Failed to create directory for SQLite DB: {ex.Message}");
+    }
+}
