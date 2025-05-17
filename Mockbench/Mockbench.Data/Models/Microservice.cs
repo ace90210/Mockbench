@@ -7,26 +7,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Mockbench.Data.Models
 {
-    [Mapper]
-    public partial class MicroserviceMapper
-    {
-        public partial FullMicroserviceDto ToMicroserviceDto(Microservice tenant);
-
-        public partial Microservice ToMicroserviceEntity(FullMicroserviceDto tenant);
-
-        public partial List<FullMicroserviceDto> ToMicroserviceDtos(List<Microservice> tenants);
-
-        public partial List<Microservice> ToMicroserviceEntities(List<FullMicroserviceDto> tenants);
-    }
-
-    [Mapper(UseDeepCloning = true)]
-    public partial class MicroserviceClonerMapper
-    {
-        public partial Microservice Clone(Microservice tenant);
-
-        public partial FullMicroserviceDto Clone(FullMicroserviceDto tenant);
-    }
-
     public class Microservice
     {
         [Key]

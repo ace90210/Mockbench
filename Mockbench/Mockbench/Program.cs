@@ -57,8 +57,7 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 
-var deploymentConfiguration =
-    builder.Configuration.GetSection("DeploymentConfiguration").Get<DeploymentConfiguration>();
+var deploymentConfiguration = builder.Configuration.GetSection("DeploymentConfiguration").Get<DeploymentConfiguration>();
 
 builder.Services.Configure<DeploymentConfiguration>(builder.Configuration.GetSection("DeploymentConfiguration"));
 
@@ -67,10 +66,16 @@ if(deploymentConfiguration is null)
     throw new ArgumentException("DeploymentConfiguration is null");
 }
 
+// In development, override with BU (Back Up) connection strings
+if (builder.Environment.IsDevelopment())
+{
+    deploymentConfiguration = SetConnectionStringByProvider(builder, deploymentConfiguration);
+}
+
 switch (deploymentConfiguration.DatabaseConfig.Provider)
 {
     case DatabaseProvider.SQLite:
-        builder.Services.AddSqliteServices(builder, deploymentConfiguration);
+        builder.Services.AddSqliteServices(builder.Environment, deploymentConfiguration);
         break;
 
     case DatabaseProvider.Postgres:
@@ -131,3 +136,32 @@ app.MapControllers();
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+
+
+static DeploymentConfiguration SetConnectionStringByProvider(WebApplicationBuilder builder, DeploymentConfiguration deploymentConfiguration)
+{
+    switch (deploymentConfiguration.DatabaseConfig.Provider)
+    {
+        case DatabaseProvider.SQLite:
+            deploymentConfiguration.DatabaseConfig.MainConnectionString =
+                builder.Configuration["BUSqliteDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
+            deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
+                builder.Configuration["BUSqliteDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
+            break;
+
+        case DatabaseProvider.Postgres:
+            deploymentConfiguration.DatabaseConfig.MainConnectionString =
+                builder.Configuration["BUPostgresDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
+            deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
+                builder.Configuration["BUPostgresDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
+            break;
+
+        case DatabaseProvider.SqlServer:
+            deploymentConfiguration.DatabaseConfig.MainConnectionString =
+                builder.Configuration["BUSqlServerDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
+            deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
+                builder.Configuration["BUSqlServerDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
+            break;
+    }
+    return deploymentConfiguration;
+}

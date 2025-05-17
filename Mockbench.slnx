@@ -12,6 +12,10 @@
     <Project Path="Mockbench/Mockbench.Abstractions/Mockbench.Abstractions.csproj" />
     <Project Path="Mockbench/Mockbench.Shared/Mockbench.Shared.csproj" />
   </Folder>
+  <Folder Name="/Tests/" />
+  <Folder Name="/Tests/Libraries/">
+    <Project Path="Mockbench/Tests/Mockbench.Api.Tests/Mockbench.Api.Tests.csproj" />
+  </Folder>
   <Project Path="Mockbench/Mockbench.Client/Mockbench.Client.csproj" />
   <Project Path="Mockbench/Mockbench/Mockbench.csproj" />
 </Solution>

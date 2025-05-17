@@ -2,7 +2,6 @@
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Data.Contexts;
 using Mockbench.Data.Mappers;
-using Mockbench.Data.Models;
 using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Response;
 
@@ -11,11 +10,6 @@ namespace Mockbench.Data.Repositories
     public class EndpointRepository : BaseRepository, IEndpointRepository
     {
         private readonly MockbenchDbContext _context;
-
-        private readonly TenantMapper _tenantMapper = new();
-        private readonly EnvironmentMapper environmentMapper = new();
-        private readonly MicroserviceMapper _microserviceMapper = new();
-
         public EndpointRepository(MockbenchDbContext context) : base(context)
         {
             _context = context;
@@ -68,9 +62,9 @@ namespace Mockbench.Data.Repositories
             var microservice = _context.Microservices.FirstOrDefault(m => m.Path == microservicePath);
 
             return new MatchingEndpoints() {
-                Tenant = tenant is not null ? _tenantMapper.ToTenantDto(tenant) : null,
-                Environment = environment is not null ? environmentMapper.ToEnvironmentDto(environment) : null,
-                Microservice = microservice is not null ? _microserviceMapper.ToMicroserviceDto(microservice) : null,
+                Tenant = Mapper.Tenant.ToDto(tenant),
+                Environment = Mapper.Environment.ToDto(environment),
+                Microservice = Mapper.Microservice.ToDto(microservice),
                 TenantPath = tenantPath,
                 EnvironmentPath = environmentPath,
                 MicroservicePath = microservicePath,

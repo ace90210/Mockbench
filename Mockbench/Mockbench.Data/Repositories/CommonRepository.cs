@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Data.Contexts;
+using Mockbench.Data.Mappers;
 using Mockbench.Data.Models;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Models.Configuration;
@@ -17,15 +18,6 @@ namespace Mockbench.Data.Repositories
     {
         private readonly MockbenchDbContext _context;
         private readonly DeploymentConfiguration _deploymentConfiguration;
-        private readonly TenantMapper _tenantMapper = new TenantMapper();
-        private readonly TenantClonerMapper _tenantClonerMapper = new TenantClonerMapper();
-
-        private readonly EnvironmentMapper _environmentMapper = new EnvironmentMapper();
-        private readonly EnvironmentClonerMapper _environmentClonerMapper = new EnvironmentClonerMapper();
-
-        private readonly MicroserviceMapper _microserviceMapper = new MicroserviceMapper();
-        private readonly MicroserviceClonerMapper _microserviceClonerMapper = new MicroserviceClonerMapper();
-
 
         public CommonRepository(MockbenchDbContext context, IOptions<DeploymentConfiguration> deploymentOptions) : base(context)
         {
@@ -193,7 +185,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<FullDatabaseDto> ExportDatabaseToJson()
         {
-            _tenantClonerMapper.Clone(new Tenant());
+            Mapper.TenantCloner.Clone(new Tenant());
 
 
             var fullDatabase = new FullDatabaseDto
@@ -225,16 +217,16 @@ namespace Mockbench.Data.Repositories
                 });
             });
 
-            fullDatabase.Tenants = _tenantMapper.ToTenantDtos(tenants);
+            fullDatabase.Tenants = Mapper.Tenant.ToDtos(tenants);
 
-            fullDatabase.Environments = _environmentMapper.ToEnvironmentDtos(environments);
+            fullDatabase.Environments = Mapper.Environment.ToDtos(environments);
 
             var microservices = _context.Microservices
                         .Include(ms => ms.Headers)
                         .Include(ms => ms.Endpoints)
                         .ToList();
 
-            fullDatabase.Microservices = _microserviceMapper.ToMicroserviceDtos(microservices);
+            fullDatabase.Microservices = Mapper.Microservice.ToDtos(microservices);
 
                     
             foreach (var microservice in microservices)
@@ -294,9 +286,9 @@ namespace Mockbench.Data.Repositories
             if (import.Microservices == null)
                 import.Microservices = new List<FullMicroserviceDto>();
 
-            var tenants = _tenantMapper.ToTenantEntities(import.Tenants.ToList());
-            var environments = _environmentMapper.ToEnvironmentEntities(import.Environments.ToList());
-            var microservices = _microserviceMapper.ToMicroserviceEntities(import.Microservices.ToList());
+            var tenants = Mapper.Tenant.ToEntities(import.Tenants.ToList());
+            var environments = Mapper.Environment.ToEntities(import.Environments.ToList());
+            var microservices = Mapper.Microservice.ToEntities(import.Microservices.ToList());
 
             var existingTenants = _context.Tenants;
 

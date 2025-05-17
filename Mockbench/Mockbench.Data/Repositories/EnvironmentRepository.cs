@@ -5,15 +5,12 @@ using Mockbench.Data.Mappers;
 using Mockbench.Data.Models;
 using Mockbench.Shared.Models.Environment;
 using Mockbench.Shared.Models.General;
-using Mockbench.Shared.Models.Tenant;
 
 namespace Mockbench.Data.Repositories
 {
     public class EnvironmentRepository : BaseRepository, IEnvironmentRepository
     {
         private readonly MockbenchDbContext _context;
-
-        private readonly EnvironmentMapper _environmentMapper = new EnvironmentMapper();
 
         public EnvironmentRepository(MockbenchDbContext context) : base(context)
         {
@@ -24,7 +21,7 @@ namespace Mockbench.Data.Repositories
         {
             var services = await _context.Environments.Include(e => e.Variables).ToListAsync();
 
-            return _environmentMapper.ToEnvironmentDtos(services);
+            return Mapper.Environment.ToDtos(services);
         }
 
         public async Task<List<PathNameItem>> GetAllEnvironmentNameAndPaths()
@@ -48,7 +45,7 @@ namespace Mockbench.Data.Repositories
             var environment = await _context.Environments.Include(e => e.Variables)
                                         .FirstOrDefaultAsync(sg => sg.ID == id);
 
-            return environment?.ToBaseEnvironmentDto();
+            return Mapper.Environment.ToDto(environment);
         }
 
         public async Task<EnvironmentDto> CreateEnvironment(EnvironmentDto newEnvironmentDto)

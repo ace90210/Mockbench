@@ -1,22 +1,24 @@
 ﻿using Mockbench.Shared.Models.Environment;
+using Riok.Mapperly.Abstractions;
 
-namespace Mockbench.Data.Mappers
+namespace Mockbench.Data.Mappers;
+
+[Mapper]
+public partial class EnvironmentMapper
 {
-    public static class EnvironmentMappers
-    {
-        #region Basic Environment Mappers
-        public static EnvironmentDto? ToBaseEnvironmentDto(this Models.Environment environment)
-        {
-            return environment == null ? null : new EnvironmentDto()
-            {
-                Id = environment.ID,
-                Enabled = environment.Enabled,
-                DefaultHealthCheckUrl = environment.DefaultHealthCheckUrl,
-                Name = environment.Name,
-                Path = environment.Path,
-                SimulateTime = environment.SimulateTime
-            };
-        }
-        #endregion
-    }
+    public partial EnvironmentDto? ToDto(Models.Environment? environment);
+
+    public partial Models.Environment? ToEntity(EnvironmentDto? environment);
+
+    public partial List<EnvironmentDto>? ToDtos(List<Models.Environment>? environments);
+
+    public partial List<Models.Environment>? ToEntities(List<EnvironmentDto>? environments);
+}
+
+[Mapper(UseDeepCloning = true)]
+public partial class EnvironmentClonerMapper
+{
+    public partial Models.Environment? Clone(Models.Environment? environment);
+
+    public partial EnvironmentDto? Clone(EnvironmentDto? environment);
 }

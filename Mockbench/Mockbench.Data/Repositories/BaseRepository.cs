@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Data.Contexts;
+using Mockbench.Data.Mappers;
 using Mockbench.Data.Models;
 using Mockbench.Shared.Models.Endpoint;
 
@@ -9,15 +10,6 @@ namespace Mockbench.Data.Repositories
     public class BaseRepository : IBaseRepository
     {
         private readonly MockbenchDbContext _context;
-        private readonly TenantMapper _tenantMapper = new TenantMapper();
-        private readonly TenantClonerMapper _tenantClonerMapper = new TenantClonerMapper();
-
-        private readonly EnvironmentMapper _environmentMapper = new EnvironmentMapper();
-        private readonly EnvironmentClonerMapper _environmentClonerMapper = new EnvironmentClonerMapper();
-
-        private readonly MicroserviceMapper _microserviceMapper = new MicroserviceMapper();
-        private readonly MicroserviceClonerMapper _microserviceClonerMapper = new MicroserviceClonerMapper();
-
 
         public BaseRepository(MockbenchDbContext context)
         {
@@ -89,9 +81,9 @@ namespace Mockbench.Data.Repositories
                 await _context.SaveChangesAsync();
             }
 
-            matchingEndpoints.Tenant = existingTenant is not null ? _tenantMapper.ToTenantDto(existingTenant) : null;
-            matchingEndpoints.Environment = existingEnvironment is not null ? _environmentMapper.ToEnvironmentDto(existingEnvironment) : null;
-            matchingEndpoints.Microservice = existingMicroservice is not null ? _microserviceMapper.ToMicroserviceDto(existingMicroservice) : null;
+            matchingEndpoints.Tenant = Mapper.Tenant.ToDto(existingTenant);
+            matchingEndpoints.Environment = Mapper.Environment.ToDto(existingEnvironment);
+            matchingEndpoints.Microservice = Mapper.Microservice.ToDto(existingMicroservice);
 
             return (true, matchingEndpoints);
         }
@@ -164,9 +156,9 @@ namespace Mockbench.Data.Repositories
             {
                 await _context.SaveChangesAsync();
             }
-            matchingEndpoints.Tenant = existingTenant is not null ? _tenantMapper.ToTenantDto(existingTenant) : null;
-            matchingEndpoints.Environment = existingEnvironment is not null ? _environmentMapper.ToEnvironmentDto(existingEnvironment) : null;
-            matchingEndpoints.Microservice = existingMicroservice is not null ? _microserviceMapper.ToMicroserviceDto(existingMicroservice) : null;
+            matchingEndpoints.Tenant = Mapper.Tenant.ToDto(existingTenant);
+            matchingEndpoints.Environment = Mapper.Environment.ToDto(existingEnvironment);
+            matchingEndpoints.Microservice = Mapper.Microservice.ToDto(existingMicroservice);
             return (true, matchingEndpoints);
         }
 

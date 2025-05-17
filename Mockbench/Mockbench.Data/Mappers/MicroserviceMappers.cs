@@ -1,34 +1,25 @@
 ﻿using Mockbench.Data.Models;
 using Mockbench.Shared.Models.Microservice;
+using Riok.Mapperly.Abstractions;
 
-namespace Mockbench.Data.Mappers
+namespace Mockbench.Data.Mappers;
+
+[Mapper]
+public partial class MicroserviceMapper
 {
-    public static class MicroserviceMappers
-    {
-        public static MicroserviceResultDto? ToDto(this Microservice microservice, int environmentId)
-        {
-            return microservice == null ? null : new MicroserviceResultDto()
-            {
-                Id = microservice.Id,
-                Name = microservice.Name,
-                Path = microservice.Path,
-                Enabled = microservice.Enabled,
-                ProxyMode = microservice.ProxyMode,
-                RandomiseMockResult = microservice.RandomiseMockResult,
-                FakeDelay = microservice.FakeDelay,
-                TargetUrl = microservice.TargetUrl,
-                SimulateTime = microservice.SimulateTime,
-                PassThroughTenant = microservice.PassThroughTenant,
-                HeadersMode = microservice.HeadersMode,
-                InjectForwardingHeadersOnRequest = microservice.InjectForwardingHeadersOnRequest,
-                Headers = microservice.Headers?.ToDtos(),
-                Endpoints = microservice.Endpoints?.ToDtos(false, false)
-            };
-        }
+    public partial FullMicroserviceDto? ToDto(Microservice? microservice);
 
-        public static List<MicroserviceResultDto?>? ToDtos(this List<Microservice> microservice, int environmentId)
-        {
-            return microservice?.Select(rr => rr.ToDto(environmentId)).ToList();
-        }
-    }
+    public partial Microservice? ToEntity(FullMicroserviceDto? microservice);
+
+    public partial List<FullMicroserviceDto>? ToDtos(List<Microservice>? microservices);
+
+    public partial List<Microservice>? ToEntities(List<FullMicroserviceDto>? microservices);
+}
+
+[Mapper(UseDeepCloning = true)]
+public partial class MicroserviceClonerMapper
+{
+    public partial Microservice? Clone(Microservice? microservice);
+
+    public partial FullMicroserviceDto? Clone(FullMicroserviceDto? microservice);
 }

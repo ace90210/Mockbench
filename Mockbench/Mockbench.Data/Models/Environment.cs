@@ -5,26 +5,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Mockbench.Data.Models
 {
-    [Mapper]
-    public partial class EnvironmentMapper
-    {
-        public partial EnvironmentDto ToEnvironmentDto(Environment tenant);
-
-        public partial Environment ToEnvironmentEntity(EnvironmentDto tenant);
-
-        public partial List<EnvironmentDto> ToEnvironmentDtos(List<Environment> tenants);
-
-        public partial List<Environment> ToEnvironmentEntities(List<EnvironmentDto> tenants);
-    }
-
-    [Mapper(UseDeepCloning = true)]
-    public partial class EnvironmentClonerMapper
-    {
-        public partial Environment Clone(Environment tenant);
-
-        public partial EnvironmentDto Clone(EnvironmentDto tenant);
-    }
-
     public class Environment
     {
         [Key]

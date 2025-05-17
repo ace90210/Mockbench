@@ -13,20 +13,14 @@ namespace Mockbench.Data.Sqlite.Services;
 public static class ServiceCollectionExtensions
 {
 
-    public static IServiceCollection AddSqliteServices(this IServiceCollection services, WebApplicationBuilder builder, DeploymentConfiguration deploymentConfiguration)
+    public static IServiceCollection AddSqliteServices(this IServiceCollection services, IWebHostEnvironment environment, DeploymentConfiguration deploymentConfiguration)
     {
         var migrationAssembly = typeof(ServiceCollectionExtensions).Assembly.GetName().Name;
 
-        // In development, override with BU (Back Up) connection strings
-        if (builder.Environment.IsDevelopment())
-        {
-            deploymentConfiguration = SetConnectionStringByProvider(builder, deploymentConfiguration);
-        }
-
         var authenticationConnectionString = deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString ?? deploymentConfiguration.DatabaseConfig.MainConnectionString;
 
-        EnsureDbFolderCreated(builder.Environment, authenticationConnectionString);
-        EnsureDbFolderCreated(builder.Environment, deploymentConfiguration.DatabaseConfig.MainConnectionString);
+        EnsureDbFolderCreated(environment, authenticationConnectionString);
+        EnsureDbFolderCreated(environment, deploymentConfiguration.DatabaseConfig.MainConnectionString);
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlite(
@@ -44,34 +38,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDatabaseConfigurationService, SqliteDatabaseConfigurationService>();
 
         return services;
-    }
-
-    private static DeploymentConfiguration SetConnectionStringByProvider(WebApplicationBuilder builder, DeploymentConfiguration deploymentConfiguration)
-    {            
-        switch (deploymentConfiguration.DatabaseConfig.Provider)
-        {
-            case DatabaseProvider.SQLite:
-                deploymentConfiguration.DatabaseConfig.MainConnectionString =
-                    builder.Configuration["BUSqliteDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
-                deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
-                    builder.Configuration["BUSqliteDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
-                break;
-
-            case DatabaseProvider.Postgres:
-                deploymentConfiguration.DatabaseConfig.MainConnectionString =
-                    builder.Configuration["BUPostgresDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
-                deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
-                    builder.Configuration["BUPostgresDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
-                break;
-
-            case DatabaseProvider.SqlServer:
-                deploymentConfiguration.DatabaseConfig.MainConnectionString =
-                    builder.Configuration["BUSqlServerDeploymentConfiguration:DatabaseConfig:MainConnectionString"];
-                deploymentConfiguration.DatabaseConfig.AuthenticationConnectionString =
-                    builder.Configuration["BUSqlServerDeploymentConfiguration:DatabaseConfig:AuthenticationConnectionString"];
-                break;
-        }
-        return deploymentConfiguration;
     }
 
     private static void EnsureDbFolderCreated(IWebHostEnvironment webHostEnvironment, string connectionString)
