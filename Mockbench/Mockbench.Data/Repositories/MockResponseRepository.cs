@@ -23,7 +23,7 @@ namespace Mockbench.Data.Repositories
             if (response == null)
                 return null;
 
-            return response.ToDto(false);
+            return response.ToDto();
         }
 
         public async Task<UpdateMockResponseDto> GetUpdateMockResponseAsync(int id)
@@ -43,7 +43,7 @@ namespace Mockbench.Data.Repositories
             if (existingMockResponse == null)
                 return null;
 
-            existingMockResponse = existingMockResponse.UpdateWithDto(updateMockResponse, generateChecksum: true);
+            existingMockResponse = existingMockResponse.UpdateWithDto(updateMockResponse);
 
             _context.MockResponses.Update(existingMockResponse);
 
@@ -80,14 +80,13 @@ namespace Mockbench.Data.Repositories
             existingMockResponse.Code = updatedResponse.Code;
             existingMockResponse.Priority = updatedResponse.Priority;
             existingMockResponse.FakeDelay = updatedResponse.FakeDelay;
-            existingMockResponse.Checksum = ChecksumHelpers.CreateDefaultChecksum(updatedResponse);
             existingMockResponse.CreatedUtc = updatedResponse.CreatedUtc;
 
             _context.MockResponses.Update(existingMockResponse);
 
             await _context.SaveChangesAsync();
 
-            return existingMockResponse.ToDto(false);
+            return existingMockResponse.ToDto();
             
         }
 
@@ -105,11 +104,11 @@ namespace Mockbench.Data.Repositories
                 return (false, null);
             }
             
-            var model = response.ToEntity(true);
+            var model = response.ToEntity();
 
             existingRequest.MockResponses.Add(model);
             await _context.SaveChangesAsync();
-            return (true, model.ToDto(false));
+            return (true, model.ToDto());
         }
 
 
@@ -134,13 +133,13 @@ namespace Mockbench.Data.Repositories
 
             responses.ForEach(action => action.Id = 0);
 
-            var models = responses.ToEntities(true).DistinctBy(nr => nr.Checksum).Where(nr => existingRequest.MockResponses.All(rr => rr.Checksum != nr.Checksum)).ToList();
+            var models = responses.ToEntities().DistinctBy(nr => nr.Checksum).Where(nr => existingRequest.MockResponses.All(rr => rr.Checksum != nr.Checksum)).ToList();
 
             if (models.Any())
             {
                 existingRequest.MockResponses.AddRange(models);
                 await _context.SaveChangesAsync();
-                return (true, models.ToDtos(false));
+                return (true, models.ToDtos());
             }
             else
             {

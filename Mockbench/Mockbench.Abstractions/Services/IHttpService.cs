@@ -7,6 +7,6 @@ namespace Mockbench.Abstractions.Services
 {
     public interface IHttpService
     {
-        Task<IActionResult> ProcessRequestAsync(MatchingEndpoints matchingEndpoint, RestType restType, HttpContext context, string path);
+        Task<IActionResult?> ProcessRequestAsync(MatchingEndpoints matchingEndpoint, RestType restType, HttpContext context, string path);
     }
 }

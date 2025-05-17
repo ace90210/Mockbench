@@ -95,7 +95,7 @@ namespace Mockbench.Data.Repositories
                 };
             }
 
-            var result = endpointDto.MockResponses.Select(rr => rr.CreatedUtc).ToList();
+            var result = endpointDto.MockResponses.Select(rr => rr.CreatedUtc!.Value).ToList();
 
 
             return new TimeTravelDto()
@@ -121,7 +121,7 @@ namespace Mockbench.Data.Repositories
             var endpoints = _context.Endpoints.Include(sr => sr.MockResponses).Where(sr => sr.MicroserviceId == id);
 
             var result = endpoints.SelectMany(sr => sr.MockResponses)
-                                            .Select(mr => mr.CreatedUtc).ToList();
+                                            .Select(mr => mr.CreatedUtc!.Value).ToList();
             return new TimeTravelDto()
             {
                 AvailableTimes = result.ToList(),
@@ -148,7 +148,7 @@ namespace Mockbench.Data.Repositories
 
             var result = microservices.SelectMany(m => m.Endpoints)
                                         .SelectMany(sr => sr.MockResponses)
-                                        .Select(mr => mr.CreatedUtc).ToList();
+                                        .Select(mr => mr.CreatedUtc!.Value).ToList();
 
             return new TimeTravelDto()
             {
@@ -173,7 +173,7 @@ namespace Mockbench.Data.Repositories
             var result = _context.Microservices
                                         .SelectMany(m => m.Endpoints)
                                         .SelectMany(sr => sr.MockResponses)
-                                        .Select(mr => mr.CreatedUtc).ToList();
+                                        .Select(mr => mr.CreatedUtc!.Value).ToList();
 
             return new TimeTravelDto()
             {
@@ -284,7 +284,7 @@ namespace Mockbench.Data.Repositories
 
 
             if (import.Microservices == null)
-                import.Microservices = new List<FullMicroserviceDto>();
+                import.Microservices = new List<MicroserviceDto>();
 
             var tenants = Mapper.Tenant.ToEntities(import.Tenants.ToList());
             var environments = Mapper.Environment.ToEntities(import.Environments.ToList());

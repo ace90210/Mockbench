@@ -26,11 +26,11 @@ namespace Mockbench.Api.Controllers.Admin
         }
 
         [HttpGet("{microserviceId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceResultDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MicroserviceResultDto>> Get(int microserviceId)
+        public async Task<ActionResult<MicroserviceDto>> Get(int microserviceId)
         {
             _logger.LogInformation("Getting microservice: {MicroserviceId}", microserviceId);
 
@@ -46,11 +46,11 @@ namespace Mockbench.Api.Controllers.Admin
         }
 
         [HttpGet("findbypath/{environmentId}/{microservicePath}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceResultDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MicroserviceResultDto>> Get(int environmentId, string? microservicePath)
+        public async Task<ActionResult<MicroserviceDto>> Get(int environmentId, string? microservicePath)
         {
             if (environmentId <= 0)
                 return BadRequest(ErrorMessageConstants.EnvironmentId);
@@ -67,28 +67,28 @@ namespace Mockbench.Api.Controllers.Admin
         }
 
         [HttpGet("list")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceResultDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceDto>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<IEnumerable<MicroserviceResultDto>>> GetAllMicroservices()
+        public async Task<ActionResult<IEnumerable<MicroserviceDto>>> GetAllMicroservices()
         {
             return Ok(await _microserviceRepository.GetAllMicroservices());
         }
 
         [HttpGet("searchresultlist")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceResultDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceDto>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<IEnumerable<MicroserviceResultDto>>> GetAllMicroserviceSearchResults()
+        public async Task<ActionResult<IEnumerable<MicroserviceDto>>> GetAllMicroserviceSearchResults()
         {
             return Ok(await _microserviceRepository.GetAllMicroserviceSearchResults());
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MicroserviceResultDto))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MicroserviceDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MicroserviceResultDto>> CreateMicroservice([FromBody] MicroserviceResultDto? newMicroservice)
+        public async Task<ActionResult<MicroserviceDto>> CreateMicroservice([FromBody] MicroserviceDto? newMicroservice)
         {            
             if (newMicroservice == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
@@ -133,7 +133,7 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult> UpdateMicroservice(int microserviceId, [FromBody] MicroserviceResultDto? updatedMicroservice)
+        public async Task<ActionResult> UpdateMicroservice(int microserviceId, [FromBody] MicroserviceDto? updatedMicroservice)
         {
             if (microserviceId <= 0)
                 return BadRequest(ErrorMessageConstants.MicroserviceId);

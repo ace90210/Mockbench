@@ -198,7 +198,7 @@ namespace Mockbench.Services.ProxyServices
             throw new ArgumentException("Invalid Microservice");
         }
 
-        private static void SetRequestHeaders(MicroserviceResultDto microservice, HttpContext context,
+        private static void SetRequestHeaders(MicroserviceDto microservice, HttpContext context,
             HttpRequestMessage httpRequestMessage)
         {
             foreach (var header in context.Request.Headers.Where(h => h.Key.ToLower() != "host"))

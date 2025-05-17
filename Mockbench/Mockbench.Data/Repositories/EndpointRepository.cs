@@ -26,7 +26,7 @@ namespace Mockbench.Data.Repositories
             if (e == null)
                 return null;
 
-            return e.ToDto(createNew: false, createChecksumOnResponses: true);
+            return e.ToDto(createNew: false);
         }
 
         public async Task<UpdateEndpointDto> GetUpdateEndpoint(int id)
@@ -68,7 +68,7 @@ namespace Mockbench.Data.Repositories
                 TenantPath = tenantPath,
                 EnvironmentPath = environmentPath,
                 MicroservicePath = microservicePath,
-                Endpoints = endpoint.ToDtos(createNew: false, createChecksumOnResponses: false)
+                Endpoints = endpoint.ToDtos(createNew: false)
             };
         }
 
@@ -77,13 +77,13 @@ namespace Mockbench.Data.Repositories
             if (endpointDto == null)
                 throw new Exception("No endpoint provided");
             
-            var endpoint = endpointDto.ToEntity(createNew: true, createChecksumOnResponses: true);
+            var endpoint = endpointDto.ToEntity(createNew: true);
 
             _context.Endpoints.Add(endpoint);
 
             await _context.SaveChangesAsync();
 
-            return endpoint.ToDto(createNew: false, createChecksumOnResponses: true);
+            return endpoint.ToDto(createNew: false);
         }
 
         public async Task<UpdateEndpointDto> UpdateEndpoint(int endpointId, UpdateEndpointDto endpointDto)
@@ -106,7 +106,7 @@ namespace Mockbench.Data.Repositories
 
             await _context.SaveChangesAsync();
 
-            return existingendpoint.ToUpdateDto(false);
+            return existingendpoint.ToUpdateDto();
         }
 
         public async Task<EndpointDto> UpdateMockResponses(int endpointId, List<MockResponseDto> responses)
@@ -132,7 +132,7 @@ namespace Mockbench.Data.Repositories
 
             await _context.SaveChangesAsync();
 
-            return existingendpoint.ToDto(false, false);
+            return existingendpoint.ToDto(false);
         }
 
         public async Task<bool> DeleteEndpoint(int endpointId)
@@ -152,7 +152,7 @@ namespace Mockbench.Data.Repositories
         {
             mockResponseDto.EndpointId = endpointId;
 
-            var newMockResponse = mockResponseDto.ToEntity(true);
+            var newMockResponse = mockResponseDto.ToEntity();
 
             _context.MockResponses.Add(newMockResponse);
 
@@ -161,7 +161,7 @@ namespace Mockbench.Data.Repositories
 
         public async Task<DateTime[]> GetMockResponseTimes(int endpointId)
         {
-            var dateTimes = _context.MockResponses.Where(rr => rr.EndpointId == endpointId).Select(rr => rr.CreatedUtc);
+            var dateTimes = _context.MockResponses.Where(rr => rr.EndpointId == endpointId).Select(rr => rr.CreatedUtc!.Value);
 
             return await dateTimes.ToArrayAsync();
         }

@@ -2,11 +2,13 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using Mockbench.Data.Models.Headers;
+using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Enum;
+using Mockbench.Shared.Models.Response;
 
 namespace Mockbench.Data.Models
 {
-    public class MockResponse
+    public class MockResponse : IMockResponse
     {
         [Key]
         // ReSharper disable once InconsistentNaming
@@ -27,11 +29,7 @@ namespace Mockbench.Data.Models
 
         public int EndpointId { get; set; }
 
-
-        [Required(AllowEmptyStrings = false)]
-        [MaxLength(64)]
-        [Column(TypeName = "varchar(64)")]
-        public string? Checksum { get; set; }
+        public string? Checksum => ChecksumHelpers.CreateDefaultChecksum(this);
 
         public int Priority { get; set; } = 100;
 
@@ -51,9 +49,9 @@ namespace Mockbench.Data.Models
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public TimeSpan Latency { get; set; }
 
-        private DateTime _createdUtc = DateTime.Now;
+        private DateTime? _createdUtc = DateTime.Now;
         [Required, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime CreatedUtc
+        public DateTime? CreatedUtc
         {
             get
             {

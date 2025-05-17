@@ -7,15 +7,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Mockbench.Shared.Models.Microservice
 {
-    public class MicroserviceResultDto : IValidatableObject, ICopyTo<MicroserviceResultDto>
+    public class MicroserviceDto : IValidatableObject, ICopyTo<MicroserviceDto>
     {
         public int Id { get; set; }
-        
+
         [Required(AllowEmptyStrings = false, ErrorMessage = "Path is required")]
         [MaxLength(150, ErrorMessage = "field exceeded max length {0}")]
         [RegularExpression(@"^[a-zA-Z0-9]*$", ErrorMessage = "Must have alpha numeric characters only")]
         public string Path { get; set; }
-        
+
         [Required(AllowEmptyStrings = false, ErrorMessage = "Name is required")]
         [MaxLength(100, ErrorMessage = "field exceeded max length {0}")]
         public string Name { get; set; }
@@ -39,7 +39,7 @@ namespace Mockbench.Shared.Models.Microservice
 
         public bool PassThroughTenant { get; set; }
 
-        public List<ServiceHeaderDto>? Headers { get; set; } = new ();
+        public List<ServiceHeaderDto>? Headers { get; set; } = new();
 
         public List<EndpointDto>? Endpoints { get; set; }
 
@@ -50,11 +50,11 @@ namespace Mockbench.Shared.Models.Microservice
             return Id;
         }
 
-        public MicroserviceResultDto CopyTo(MicroserviceResultDto target)
+        public MicroserviceDto CopyTo(MicroserviceDto target)
         {
             if (target == null)
-                throw new NotSupportedException($"{nameof(MicroserviceResultDto)}: Cannot copy to a null target");
-            
+                throw new NotSupportedException($"{nameof(MicroserviceDto)}: Cannot copy to a null target");
+
             target.Id = Id;
             target.Path = Path;
             target.Name = Name;
@@ -68,7 +68,7 @@ namespace Mockbench.Shared.Models.Microservice
             target.PassThroughTenant = PassThroughTenant;
 
             target.Headers = new List<ServiceHeaderDto>();
-            foreach(var header in Headers)
+            foreach (var header in Headers)
             {
                 target.Headers.Add(header.CopyTo(new ServiceHeaderDto()));
             }
@@ -80,7 +80,7 @@ namespace Mockbench.Shared.Models.Microservice
         {
             return GeneralHelper.IsValidFullObject(this, new ValidationContext(this, null, validationDictionary), null);
         }
-        
+
         /// <summary>
         /// Validates tenant
         /// </summary>
@@ -113,8 +113,8 @@ namespace Mockbench.Shared.Models.Microservice
                 {
                     urlToTest = (string)overrideTargetUrl;
                 }
-                
-                if ((validationContext.MemberName == null || validationContext.MemberName.Equals("TargetUrl")) && 
+
+                if ((validationContext.MemberName == null || validationContext.MemberName.Equals("TargetUrl")) &&
                     string.IsNullOrWhiteSpace(urlToTest) || !Uri.TryCreate(urlToTest, UriKind.Absolute, out var uriResult) ||
                     (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
                 {

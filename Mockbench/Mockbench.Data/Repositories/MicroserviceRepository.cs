@@ -31,11 +31,11 @@ namespace Mockbench.Data.Repositories
             return await paths.ToListAsync();
         }
 
-        public async Task<MicroserviceResultDto> GetMicroservice(string microservicePath)
+        public async Task<MicroserviceDto> GetMicroservice(string microservicePath)
         {
             var ms = await _context.Microservices.Include(ms => ms.Headers).Include(ms => ms.Endpoints).AsSplitQuery().FirstOrDefaultAsync(ms => ms.Path == microservicePath);
 
-            return new MicroserviceResultDto()
+            return new MicroserviceDto()
             {
                 Id = ms.Id,
                 Name = ms.Name,
@@ -50,18 +50,18 @@ namespace Mockbench.Data.Repositories
                 InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
                 SimulateTime = ms.SimulateTime,
                 Headers = ms.Headers.ToDtos(),
-                Endpoints = ms.Endpoints.ToDtos(false, false)
+                Endpoints = ms.Endpoints.ToDtos(false)
             };
         }
 
-        public async Task<MicroserviceResultDto> GetMicroserviceById(int id)
+        public async Task<MicroserviceDto> GetMicroserviceById(int id)
         {
             var ms = await _context.Microservices.Include(m => m.Headers).Include(ms => ms.Endpoints).AsSplitQuery().FirstOrDefaultAsync(ms => ms.Id == id);
 
             if (ms == null)
                 return null;
 
-            return new MicroserviceResultDto()
+            return new MicroserviceDto()
             {
                 Id = ms.Id,
                 Name = ms.Name,
@@ -76,15 +76,15 @@ namespace Mockbench.Data.Repositories
                 InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
                 SimulateTime = ms.SimulateTime,
                 Headers = ms.Headers.ToDtos(),
-                Endpoints = ms.Endpoints.ToDtos(false, false)
+                Endpoints = ms.Endpoints.ToDtos(false)
             };
         }
 
-        public async Task<IEnumerable<MicroserviceResultDto>> GetAllMicroservices()
+        public async Task<IEnumerable<MicroserviceDto>> GetAllMicroservices()
         {
             var microservices = await _context.Microservices.Include(m => m.Headers).Include(ms => ms.Endpoints).AsSplitQuery().ToListAsync();
 
-            return microservices.Select(ms => new MicroserviceResultDto()
+            return microservices.Select(ms => new MicroserviceDto()
             {
                 Id = ms.Id,
                 Name = ms.Name,
@@ -99,11 +99,11 @@ namespace Mockbench.Data.Repositories
                 InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
                 SimulateTime = ms.SimulateTime,
                 Headers = ms.Headers.ToDtos(),
-                Endpoints = ms.Endpoints.ToDtos(false, false)
+                Endpoints = ms.Endpoints.ToDtos(false)
             });
         }
 
-        public async Task<IEnumerable<MicroserviceResultDto>> GetAllMicroserviceSearchResults()
+        public async Task<IEnumerable<MicroserviceDto>> GetAllMicroserviceSearchResults()
         {
             var microservices = await _context.Microservices
                                                             .Include(m => m.Headers)
@@ -111,7 +111,7 @@ namespace Mockbench.Data.Repositories
                                                             .AsSplitQuery()
                                                             .ToListAsync();
 
-            return microservices.Select(ms => new MicroserviceResultDto()
+            return microservices.Select(ms => new MicroserviceDto()
             {
                 Id = ms.Id,
                 Name = ms.Name,
@@ -126,12 +126,12 @@ namespace Mockbench.Data.Repositories
                 InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
                 SimulateTime = ms.SimulateTime,
                 Headers = ms.Headers.ToDtos(),
-                Endpoints = ms.Endpoints.ToDtos(false, false)
+                Endpoints = ms.Endpoints.ToDtos(false)
             });
             
         }
 
-        public async Task<MicroserviceResultDto> FindMicroservice(string tenantPath, string environmentPath, string path)
+        public async Task<MicroserviceDto> FindMicroservice(string tenantPath, string environmentPath, string path)
         {
             if (string.IsNullOrWhiteSpace(tenantPath) || string.IsNullOrWhiteSpace(environmentPath) || string.IsNullOrWhiteSpace(path))
                 return null;
@@ -145,7 +145,7 @@ namespace Mockbench.Data.Repositories
 
             if (microservice == null) return null;
 
-            return new MicroserviceResultDto()
+            return new MicroserviceDto()
             {
                 Id = microservice.Id,
                 Name = microservice.Name,
@@ -160,11 +160,11 @@ namespace Mockbench.Data.Repositories
                 InjectForwardingHeadersOnRequest = microservice.InjectForwardingHeadersOnRequest,
                 Headers = microservice.Headers?.ToDtos(),
                 SimulateTime = microservice.SimulateTime,
-                Endpoints = microservice.Endpoints?.ToDtos(false, false)
+                Endpoints = microservice.Endpoints?.ToDtos(false)
             };
         }
 
-        public async Task<MicroserviceResultDto> CreateMicroservice(MicroserviceResultDto newMicroserviceDto)
+        public async Task<MicroserviceDto> CreateMicroservice(MicroserviceDto newMicroserviceDto)
         {
             if (newMicroserviceDto == null)
                 throw new Exception("Error new microservice not provided");
@@ -186,14 +186,14 @@ namespace Mockbench.Data.Repositories
                 HeadersMode = newMicroserviceDto.HeadersMode,
                 InjectForwardingHeadersOnRequest = newMicroserviceDto.InjectForwardingHeadersOnRequest,
                 SimulateTime = newMicroserviceDto.SimulateTime,
-                Endpoints = newMicroserviceDto.Endpoints?.ToEntities(false, false)
+                Endpoints = newMicroserviceDto.Endpoints?.ToEntities(false)
             };
 
             _context.Microservices.Add(newMicroservice);
 
             await _context.SaveChangesAsync();
 
-            return new MicroserviceResultDto()
+            return new MicroserviceDto()
             {
                 Id = newMicroservice.Id,
                 Name = newMicroservice.Name,
@@ -212,7 +212,7 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<bool> UpdateMicroservice(int id, MicroserviceResultDto updatedMicroservice)
+        public async Task<bool> UpdateMicroservice(int id, MicroserviceDto updatedMicroservice)
         {
             if (updatedMicroservice == null)
                 return false;

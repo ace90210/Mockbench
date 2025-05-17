@@ -9,7 +9,7 @@ using Mockbench.Shared.Models.Headers;
 
 namespace Mockbench.Shared.Models.Response
 {
-    public class MockResponseDto : IValidatableObject, ICopyTo<MockResponseDto>
+    public class MockResponseDto : IValidatableObject, IMockResponse, ICopyTo<MockResponseDto>
     {
         public int Id { get; set; }
 
@@ -26,8 +26,8 @@ namespace Mockbench.Shared.Models.Response
         [MaxLength(10_000_000, ErrorMessage = "Response body exceeded max length {0}")]
         public string? Body { get; set; }
 
-        [MaxLength(64)]
-        public string? Checksum { get; set; }
+
+        public string Checksum => ChecksumHelpers.CreateDefaultChecksum(this);
 
         public string UniqueChecksum => ChecksumHelpers.CreateUniqueDefaultChecksum(this);
 
@@ -37,7 +37,7 @@ namespace Mockbench.Shared.Models.Response
 
         public bool Enabled { get; set; } = true;
 
-        public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+        public DateTime? CreatedUtc { get; set; } = DateTime.UtcNow;
 
         public int EndpointId { get; set; }
 
@@ -62,7 +62,6 @@ namespace Mockbench.Shared.Models.Response
             target.Encoding = Encoding;
             target.ContentType = ContentType;
             target.Body = Body;
-            target.Checksum = Checksum;
             target.Priority = Priority;
             target.FakeDelay = FakeDelay;
             target.Enabled = Enabled;

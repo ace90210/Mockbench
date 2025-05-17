@@ -7,7 +7,7 @@ namespace Mockbench.Data.Mappers;
 
 public static class ResponseMappers
 {
-    public static MockResponse ToEntity(this MockResponseDto mockResponseDto, bool generateChecksum)
+    public static MockResponse? ToEntity(this MockResponseDto? mockResponseDto)
     {
         return mockResponseDto == null
             ? null
@@ -18,9 +18,6 @@ public static class ResponseMappers
                 Code = mockResponseDto.Code,
                 ContentType = mockResponseDto.ContentType,
                 Encoding = mockResponseDto.Encoding,
-                Checksum = !generateChecksum
-                    ? mockResponseDto.Checksum
-                    : ChecksumHelpers.CreateDefaultChecksum(mockResponseDto),
                 Headers = mockResponseDto.Headers.ToEntities(),
                 EndpointId = mockResponseDto.EndpointId,
                 Id = mockResponseDto.Id,
@@ -32,12 +29,12 @@ public static class ResponseMappers
             };
     }
 
-    public static List<MockResponse> ToEntities(this List<MockResponseDto> mockResponseDtos, bool generateChecksum)
+    public static List<MockResponse> ToEntities(this List<MockResponseDto> mockResponseDtos)
     {
-        return mockResponseDtos?.Select(rr => rr.ToEntity(generateChecksum)).ToList();
+        return mockResponseDtos?.Select(rr => rr.ToEntity()).ToList();
     }
 
-    public static MockResponseDto ToDto(this MockResponse mockResponse, bool generateChecksum)
+    public static MockResponseDto ToDto(this MockResponse mockResponse)
     {
         return mockResponse == null
             ? null
@@ -55,16 +52,13 @@ public static class ResponseMappers
                 CreatedUtc = mockResponse.CreatedUtc,
                 Priority = mockResponse.Priority,
                 FakeDelay = mockResponse.FakeDelay,
-                Latency = mockResponse.Latency,
-                Checksum = !generateChecksum
-                    ? mockResponse.Checksum
-                    : ChecksumEntityHelpers.CreateDefaultChecksum(mockResponse)
+                Latency = mockResponse.Latency
             };
     }
 
-    public static List<MockResponseDto> ToDtos(this List<MockResponse> mockResponses, bool generateChecksum)
+    public static List<MockResponseDto> ToDtos(this List<MockResponse> mockResponses)
     {
-        return mockResponses?.Select(rr => rr.ToDto(generateChecksum)).ToList();
+        return mockResponses?.Select(rr => rr.ToDto()).ToList();
     }
 
     //Request Response Dto to Update Dto
@@ -144,7 +138,7 @@ public static class ResponseMappers
     }
 
     public static MockResponse UpdateWithDto(this MockResponse baseMockResponse,
-        UpdateMockResponseDto updateMockResponse, bool generateChecksum)
+        UpdateMockResponseDto updateMockResponse)
     {
         if (baseMockResponse == null)
             throw new Exception("cannot update null request response");
@@ -163,11 +157,6 @@ public static class ResponseMappers
         baseMockResponse.CreatedUtc = updateMockResponse.CreatedUtc ?? DateTime.UtcNow;
         baseMockResponse.Latency = updateMockResponse.Latency;
         baseMockResponse.Headers = updateMockResponse.Headers?.ToEntities();
-
-        if (generateChecksum)
-        {
-            baseMockResponse.Checksum = ChecksumHelpers.CreateDefaultChecksum(updateMockResponse);
-        }
 
         return baseMockResponse;
     }

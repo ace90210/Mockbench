@@ -34,7 +34,7 @@ namespace Mockbench.Server.Services
             _logger = logger;
         }
 
-        public async Task<IActionResult> ProcessRequestAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string endpointPath)
+        public async Task<IActionResult?> ProcessRequestAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string endpointPath)
         {
             if (context == null)
                 throw new ArgumentNullException($"Error {nameof(context)} is null");
@@ -46,7 +46,7 @@ namespace Mockbench.Server.Services
             var foundRequest = await _mockService.GetMatchingEndpointDtoAsync(matchingEndpoints, restType, context, endpointPath);
 
             bool shouldFallback = false;
-            IActionResult proxyResponse = null;
+            IActionResult? proxyResponse = null;
 
             // If proxy mode is enabled, try to proxy the request first
             if (matchingEndpoints.Microservice is not null && (matchingEndpoints.Microservice.ProxyMode == ProxyMode.FailOver || matchingEndpoints.Microservice.ProxyMode == ProxyMode.Proxy))

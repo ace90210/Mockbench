@@ -1,6 +1,5 @@
 ﻿using Mockbench.Data.Models;
 using Mockbench.Data.Models.Headers;
-using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Headers;
 using Mockbench.Shared.Models.QueryParameters;
@@ -10,7 +9,7 @@ namespace Mockbench.Data.Mappers
 {
     public static class EndpointMappers
     {
-        public static Endpoint? ToEntity(this EndpointDto endpointDto, bool createNew, bool createChecksumOnResponses)
+        public static Endpoint? ToEntity(this EndpointDto endpointDto, bool createNew)
         {
             return endpointDto == null ? null : new Endpoint()
             {
@@ -27,18 +26,18 @@ namespace Mockbench.Data.Mappers
                 RestType = (Shared.Models.Enum.RestType)endpointDto.RestType,
                 SimulateTime = endpointDto.SimulateTime,
                 TTL = endpointDto.Ttl,
-                MockResponses = endpointDto.MockResponses?.ToEntities(createChecksumOnResponses),
+                MockResponses = endpointDto.MockResponses?.ToEntities(),
                 QueryParameters = endpointDto.QueryParameters?.ToEntities(),
                 EndpointHeaders = endpointDto.EndpointHeaders?.ToEntities()
             };
         }
 
-        public static List<Endpoint> ToEntities(this List<EndpointDto> endpointDtos, bool createNew, bool createChecksumOnResponses)
+        public static List<Endpoint> ToEntities(this List<EndpointDto> endpointDtos, bool createNew)
         {
-            return endpointDtos?.Select(endpointDto => endpointDto.ToEntity(createNew, createChecksumOnResponses)).ToList();
+            return endpointDtos?.Select(endpointDto => endpointDto.ToEntity(createNew)).ToList();
         }
 
-        public static Endpoint? ToEntity(this UpdateEndpointDto endpointDto, bool createChecksumOnResponses)
+        public static Endpoint? ToEntity(this UpdateEndpointDto endpointDto)
         {
             return endpointDto == null ? null : new Endpoint()
             {
@@ -51,19 +50,19 @@ namespace Mockbench.Data.Mappers
                 RestType = endpointDto.RestType,
                 SimulateTime = endpointDto.SimulateTime,
                 TTL = endpointDto.Ttl,
-                MockResponses = endpointDto.Responses?.ToEntities(createChecksumOnResponses),
+                MockResponses = endpointDto.Responses?.ToEntities(),
                 QueryParameters = endpointDto.QueryParameters?.ToEntities(),
                 EndpointHeaders = endpointDto.EndpointHeaders?.ToEntities(),
                 CreatedUtc = endpointDto.CreatedUtc ?? DateTime.UtcNow
         };
         }
 
-        public static List<Endpoint> ToEntities(this List<UpdateEndpointDto> endpointDtos, bool createChecksumOnResponses)
+        public static List<Endpoint> ToEntities(this List<UpdateEndpointDto> endpointDtos)
         {
-            return endpointDtos?.Select(endpointDto => endpointDto.ToEntity(createChecksumOnResponses)).ToList();
+            return endpointDtos?.Select(endpointDto => endpointDto.ToEntity()).ToList();
         }
 
-        public static EndpointDto? ToDto(this Endpoint endpoint, bool createNew, bool createChecksumOnResponses)
+        public static EndpointDto? ToDto(this Endpoint endpoint, bool createNew)
         {
             return endpoint == null ? null : new EndpointDto()
             {
@@ -81,19 +80,19 @@ namespace Mockbench.Data.Mappers
                 RestType = endpoint.RestType,
                 SimulateTime = endpoint.SimulateTime,
                 Ttl = endpoint.TTL,
-                MockResponses = endpoint.MockResponses?.ToDtos(createChecksumOnResponses),
+                MockResponses = endpoint.MockResponses?.ToDtos(),
                 QueryParameters = endpoint.QueryParameters?.ToDtos(),
                 EndpointHeaders = endpoint.EndpointHeaders?.ToDtos()
             };
         }
 
 
-        public static List<EndpointDto> ToDtos(this List<Endpoint> endpoints, bool createNew, bool createChecksumOnResponses)
+        public static List<EndpointDto> ToDtos(this List<Endpoint> endpoints, bool createNew)
         {
-            return endpoints?.Select(endpoint => endpoint.ToDto(createNew, createChecksumOnResponses)).ToList();
+            return endpoints?.Select(endpoint => endpoint.ToDto(createNew)).ToList();
         }
 
-        public static UpdateEndpointDto? ToUpdateDto(this Endpoint endpoint, bool createChecksumOnResponses)
+        public static UpdateEndpointDto? ToUpdateDto(this Endpoint endpoint)
         {
             return endpoint == null ? null : new UpdateEndpointDto()
             {
@@ -106,16 +105,16 @@ namespace Mockbench.Data.Mappers
                 RestType = endpoint.RestType,
                 SimulateTime = endpoint.SimulateTime,
                 Ttl = endpoint.TTL,
-                Responses = endpoint.MockResponses?.ToDtos(createChecksumOnResponses),
+                Responses = endpoint.MockResponses?.ToDtos(),
                 QueryParameters = endpoint.QueryParameters?.ToDtos(),
                 EndpointHeaders = endpoint.EndpointHeaders?.ToDtos(),
                 CreatedUtc = endpoint.CreatedUtc
             };
         }
 
-        public static List<UpdateEndpointDto> ToUpdateDtos(this List<Endpoint> endpoints, bool createChecksumOnResponses)
+        public static List<UpdateEndpointDto> ToUpdateDtos(this List<Endpoint> endpoints)
         {
-            return endpoints?.Select(endpoint => endpoint.ToUpdateDto(createChecksumOnResponses)).ToList();
+            return endpoints?.Select(endpoint => endpoint.ToUpdateDto()).ToList();
         }
 
         public static UpdateEndpointDto? ToUpdateDto(this EndpointDto endpoint)
@@ -173,9 +172,9 @@ namespace Mockbench.Data.Mappers
 
             baseEndpoint.MockResponses.RemoveAll(rr => !responses.Any(sr => sr.Id == rr.Id && sr.Id > 0));
 
-            if (responsesToAdd.Any())
+            if (responsesToAdd is not null && responsesToAdd.Any())
             {
-                baseEndpoint.MockResponses.AddRange(responsesToAdd.ToEntities(true));
+                baseEndpoint.MockResponses.AddRange(responsesToAdd.ToEntities());
             }
 
             foreach(var baseResponse in responsesToUpdate)
@@ -184,7 +183,6 @@ namespace Mockbench.Data.Mappers
                 baseResponse.Body = updatedResponse.Body;
                 baseResponse.Encoding = updatedResponse.Encoding;
                 baseResponse.Code = updatedResponse.Code;
-                baseResponse.Checksum = ChecksumHelpers.CreateDefaultChecksum(updatedResponse);
                 baseResponse.CreatedUtc = updatedResponse.CreatedUtc;
 
                 MergeResponseHeaders(baseResponse, updatedResponse.Headers);

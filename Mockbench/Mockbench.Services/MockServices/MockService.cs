@@ -103,7 +103,6 @@ namespace Mockbench.Services.MockServices
                 ContentType = responseContentType,
                 Encoding = SupportedEncodingType.UTF8,
                 Latency = latency,
-                Checksum = ChecksumHelpers.CreateChecksum(SupportedEncodingType.UTF8, $"{responseContent}-{response.StatusCode}-{responseContentType}"),
                 Code = response.StatusCode
             };
 
@@ -141,7 +140,7 @@ namespace Mockbench.Services.MockServices
             return endpoint;
         }
 
-        private static List<EndpointHeaderDto> GetRequestHeaders(FullMicroserviceDto microservice, HttpContext context)
+        private static List<EndpointHeaderDto> GetRequestHeaders(MicroserviceDto microservice, HttpContext context)
         {
             var serviceHeaders = new List<EndpointHeaderDto>();
 
@@ -171,7 +170,7 @@ namespace Mockbench.Services.MockServices
             return serviceHeaders;
         }
 
-        private static List<MockResponseHeaderDto> GetResponseHeaders(FullMicroserviceDto? microservice, HttpResponseMessage response)
+        private static List<MockResponseHeaderDto> GetResponseHeaders(MicroserviceDto? microservice, HttpResponseMessage response)
         {
             var responseHeaders = new List<MockResponseHeaderDto>();
             foreach (var header in response.Headers.Where(h => h.Key.ToLower() != "host"))

@@ -13,7 +13,7 @@ public class FullDatabaseDto : IValidatableObject
     public IEnumerable<EnvironmentDto> Environments { get; set; }
 
 
-    public IEnumerable<FullMicroserviceDto> Microservices { get; set; }
+    public IEnumerable<MicroserviceDto> Microservices { get; set; }
 
     public IEnumerable<string> AppliedMigrations { get; set; }
     
@@ -62,7 +62,7 @@ public class FullDatabaseDto : IValidatableObject
         }
     }
 
-    private IEnumerable<ValidationResult> ValidateMicroservices(List<FullMicroserviceDto> microservices, ValidationContext validationContext)
+    private IEnumerable<ValidationResult> ValidateMicroservices(List<MicroserviceDto> microservices, ValidationContext validationContext)
     {
         if (microservices?.Count > 0)
         {

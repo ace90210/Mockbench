@@ -44,9 +44,6 @@ public class MockControllerTests
         // Arrange
         string code = "xyz";
         string rest = "invalid/rest";
-        // Simulate TryParseParamCodes failure
-        // Since it's a static method, we'll assume it's already tested independently
-        // This test simulates the failure by bypassing the static helper (can't mock directly)
 
         // Act
         var result = await _controller.ProxyAsync(null, null);
@@ -62,7 +59,7 @@ public class MockControllerTests
         var matchingEndpoint = new MatchingEndpoints
         {
             Environment = new EnvironmentDto { Enabled = false },
-            Microservice = new FullMicroserviceDto { Enabled = true }
+            Microservice = new MicroserviceDto { Enabled = true }
         };
 
         _endpointRepositoryMock
@@ -86,7 +83,7 @@ public class MockControllerTests
         var matchingEndpoint = new MatchingEndpoints
         {
             Environment = new EnvironmentDto { Enabled = true },
-            Microservice = new FullMicroserviceDto { Enabled = false }
+            Microservice = new MicroserviceDto { Enabled = false }
         };
 
         _endpointRepositoryMock
@@ -110,7 +107,7 @@ public class MockControllerTests
         var matchingEndpoint = new MatchingEndpoints
         {
             Environment = new EnvironmentDto { Enabled = true },
-            Microservice = new FullMicroserviceDto { Enabled = true }
+            Microservice = new MicroserviceDto { Enabled = true }
         };
 
         _endpointRepositoryMock
@@ -137,7 +134,7 @@ public class MockControllerTests
         var matchingEndpoint = new MatchingEndpoints
         {
             Environment = new EnvironmentDto { Enabled = true },
-            Microservice = new FullMicroserviceDto { Enabled = true }
+            Microservice = new MicroserviceDto { Enabled = true }
         };
 
         _endpointRepositoryMock
@@ -145,7 +142,7 @@ public class MockControllerTests
             .ReturnsAsync(matchingEndpoint);
 
         _httpServiceMock
-            .Setup(x => x.ProcessRequestAsync(It.IsAny<MatchingEndpoints>(), RestType.GET, It.IsAny<HttpContext>(), It.IsAny<string>()))
+            .Setup(static x => x.ProcessRequestAsync(It.IsAny<MatchingEndpoints>(), RestType.GET, It.IsAny<HttpContext>(), It.IsAny<string>()))
             .ReturnsAsync((IActionResult?)null);
 
         SetRequestMethod("GET");

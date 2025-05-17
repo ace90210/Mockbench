@@ -5,7 +5,7 @@ using System.Net;
 
 namespace Mockbench.Shared.Models.Response
 {
-    public class UpdateMockResponseDto
+    public class UpdateMockResponseDto: IMockResponse
     {
         [MaxLength(250, ErrorMessage = "Description too long. Maximum length is 250")]
         public string? Description { get; set; }

@@ -7,7 +7,7 @@ namespace Mockbench.Shared.Helper;
 
 public static class HttpHelpers
 {
-    public static List<HeaderItem> GetResponseHeadersToAdd(MicroserviceResultDto? microservice, IEnumerable<HeaderItem> responseHeaders)
+    public static List<HeaderItem> GetResponseHeadersToAdd(MicroserviceDto? microservice, IEnumerable<HeaderItem> responseHeaders)
     {
         var headersToAdd = new List<HeaderItem>();
         

@@ -14,7 +14,7 @@ namespace Mockbench.Shared.Models.Endpoint
 
         public string? EnvironmentPath { get; set; }
 
-        public FullMicroserviceDto? Microservice { get; set; }
+        public MicroserviceDto? Microservice { get; set; }
 
         public string? MicroservicePath { get; set; }
 
