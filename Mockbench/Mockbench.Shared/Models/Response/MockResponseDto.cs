@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
-using Mockbench.Shared.Helper;
+﻿using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.Headers;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 
 namespace Mockbench.Shared.Models.Response
 {
@@ -88,7 +85,7 @@ namespace Mockbench.Shared.Models.Response
             return target;
         }
 
-        public bool IsValid(IDictionary<object, object> validationDictionary = null)
+        public bool IsValid(IDictionary<object, object?>? validationDictionary = null)
         {
             return GeneralHelper.IsValidFullObject(this, new ValidationContext(this, null, validationDictionary), null);
         }

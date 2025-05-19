@@ -1,7 +1,5 @@
 ﻿using Mockbench.Data.Models.Headers;
 using Mockbench.Shared.Models.Enum;
-using Mockbench.Shared.Models.Microservice;
-using Riok.Mapperly.Abstractions;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 

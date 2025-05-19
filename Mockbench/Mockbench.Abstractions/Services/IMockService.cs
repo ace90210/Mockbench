@@ -9,8 +9,8 @@ namespace Mockbench.Abstractions.Services
     {
         Task CreateMockResponseIfNotExistAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointPath, string requestBody, HttpResponseMessage response, TimeSpan latency);
 
-        Task<EndpointDto> FindExactEndpointAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpoint, string requestBody);
-        
+        EndpointDto? FindExactEndpointAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointUrl, string requestBody);
+
         Task<EndpointDto> GetMatchingEndpointDtoAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string fullPath);
 
         Task<MockResponseDto> GetMockResponseAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string endpointPath);

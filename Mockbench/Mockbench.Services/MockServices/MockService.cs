@@ -3,14 +3,12 @@ using Microsoft.Extensions.Primitives;
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Abstractions.Services;
 using Mockbench.Services.Helpers;
-using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Enum;
 using Mockbench.Shared.Models.Headers;
 using Mockbench.Shared.Models.Microservice;
 using Mockbench.Shared.Models.QueryParameters;
 using Mockbench.Shared.Models.Response;
-using Mockbench.Shared.Models.Tenant;
 using System.Web;
 
 namespace Mockbench.Services.MockServices
@@ -33,7 +31,7 @@ namespace Mockbench.Services.MockServices
         {
             string body = restType != RestType.GET ? await GeneralHelpers.RequestBodyToStringAsync(context?.Request) : null;
 
-            return await FindExactEndpointAsync(matchingEndpoints, context, restType, endpointPath, body);
+            return FindExactEndpointAsync(matchingEndpoints, context, restType, endpointPath, body);
         }
 
         public async Task<MockResponseDto?> GetMockResponseAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string endpointPath)
@@ -67,7 +65,7 @@ namespace Mockbench.Services.MockServices
         {
             await _baseRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(matchingEndpoints);
 
-            var exactEndpoint = await FindExactEndpointAsync(matchingEndpoints, context, restType, endpointPath, requestBody);
+            var exactEndpoint = FindExactEndpointAsync(matchingEndpoints, context, restType, endpointPath, requestBody);
 
             if (exactEndpoint == null || exactEndpoint.MockBehaviour == MockBehaviour.AutoMockWithProxy)
             {
@@ -201,7 +199,7 @@ namespace Mockbench.Services.MockServices
             return responseHeaders;
         }
 
-        public async Task<EndpointDto?> FindExactEndpointAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointUrl, string requestBody)
+        public EndpointDto? FindExactEndpointAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointUrl, string requestBody)
         {
             if (matchingEndpoints == null || matchingEndpoints.Endpoints == null || matchingEndpoints.Endpoints.Count == 0)
             {

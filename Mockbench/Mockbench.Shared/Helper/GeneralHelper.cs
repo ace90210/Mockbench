@@ -68,7 +68,7 @@ public static class GeneralHelper
     /// <typeparam name="T">The Type, must inherit from <see cref="IValidatableObject"/></typeparam>
     /// <returns>true is validation passes</returns>
     public static bool IsValidFullObject<T>(T obj, ValidationContext validationContext, 
-        List<ValidationResult> validationResults, bool allProperties = true) where T : IValidatableObject
+        List<ValidationResult>? validationResults, bool allProperties = true) where T : IValidatableObject
     {
         if (validationResults == null)
         {

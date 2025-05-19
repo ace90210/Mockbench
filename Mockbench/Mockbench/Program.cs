@@ -97,6 +97,12 @@ switch (deploymentConfiguration.DatabaseConfig.Provider)
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Fix: Specify the name of the HttpClient service explicitly
+builder.Services.AddHttpClient("DefaultClient", client =>
+{
+});
+
+
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
@@ -120,6 +126,11 @@ else
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(cpb => cpb
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowAnyOrigin());
 
 
 app.UseAntiforgery();

@@ -68,15 +68,19 @@ namespace Mockbench.Shared.Models.Microservice
             target.PassThroughTenant = PassThroughTenant;
 
             target.Headers = new List<ServiceHeaderDto>();
-            foreach (var header in Headers)
+
+            if (Headers is not null)
             {
-                target.Headers.Add(header.CopyTo(new ServiceHeaderDto()));
+                foreach (var header in Headers)
+                {
+                    target.Headers.Add(header.CopyTo(new ServiceHeaderDto()));
+                }
             }
             return target;
 
         }
 
-        public bool IsValid(IDictionary<object, object> validationDictionary = null)
+        public bool IsValid(IDictionary<object, object?>? validationDictionary = null)
         {
             return GeneralHelper.IsValidFullObject(this, new ValidationContext(this, null, validationDictionary), null);
         }
@@ -88,7 +92,7 @@ namespace Mockbench.Shared.Models.Microservice
         /// <returns></returns>
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if ((validationContext.MemberName == null || validationContext.MemberName.Equals("Path")) && validationContext.Items.TryGetValue("Path", out object existingPathObjects))
+            if ((validationContext.MemberName == null || validationContext.MemberName.Equals("Path")) && validationContext.Items.TryGetValue("Path", out object? existingPathObjects))
             {
                 var existingPaths = (IEnumerable<string>)existingPathObjects;
                 if (existingPaths.Any(path => string.Equals(path, Path, StringComparison.CurrentCultureIgnoreCase)))
@@ -96,7 +100,7 @@ namespace Mockbench.Shared.Models.Microservice
                     yield return new ValidationResult($"Path \"{Path}\" already taken by existing microservice in this environment, please try another", new[] { "Path" });
                 }
             }
-            if ((validationContext.MemberName == null || validationContext.MemberName.Equals("Name")) && validationContext.Items.TryGetValue("Name", out object existingNameObjects))
+            if ((validationContext.MemberName == null || validationContext.MemberName.Equals("Name")) && validationContext.Items.TryGetValue("Name", out object? existingNameObjects))
             {
                 var existingNames = (IEnumerable<string>)existingNameObjects;
 

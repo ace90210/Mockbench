@@ -31,6 +31,8 @@ namespace Mockbench.Data.Models
 
         public string? Checksum => ChecksumHelpers.CreateDefaultChecksum(this);
 
+        public string? UniqueChecksum => ChecksumHelpers.CreateUniqueDefaultChecksum(this);
+
         public int Priority { get; set; } = 100;
 
         public int FakeDelay { get; set; }

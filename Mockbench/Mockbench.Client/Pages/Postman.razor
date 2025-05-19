@@ -1,0 +1,668 @@
+﻿@page "/postman"
+
+@layout FullscreenLayout
+
+@rendermode InteractiveAuto
+@inject IJSRuntime JSRuntime
+@inject IHttpClientFactory HttpClientFactory
+
+<div class="flex flex-col min-h-screen bg-gray-900 text-gray-300 font-inter">
+
+
+    <div class="flex flex-1 overflow-hidden">
+        <aside class="w-1/5 bg-gray-800 p-0 flex flex-col border-r border-gray-700">
+            <div class="flex border-b border-gray-700">
+                <button @onclick="() => SwitchLeftSidebarTab(LeftSidebarTab.Microservices)"
+                class="flex-1 p-3 text-sm font-medium hover:bg-gray-700 focus:outline-none @(ActiveLeftSidebarTab == LeftSidebarTab.Microservices ? "sidebar-tab-active" : "text-gray-400")">
+                    Microservices
+                </button>
+                <button @onclick="() => SwitchLeftSidebarTab(LeftSidebarTab.Endpoints)"
+                class="flex-1 p-3 text-sm font-medium hover:bg-gray-700 focus:outline-none @(ActiveLeftSidebarTab == LeftSidebarTab.Endpoints ? "sidebar-tab-active" : "text-gray-400")">
+                    Endpoints
+                </button>
+            </div>
+
+            @if (ActiveLeftSidebarTab == LeftSidebarTab.Microservices)
+            {
+                <div class="p-4 space-y-2 overflow-y-auto flex-1">
+                    <div class="p-2 rounded hover:bg-gray-700 cursor-pointer text-sm text-gray-300">Auth Service</div>
+                    <div class="p-2 rounded hover:bg-gray-700 cursor-pointer text-sm text-gray-300">User Service</div>
+                    <div class="p-2 rounded hover:bg-gray-700 cursor-pointer text-sm text-gray-300">Product Service</div>
+                </div>
+            }
+            @if (ActiveLeftSidebarTab == LeftSidebarTab.Endpoints)
+            {
+                <div class="p-4 space-y-1 overflow-y-auto flex-1">
+                    <button @onclick="AddNewRequest" class="w-full bg-blue-500 hover:bg-blue-600 font-semibold py-2 px-4 rounded-md mb-3 text-sm transition-colors">
+                        + New Request
+                    </button>
+                    @if (!Requests.Any())
+                    {
+                        <p class="text-gray-400 text-sm text-center py-4">No requests yet.</p>
+                    }
+                    @foreach (var req in Requests)
+                    {
+                        <button @key="req.Id" @onclick="() => SelectRequest(req)"
+                        class="w-full text-left p-2 rounded hover:bg-gray-700 cursor-pointer text-sm text-gray-300 block truncate @(SelectedRequest?.Id == req.Id ? "endpoint-item-active" : "")">
+                            <span class="font-medium text-xs @(GetMethodClass(req.Method))">@req.Method</span> @req.Name
+                        </button>
+                    }
+                </div>
+            }
+        </aside>
+
+        @if (SelectedRequest != null)
+        {
+            <main class="flex-1 flex flex-col p-4 bg-gray-900 overflow-y-auto">
+                <div class="flex items-center space-x-2 mb-4">
+                    <select @bind="SelectedRequest.Method" class="p-2 border border-gray-700 rounded-md bg-gray-800  focus:ring-blue-500 focus:border-blue-500 w-32">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                        <option value="HEAD">HEAD</option>
+                        <option value="OPTIONS">OPTIONS</option>
+                    </select>
+                    <input @bind="SelectedRequest.Url" type="text" placeholder="Enter request URL" class="flex-1 p-2 border border-gray-700 rounded-md bg-gray-800  focus:ring-blue-500 focus:border-blue-500" />
+                    <button @onclick="SendRequestAsync" disabled="@IsSending" class="btn-primary">
+                        @(IsSending ? "Sending..." : "Send")
+                    </button>
+                    <button @onclick="SaveCurrentRequestToCollection" class="btn-secondary">Save to Collection</button>
+                </div>
+                <div class="form-group form-group-inline mb-3">
+                    <label for="requestName" class="text-sm font-medium text-gray-400 mr-2">Name:</label>
+                    <input id="requestName" @bind="SelectedRequest.Name" placeholder="Request Name (e.g., Get Users)" class="input-field flex-grow bg-gray-800 border-gray-700" />
+                </div>
+
+
+                <div class="flex border-b border-gray-700 mb-4">
+                    <button @onclick="() => ActiveRequestTab = RequestTab.Params" class="p-3 text-sm font-medium hover:text-blue-400 focus:outline-none @(ActiveRequestTab == RequestTab.Params ? "tab-active" : "text-gray-400")">Params</button>
+                    <button @onclick="() => ActiveRequestTab = RequestTab.Headers" class="p-3 text-sm font-medium hover:text-blue-400 focus:outline-none @(ActiveRequestTab == RequestTab.Headers ? "tab-active" : "text-gray-400")">Headers</button>
+                    <button @onclick="() => ActiveRequestTab = RequestTab.Body" class="p-3 text-sm font-medium hover:text-blue-400 focus:outline-none @(ActiveRequestTab == RequestTab.Body ? "tab-active" : "text-gray-400")">Body</button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto">
+                    @if (ActiveRequestTab == RequestTab.Params)
+                    {
+                        <div id="params-content" class="space-y-2">
+                            @foreach (var item in SelectedRequest.Params)
+                            {
+                                <div @key="item.Id" class="flex space-x-2 items-center dynamic-row">
+                                    <input @bind="item.Key" placeholder="Key" class="flex-1 param-key" />
+                                    <input @bind="item.Value" placeholder="Value" class="flex-1 param-value" />
+                                    <button class="btn-danger" @onclick="() => RemoveParamRow(item)">Remove</button>
+                                </div>
+                            }
+                            <button class="btn-secondary text-sm mt-2" @onclick="AddParamRow">Add Param</button>
+                        </div>
+                    }
+                    @if (ActiveRequestTab == RequestTab.Headers)
+                    {
+                        <div id="headers-content" class="space-y-2">
+                            @foreach (var item in SelectedRequest.Headers)
+                            {
+                                <div @key="item.Id" class="flex space-x-2 items-center dynamic-row">
+                                    <input @bind="item.Key" placeholder="Header" class="flex-1 header-key" />
+                                    <input @bind="item.Value" placeholder="Value" class="flex-1 header-value" />
+                                    <button class="btn-danger" @onclick="() => RemoveHeaderRow(item)">Remove</button>
+                                </div>
+                            }
+                            <button class="btn-secondary text-sm mt-2" @onclick="AddHeaderRow">Add Header</button>
+                        </div>
+                    }
+                    @if (ActiveRequestTab == RequestTab.Body)
+                    {
+                        <div id="body-content" class="h-full">
+                            <div class="mb-2">
+                                <label class="mr-2 text-sm">
+                                    <input type="radio" name="bodyType" value="raw" @onchange="@(() => SelectedRequest.RequestBodyType = raw)" checked="@(SelectedRequest.RequestBodyType == "raw")" /> Raw
+                                </label>
+                                <label class="mr-2 text-sm">
+                                    <input type="radio" name="bodyType" value="json" @onchange="@(() => SelectedRequest.RequestBodyType = json)" checked="@(SelectedRequest.RequestBodyType == "json")" /> JSON
+                                </label>
+                            </div>
+                            <textarea @bind="SelectedRequest.RequestBody" @bind:event="oninput" class="w-full h-48 p-2 border border-gray-700 rounded-md bg-gray-800  focus:ring-blue-500 focus:border-blue-500 resize-none"
+                            placeholder="@(SelectedRequest.RequestBodyType == "json" ? "Enter JSON body. Example: {\"name\": \"Test\"}" : "Enter raw request body")"></textarea>
+                            @if (SelectedRequest.RequestBodyType == "json")
+                            {
+                                <div class="mt-2">
+                                    <label for="requestContentType" class="text-sm font-medium text-gray-400 mr-2">Content-Type:</label>
+                                    <input id="requestContentType" @bind="SelectedRequest.RequestContentType" placeholder="application/json; charset=utf-8" class="input-field bg-gray-800 border-gray-700 w-1/2" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="mt-2">
+                                    <label for="requestContentType" class="text-sm font-medium text-gray-400 mr-2">Content-Type:</label>
+                                    <input id="requestContentType" @bind="SelectedRequest.RequestContentType" placeholder="e.g., text/plain" class="input-field bg-gray-800 border-gray-700 w-1/2" />
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </main>
+        }
+        else
+        {
+            <main class="flex-1 flex items-center justify-center p-4 bg-gray-900">
+                <p class="text-gray-500">Select or create a request to start.</p>
+            </main>
+        }
+
+
+        <aside class="w-2/5 bg-gray-800 p-4 flex flex-col border-l border-gray-700 overflow-y-auto">
+            <h2 class="text-lg font-semibold mb-2 ">Response</h2>
+            @if (SelectedRequest != null && (SelectedRequest.ResponseStatusCode != null || IsSending || LastError != null))
+            {
+                <div class="flex items-center space-x-4 mb-3 text-sm">
+                    <span class="text-gray-300">
+                        Status:
+                        <span class="font-mono px-2 py-1 rounded @(SelectedRequest.ResponseStatusCode.HasValue ? (SelectedRequest.ResponseStatusCode >= 200 && SelectedRequest.ResponseStatusCode < 300 ? "bg-green-700 text-green-100" : "bg-red-700 text-red-100") : "bg-gray-700")">
+                            @(SelectedRequest.ResponseStatusCode?.ToString() ?? "---")
+                        </span>
+                    </span>
+                    <span class="text-gray-300">Time: <span class="font-mono px-2 py-1 bg-gray-700 rounded">@(SelectedRequest.ResponseTimeMs?.ToString() ?? "---") ms</span></span>
+                </div>
+
+                @if (LastError != null)
+                {
+                    <div class="bg-red-900 border border-red-700 text-red-200 px-3 py-2 rounded-md mb-3 text-sm">
+                        <strong>Error:</strong> @LastError
+                    </div>
+                }
+
+                <div class="flex border-b border-gray-600 mb-3">
+                    <button @onclick="() => ActiveResponseTab = ResponseTab.Pretty" class="p-2 text-xs font-medium hover:text-blue-400 focus:outline-none @(ActiveResponseTab == ResponseTab.Pretty ? "tab-active" : "text-gray-400")">Pretty</button>
+                    <button @onclick="() => ActiveResponseTab = ResponseTab.Raw" class="p-2 text-xs font-medium hover:text-blue-400 focus:outline-none @(ActiveResponseTab == ResponseTab.Raw ? "tab-active" : "text-gray-400")">Raw</button>
+                    <button @onclick="() => ActiveResponseTab = ResponseTab.Preview" class="p-2 text-xs font-medium hover:text-blue-400 focus:outline-none @(ActiveResponseTab == ResponseTab.Preview ? "tab-active" : "text-gray-400")">Preview</button>
+                    <button @onclick="() => ActiveResponseTab = ResponseTab.Headers" class="p-2 text-xs font-medium hover:text-blue-400 focus:outline-none @(ActiveResponseTab == ResponseTab.Headers ? "tab-active" : "text-gray-400")">Headers</button>
+                </div>
+
+                <div class="flex-1 bg-gray-900 rounded overflow-auto text-xs">
+                    @if (ActiveResponseTab == ResponseTab.Pretty)
+                    {
+                        <pre id="responseBodyPretty" class="p-3 whitespace-pre-wrap break-all"><code class="language-@GetLanguage(SelectedRequest.ResponseContentType)">@FormattedResponseBody</code></pre>
+                    }
+                    @if (ActiveResponseTab == ResponseTab.Raw)
+                    {
+                        <pre class="p-3 whitespace-pre-wrap break-all">@SelectedRequest.ResponseBody</pre>
+                    }
+                    @if (ActiveResponseTab == ResponseTab.Preview)
+                    {
+                        @if (SelectedRequest.ResponseContentType != null && SelectedRequest.ResponseContentType.Contains("text/html"))
+                        {
+                            <iframe srcdoc="@SelectedRequest.ResponseBody" class="w-full h-full border-0 rounded bg-white"></iframe>
+                        }
+                        else
+                        {
+                            <p class="p-3 text-gray-400">Preview is not available for this content type.</p>
+                        }
+                    }
+                    @if (ActiveResponseTab == ResponseTab.Headers)
+                    {
+                        @if (SelectedRequest.ResponseHeaders?.Any() == true)
+                        {
+                            <dl class="p-3 response-headers-list">
+                                @foreach (var header in SelectedRequest.ResponseHeaders)
+                                {
+                                    <dt class="font-semibold text-gray-300">@header.Key</dt>
+                                    @foreach (var value in header.Value)
+                                    {
+                                        <dd class="ml-4 text-gray-400">@value</dd>
+                                    }
+                                }
+                            </dl>
+                        }
+                        else
+                        {
+                            <p class="p-3 text-gray-400">No headers to display.</p>
+                        }
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="flex-1 flex items-center justify-center">
+                    <p class="text-gray-500 text-sm">Send a request to see the response.</p>
+                </div>
+            }
+        </aside>
+    </div>
+</div>
+
+<style>
+    /* Minimal global styles for Blazor component if needed, Tailwind handles most */
+    body { /* Already set by Tailwind body class if it's on body tag */ }
+
+    .font-inter { font-family: 'Inter', sans-serif; }
+
+    /* Styles from original HTML, adapted for Blazor context */
+    .tab-active {
+    border-bottom-width: 2px;
+    border-color: #4299e1; /* blue-500 */
+    color: #4299e1 !important; /* blue-500 */
+    }
+    .sidebar-tab-active {
+    background-color: #4a5568; /* dark-gray-700 */
+    color: white !important;
+    border-bottom-width: 2px;
+    border-color: #4299e1; /* blue-500 */
+    }
+    .endpoint-item-active {
+    background-color: #4299e1 !important; /* blue-500 */
+    color: white !important;
+    }
+    .dynamic-row input, .input-field {
+    background-color: #2d3748; /* dark-gray-800 */
+    border: 1px solid #4a5568; /* dark-gray-600 */
+    color: #e2e8f0; /* dark-gray-300 */
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    }
+    .dynamic-row input:focus, .input-field:focus {
+    outline: none;
+    border-color: #4299e1; /* blue-500 */
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+    }
+    .btn-primary {
+    background-color: #4299e1; color: white; font-weight: bold;
+    padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s;
+    }
+    .btn-primary:hover { background-color: #3182ce; }
+    .btn-primary:disabled { background-color: #2b6cb0; cursor: not-allowed; }
+
+    .btn-secondary {
+    background-color: #4a5568; color: white;
+    padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s;
+    }
+    .btn-secondary:hover { background-color: #2d3748; }
+
+    .btn-danger {
+    background-color: #e53e3e; color: white;
+    padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem;
+    transition: background-color 0.2s;
+    }
+    .btn-danger:hover { background-color: #c53030; }
+
+    select.w-32 { /* Tailwind class for select width */ }
+
+    /* Method-specific colors for sidebar */
+    .method-get { color: #68D391; } /* green-400 */
+    .method-post { color: #F6E05E; } /* yellow-400 */
+    .method-put { color: #63B3ED; } /* blue-400 */
+    .method-delete { color: #FC8181; } /* red-400 */
+    .method-patch { color: #B794F4; } /* purple-400 */
+    .method-options, .method-head { color: #A0AEC0; } /* gray-500 */
+
+    /* Ensure highlight.js styles apply correctly */
+    pre code.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 1em;
+    background: #282c34; /* atom-one-dark background */
+    color: #abb2bf; /* atom-one-dark foreground */
+    border-radius: 0.25rem;
+    }
+</style>
+
+@code {
+    private List<ApiRequestItem> Requests { get; set; } = new List<ApiRequestItem>();
+    private ApiRequestItem? SelectedRequest { get; set; }
+    private bool IsSending { get; set; } = false;
+    private string? LastError { get; set; }
+    private string FormattedResponseBody { get; set; } = "";
+    private HttpClient HttpClient;
+
+    private LeftSidebarTab ActiveLeftSidebarTab { get; set; } = LeftSidebarTab.Endpoints;
+    private RequestTab ActiveRequestTab { get; set; } = RequestTab.Params;
+    private ResponseTab ActiveResponseTab { get; set; } = ResponseTab.Pretty;
+
+    public enum LeftSidebarTab { Microservices, Endpoints }
+    public enum RequestTab { Params, Headers, Body }
+    public enum ResponseTab { Pretty, Raw, Preview, Headers }
+
+    private string raw => "raw";
+    private string json => "json";
+
+    protected override void OnInitialized()
+    {
+        HttpClient = HttpClientFactory.CreateClient("DefaultClient"); // Ensure "DefaultClient" is configured in Program.cs or similar
+
+        // Load initial/sample requests
+        if (!Requests.Any())
+        {
+            Requests.AddRange(new List<ApiRequestItem>
+            {
+                new ApiRequestItem { Name = "Get All Posts", Url = "https://jsonplaceholder.typicode.com/posts", Method = "GET" },
+                new ApiRequestItem { Name = "Get Post 1", Url = "https://jsonplaceholder.typicode.com/posts/1", Method = "GET" },
+                new ApiRequestItem { Name = "Create Post", Url = "https://jsonplaceholder.typicode.com/posts", Method = "POST", RequestBody = "{\n  \"title\": \"My New Post\",\n  \"body\": \"This is the content.\",\n  \"userId\": 1\n}", RequestBodyType = "json", RequestContentType = "application/json; charset=UTF-8" },
+                new ApiRequestItem { Name = "Update Post 1", Url = "https://jsonplaceholder.typicode.com/posts/1", Method = "PUT", RequestBody = "{\n  \"id\": 1,\n  \"title\": \"Updated Post Title\",\n  \"body\": \"Updated content here.\",\n  \"userId\": 1\n}", RequestBodyType = "json", RequestContentType = "application/json; charset=UTF-8" },
+                new ApiRequestItem { Name = "Delete Post 1", Url = "https://jsonplaceholder.typicode.com/posts/1", Method = "DELETE" }
+            });
+        }
+
+        if (Requests.Any() && SelectedRequest == null)
+        {
+            SelectRequest(Requests.First());
+        }
+    }
+
+    private void SwitchLeftSidebarTab(LeftSidebarTab tab) => ActiveLeftSidebarTab = tab;
+
+    private void AddNewRequest()
+    {
+        var newReq = new ApiRequestItem { Name = $"New Request {Requests.Count + 1}" };
+        Requests.Add(newReq);
+        SelectRequest(newReq);
+        ActiveLeftSidebarTab = LeftSidebarTab.Endpoints; // Ensure endpoints tab is active
+    }
+
+    private void SelectRequest(ApiRequestItem request)
+    {
+        SelectedRequest = request;
+        LastError = null;
+        ActiveRequestTab = RequestTab.Params; // Default to params view
+        ActiveResponseTab = ResponseTab.Pretty; // Default to pretty view
+        FormattedResponseBody = ""; // Clear previous formatted response
+        // If there's an existing response body for this request, format it
+        if (!string.IsNullOrWhiteSpace(SelectedRequest?.ResponseBody))
+        {
+            FormatAndHighlightResponse();
+        }
+    }
+
+    private void SaveCurrentRequestToCollection()
+    {
+        if (SelectedRequest == null) return;
+        // Since SelectedRequest is a reference to an item in the Requests list,
+        // changes made via @bind are already reflected in that item.
+        // This function could be used for more complex save logic, e.g., persisting to LocalStorage.
+        // For now, it's more of a conceptual placeholder or for triggering a re-render if needed.
+        Console.WriteLine($"Request '{SelectedRequest.Name}' state is up-to-date in the collection.");
+        StateHasChanged(); // Ensure UI reflects any bound changes if not automatic
+    }
+
+    // Methods for Params
+    private void AddParamRow() => SelectedRequest?.Params.Add(new KeyValueItem());
+    private void RemoveParamRow(KeyValueItem item) => SelectedRequest?.Params.Remove(item);
+
+    // Methods for Headers
+    private void AddHeaderRow() => SelectedRequest?.Headers.Add(new KeyValueItem { Key = SelectedRequest?.Headers.Count == 0 && (SelectedRequest.RequestBodyType == "json" || !string.IsNullOrEmpty(SelectedRequest.RequestBody)) ? "Content-Type" : "", Value = SelectedRequest?.Headers.Count == 0 && SelectedRequest.RequestBodyType == "json" ? "application/json; charset=UTF-8" : "" });
+    private void RemoveHeaderRow(KeyValueItem item) => SelectedRequest?.Headers.Remove(item);
+
+
+    private async Task SendRequestAsync()
+    {
+        if (SelectedRequest == null || string.IsNullOrWhiteSpace(SelectedRequest.Url))
+        {
+            LastError = "Request URL cannot be empty.";
+            return;
+        }
+
+        IsSending = true;
+        LastError = null;
+        SelectedRequest.ResponseBody = null;
+        SelectedRequest.ResponseStatusCode = null;
+        SelectedRequest.ResponseHeaders = null;
+        SelectedRequest.ResponseContentType = null;
+        SelectedRequest.ResponseTimeMs = null;
+        FormattedResponseBody = "";
+        StateHasChanged();
+
+        try
+        {
+            var requestMessage = new HttpRequestMessage(new HttpMethod(SelectedRequest.Method), SelectedRequest.Url);
+
+            // Add Headers from UI
+            foreach (var headerItem in SelectedRequest.Headers.Where(h => !string.IsNullOrWhiteSpace(h.Key)))
+            {
+                requestMessage.Headers.TryAddWithoutValidation(headerItem.Key, headerItem.Value);
+            }
+
+            // Add Query Params for GET, HEAD, DELETE, OPTIONS
+            var finalUrl = SelectedRequest.Url;
+            if (SelectedRequest.Params.Any(p => !string.IsNullOrWhiteSpace(p.Key)) &&
+                (SelectedRequest.Method == "GET" || SelectedRequest.Method == "HEAD" || SelectedRequest.Method == "DELETE" || SelectedRequest.Method == "OPTIONS"))
+            {
+                var queryParams = "test"; //Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(finalUrl).Query);
+                // foreach (var param in SelectedRequest.Params.Where(p => !string.IsNullOrWhiteSpace(p.Key)))
+                // {
+                //     queryParams["test"] = param.Value;
+                // }
+                var uriBuilder = new UriBuilder(finalUrl)
+                {
+                    //Query = string.Join("&", queryParams.SelectMany(kvp => kvp.Value.Select(v => $"{Uri.EscapeDataString(kvp.Key)}={Uri.EscapeDataString(v)}")))
+                };
+                finalUrl = uriBuilder.ToString();
+                requestMessage.RequestUri = new Uri(finalUrl); // Update RequestUri with params
+            }
+
+            SendRequestMessage(requestMessage);
+
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var response = await HttpClient.SendAsync(requestMessage);
+            stopwatch.Stop();
+
+            SelectedRequest.ResponseTimeMs = stopwatch.ElapsedMilliseconds;
+            SelectedRequest.ResponseStatusCode = (int)response.StatusCode;
+            SelectedRequest.ResponseBody = await response.Content.ReadAsStringAsync();
+            SelectedRequest.ResponseContentType = response.Content.Headers.ContentType?.ToString();
+
+            SelectedRequest.ResponseHeaders = response.Headers.ToDictionary(h => h.Key, h => h.Value.ToList());
+            if (response.Content.Headers.Any())
+            {
+                foreach (var header in response.Content.Headers)
+                {
+                    if (!SelectedRequest.ResponseHeaders.ContainsKey(header.Key))
+                    {
+                        SelectedRequest.ResponseHeaders.Add(header.Key, header.Value.ToList());
+                    }
+                    else
+                    {
+                        SelectedRequest.ResponseHeaders[header.Key].AddRange(header.Value);
+                    }
+                }
+            }
+            FormatAndHighlightResponse();
+        }
+        catch (HttpRequestException e)
+        {
+            LastError = $"Request Error: {e.Message}";
+            SelectedRequest.ResponseBody = e.ToString();
+        }
+        catch (Exception e)
+        {
+            LastError = $"An unexpected error occurred: {e.Message}";
+            SelectedRequest.ResponseBody = e.ToString();
+        }
+        finally
+        {
+            IsSending = false;
+        }
+    }
+
+    private async void FormatAndHighlightResponse()
+    {
+        if (SelectedRequest == null || string.IsNullOrWhiteSpace(SelectedRequest.ResponseBody))
+        {
+            FormattedResponseBody = string.Empty;
+            StateHasChanged();
+            return;
+        }
+
+        string lang = GetLanguage(SelectedRequest.ResponseContentType);
+
+        if (lang == "json" && ActiveResponseTab == ResponseTab.Pretty)
+        {
+            try
+            {
+                FormattedResponseBody = await JSRuntime.InvokeAsync<string>("appInterops.prettyPrintJson", SelectedRequest.ResponseBody);
+            }
+            catch
+            {
+                FormattedResponseBody = SelectedRequest.ResponseBody; // Fallback
+            }
+        }
+        else if (lang == "xml" && ActiveResponseTab == ResponseTab.Pretty)
+        {
+            try
+            {
+                var xdoc = System.Xml.Linq.XDocument.Parse(SelectedRequest.ResponseBody);
+                FormattedResponseBody = xdoc.ToString();
+            }
+            catch { FormattedResponseBody = SelectedRequest.ResponseBody; } // Fallback
+        }
+        else
+        {
+            FormattedResponseBody = SelectedRequest.ResponseBody;
+        }
+
+        StateHasChanged();
+
+        if (ActiveResponseTab == ResponseTab.Pretty && !string.IsNullOrWhiteSpace(FormattedResponseBody))
+        {
+            // Debounce or ensure this is called after DOM update.
+            // Using Task.Delay as a simple mechanism for this example.
+            await Task.Delay(50);
+            await JSRuntime.InvokeVoidAsync("appInterops.highlightElement", "responseBodyPretty", lang);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // This is a more reliable place for JS interop calls that depend on DOM elements being rendered.
+        if (!firstRender && ActiveResponseTab == ResponseTab.Pretty && SelectedRequest?.ResponseBody != null && !string.IsNullOrWhiteSpace(FormattedResponseBody))
+        {
+            // string lang = GetLanguage(SelectedRequest.ResponseContentType);
+            // await JSRuntime.InvokeVoidAsync("appInterops.highlightElement", "responseBodyPretty", lang);
+            // The call is already in FormatAndHighlightResponse, which is called when view changes or data loads.
+            // A more sophisticated approach might involve a flag or versioning to avoid redundant calls.
+        }
+    }
+
+    private void SetResponseView(ResponseTab view) // Changed from string to enum
+    {
+        ActiveResponseTab = view;
+        FormatAndHighlightResponse();
+    }
+
+    private string GetLanguage(string? contentType)
+    {
+        if (string.IsNullOrWhiteSpace(contentType)) return "plaintext";
+        if (contentType.Contains("json")) return "json";
+        if (contentType.Contains("xml")) return "xml";
+        if (contentType.Contains("html")) return "html";
+        return "plaintext";
+    }
+
+    private string GetMethodClass(string method)
+    {
+        return method.ToLower() switch
+        {
+            "get" => "method-get",
+            "post" => "method-post",
+            "put" => "method-put",
+            "delete" => "method-delete",
+            "patch" => "method-patch",
+            "options" => "method-options",
+            "head" => "method-head",
+            _ => "text-gray-400"
+        };
+    }
+
+    // Define ApiRequestItem and KeyValueItem classes
+    public class ApiRequestItem
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string Name { get; set; } = "New Request";
+        public string Method { get; set; } = "GET";
+        public string Url { get; set; } = "";
+        public List<KeyValueItem> Params { get; set; } = new List<KeyValueItem>();
+        public List<KeyValueItem> Headers { get; set; } = new List<KeyValueItem>();
+        public string RequestBody { get; set; } = "";
+        public string RequestBodyType { get; set; } = "raw"; // "raw", "json"
+        public string RequestContentType { get; set; } = "";
+
+        public int? ResponseStatusCode { get; set; }
+        public string? ResponseBody { get; set; }
+        public string? ResponseContentType { get; set; }
+        public Dictionary<string, List<string>>? ResponseHeaders { get; set; }
+        public long? ResponseTimeMs { get; set; }
+    }
+
+    public class KeyValueItem
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string Key { get; set; } = "";
+        public string Value { get; set; } = "";
+    }
+
+    private void SendRequestMessage(HttpRequestMessage requestMessage)
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedRequest.RequestBody) &&
+                (SelectedRequest.Method == "POST" || SelectedRequest.Method == "PUT" || SelectedRequest.Method == "PATCH"))
+        {
+            string fullContentTypeInput = SelectedRequest.RequestContentType;
+            string baseMediaTypeForConstructor;
+            System.Text.Encoding encodingForConstructor = System.Text.Encoding.UTF8; // Default
+
+            if (string.IsNullOrWhiteSpace(fullContentTypeInput))
+            {
+                // If user didn't specify a content type, infer it
+                if (SelectedRequest.RequestBodyType == "json")
+                {
+                    baseMediaTypeForConstructor = "application/json";
+                    // encodingForConstructor remains UTF8 by default
+                }
+                else
+                {
+                    baseMediaTypeForConstructor = "text/plain";
+                    // encodingForConstructor remains UTF8 by default
+                }
+            }
+            else
+            {
+                // User provided a content type, try to parse it
+                try
+                {
+                    System.Net.Http.Headers.MediaTypeHeaderValue parsedHeader = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(fullContentTypeInput);
+                    baseMediaTypeForConstructor = parsedHeader.MediaType; // Extracts "application/json" from "application/json; charset=utf-8"
+
+                    if (!string.IsNullOrWhiteSpace(parsedHeader.CharSet))
+                    {
+                        try
+                        {
+                            encodingForConstructor = System.Text.Encoding.GetEncoding(parsedHeader.CharSet);
+                        }
+                        catch (ArgumentException)
+                        {
+                            // Invalid charset specified by user, fall back to UTF-8
+                            encodingForConstructor = System.Text.Encoding.UTF8;
+                            // Optionally, you might want to inform the user or log this
+                        }
+                    }
+                    // If no charset in parsedHeader, encodingForConstructor remains the default (UTF8)
+                }
+                catch (FormatException)
+                {
+                    // The user-provided content type string is malformed.
+                    // Fallback to a sensible default or handle error.
+                    // For simplicity, let's fallback based on RequestBodyType here.
+                    LastError = $"Invalid Content-Type format: '{fullContentTypeInput}'. Defaulting based on body type.";
+                    if (SelectedRequest.RequestBodyType == "json")
+                    {
+                        baseMediaTypeForConstructor = "application/json";
+                    }
+                    else
+                    {
+                        baseMediaTypeForConstructor = "text/plain";
+                    }
+                    encodingForConstructor = System.Text.Encoding.UTF8;
+                }
+            }
+
+            requestMessage.Content = new StringContent(SelectedRequest.RequestBody, encodingForConstructor, baseMediaTypeForConstructor);
+        }
+    }
+}

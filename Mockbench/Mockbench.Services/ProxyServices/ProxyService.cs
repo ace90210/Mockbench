@@ -44,7 +44,7 @@ namespace Mockbench.Services.ProxyServices
 
                 var resolvedEndpoint = matchingEndpoints.Microservice is not null && !string.IsNullOrWhiteSpace(matchingEndpoints.TenantPath) && matchingEndpoints.Microservice.PassThroughTenant ? $"{matchingEndpoints.TenantPath}/{endpointPath}" : endpointPath;
 
-                var matchingRequest = await _mockService.FindExactEndpointAsync(matchingEndpoints, context,
+                var matchingRequest = _mockService.FindExactEndpointAsync(matchingEndpoints, context,
                                                                         restType, $"{resolvedEndpoint}{queryString}", requestBody );
 
                 if (matchingRequest is not null && matchingRequest.MockBehaviour == MockBehaviour.MockOnly)

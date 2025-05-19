@@ -42,9 +42,6 @@ public class MockControllerTests
     public async Task ProxyAsync_InvalidPath_ReturnsNotFound()
     {
         // Arrange
-        string code = "xyz";
-        string rest = "invalid/rest";
-
         // Act
         var result = await _controller.ProxyAsync(null, null);
 
