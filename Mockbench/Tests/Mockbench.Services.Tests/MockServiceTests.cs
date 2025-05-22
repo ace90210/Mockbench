@@ -370,7 +370,7 @@ public class MockServiceTests
                 if (me.Environment != null) me.Environment.Id = 1;
                 if (me.Microservice != null) me.Microservice.Id = 1;
             })
-            .ReturnsAsync((true, null));
+            .ReturnsAsync((MatchingEndpoints)null);
 
         _mockEndpointRepository.Setup(r => r.CreateEndpointAsync(It.IsAny<EndpointDto>()))
             .ReturnsAsync((EndpointDto ep) => { ep.Id = 1; return ep; }); // Simulate endpoint creation and ID assignment
@@ -389,7 +389,7 @@ public class MockServiceTests
             ep.QueryParameters.Any(qp => qp.Name == "param1" && qp.Value == "value1") &&
             ep.MockResponses.Count == 1 &&
             ep.MockResponses.First().Body == "{\"key\":\"value\"}" &&
-            ep.MockResponses.First().Code == HttpStatusCode.OK &&
+            ep.MockResponses.First().StatusCode == HttpStatusCode.OK &&
             ep.MockResponses.First().ContentType == "application/json" &&
             ep.MockResponses.First().Latency == latency &&
             ep.MockResponses.First().Headers.Any(h => h.Name == "X-Test-Header" && h.Value == "TestValue")
@@ -430,7 +430,7 @@ public class MockServiceTests
         _mockCommonRepository.Verify(r => r.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(matchingEndpoints), Times.Once);
         _mockEndpointRepository.Verify(r => r.AddResponseToEndpointAsync(existingEndpoint.Id, It.Is<MockResponseDto>(mr =>
             mr.Body == "new data" &&
-            mr.Code == HttpStatusCode.Created
+            mr.StatusCode == HttpStatusCode.Created
         )), Times.Once);
         _mockEndpointRepository.Verify(r => r.CreateEndpointAsync(It.IsAny<EndpointDto>()), Times.Never); // Should not create new endpoint
     }
@@ -441,7 +441,7 @@ public class MockServiceTests
         // Arrange
         var endpointPath = "/existing";
         var responseContent = "{\"id\":1}";
-        var existingResponse = new MockResponseDto { Body = responseContent, ContentType = "application/json", Code = HttpStatusCode.OK, Enabled = true };
+        var existingResponse = new MockResponseDto { Body = responseContent, ContentType = "application/json", StatusCode = HttpStatusCode.OK, Enabled = true };
         var existingEndpoint = new EndpointDto
         {
             Id = 123,

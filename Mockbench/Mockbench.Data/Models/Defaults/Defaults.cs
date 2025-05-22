@@ -14,7 +14,7 @@ namespace Mockbench.Data.Models.Defaults
                     _response = new MockResponse()
                     {
                         Body = "{\n\t\"Warning\": \"[No mock setup configured for this end point]\"\n}",
-                        Code = System.Net.HttpStatusCode.BadRequest
+                        StatusCode = System.Net.HttpStatusCode.BadRequest
                     };
                 }
 
@@ -34,7 +34,7 @@ namespace Mockbench.Data.Models.Defaults
                     _responseDto = new MockResponseDto()
                     {
                         Body = Response.Body,
-                        Code = Response.Code
+                        StatusCode = Response.StatusCode
                     };
                 }
 

@@ -15,7 +15,7 @@ public static class ResponseMappers
             {
                 Description = mockResponseDto.Description,
                 Body = mockResponseDto.Body,
-                Code = mockResponseDto.Code,
+                StatusCode = mockResponseDto.StatusCode,
                 ContentType = mockResponseDto.ContentType,
                 Encoding = mockResponseDto.Encoding,
                 Headers = mockResponseDto.Headers.ToEntities(),
@@ -43,7 +43,7 @@ public static class ResponseMappers
                 Id = mockResponse.Id,
                 Description = mockResponse.Description,
                 Body = mockResponse.Body,
-                Code = mockResponse.Code,
+                StatusCode = mockResponse.StatusCode,
                 ContentType = mockResponse.ContentType,
                 Encoding = mockResponse.Encoding,
                 EndpointId = mockResponse.EndpointId,
@@ -70,7 +70,7 @@ public static class ResponseMappers
             {
                 Description = mockResponse.Description,
                 Body = mockResponse.Body,
-                Code = mockResponse.Code,
+                StatusCode = mockResponse.StatusCode,
                 ContentType = mockResponse.ContentType,
                 Encoding = mockResponse.Encoding,
                 Priority = mockResponse.Priority,
@@ -95,7 +95,7 @@ public static class ResponseMappers
             {
                 Description = mockResponseDto.Description,
                 Body = mockResponseDto.Body,
-                Code = mockResponseDto.Code,
+                StatusCode = mockResponseDto.StatusCode,
                 ContentType = mockResponseDto.ContentType,
                 Encoding = mockResponseDto.Encoding,
                 Priority = mockResponseDto.Priority,
@@ -120,7 +120,7 @@ public static class ResponseMappers
             {
                 Description = mockResponse.Description,
                 Body = mockResponse.Body,
-                Code = mockResponse.Code,
+                StatusCode = mockResponse.StatusCode,
                 ContentType = mockResponse.ContentType,
                 Encoding = mockResponse.Encoding,
                 Priority = mockResponse.Priority,
@@ -148,7 +148,7 @@ public static class ResponseMappers
 
         baseMockResponse.Description = updateMockResponse.Description;
         baseMockResponse.Body = updateMockResponse.Body;
-        baseMockResponse.Code = updateMockResponse.Code;
+        baseMockResponse.StatusCode = updateMockResponse.StatusCode;
         baseMockResponse.ContentType = updateMockResponse.ContentType;
         baseMockResponse.Encoding = updateMockResponse.Encoding;
         baseMockResponse.Priority = updateMockResponse.Priority;

@@ -13,7 +13,7 @@ public class MockResponseDto : IValidatableObject, IMockResponse, ICopyTo<MockRe
     [MaxLength(250, ErrorMessage = "Description too long. Maximum length is 250")]
     public string? Description { get; set; }
 
-    public HttpStatusCode Code { get; set; } = HttpStatusCode.OK;
+    public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
 
     public SupportedEncodingType Encoding { get; set; } = SupportedEncodingType.UTF8;
 
@@ -55,7 +55,7 @@ public class MockResponseDto : IValidatableObject, IMockResponse, ICopyTo<MockRe
 
         target.Id = Id;
         target.Description = Description;
-        target.Code = Code;
+        target.StatusCode = StatusCode;
         target.Encoding = Encoding;
         target.ContentType = ContentType;
         target.Body = Body;

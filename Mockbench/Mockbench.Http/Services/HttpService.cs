@@ -141,7 +141,7 @@ namespace Mockbench.Server.Services
                         {
                             Content = existingResponse.Body,
                             ContentType = string.IsNullOrEmpty(existingResponse.ContentType) ? null : existingResponse.ContentType,
-                            StatusCode = (int)existingResponse.Code
+                            StatusCode = (int)existingResponse.StatusCode
                         };
 
                         return ValidatedResponseForKnownIssues(response);

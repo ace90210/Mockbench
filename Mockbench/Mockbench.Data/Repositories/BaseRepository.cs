@@ -16,10 +16,10 @@ namespace Mockbench.Data.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<(bool, MatchingEndpoints?)> CreateTenantEnvironmentMicroserviceIfNotExistsAsync(MatchingEndpoints matchingEndpoints)
+        public async Task<MatchingEndpoints?> CreateTenantEnvironmentMicroserviceIfNotExistsAsync(MatchingEndpoints matchingEndpoints)
         {
             if (matchingEndpoints == null)
-                return (false, matchingEndpoints);
+                return null;
 
             bool changed = false;
 
@@ -85,10 +85,10 @@ namespace Mockbench.Data.Repositories
             matchingEndpoints.Environment = Mapper.Environment.ToDto(existingEnvironment);
             matchingEndpoints.Microservice = Mapper.Microservice.ToDto(existingMicroservice);
 
-            return (true, matchingEndpoints);
+            return matchingEndpoints;
         }
 
-        public async Task<(bool, MatchingEndpoints?)> CreateTenantEnvironmentMicroserviceIfNotExistsAsync(string? tenantPath, string? environmentPath, string? microservicePath)
+        public async Task<MatchingEndpoints?> CreateTenantEnvironmentMicroserviceIfNotExistsAsync(string? tenantPath, string? environmentPath, string? microservicePath)
         {
             bool changed = false;
 
@@ -159,7 +159,7 @@ namespace Mockbench.Data.Repositories
             matchingEndpoints.Tenant = Mapper.Tenant.ToDto(existingTenant);
             matchingEndpoints.Environment = Mapper.Environment.ToDto(existingEnvironment);
             matchingEndpoints.Microservice = Mapper.Microservice.ToDto(existingMicroservice);
-            return (true, matchingEndpoints);
+            return matchingEndpoints;
         }
 
         public bool ValidateTenantEnvironmentMicroserviceIfNotExists(string? tenantPath, string? environmentPath, string? microservicePath)

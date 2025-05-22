@@ -9,7 +9,7 @@ namespace Mockbench.Shared.Helper
         {
             using var sha = SHA1.Create();
 
-            byte[] valueInBytes = ConvertHelper.ToByteArray(mockResponse.Encoding, $"{mockResponse.Body}-{mockResponse.Code}-{mockResponse.ContentType}");
+            byte[] valueInBytes = ConvertHelper.ToByteArray(mockResponse.Encoding, $"{mockResponse.Body}-{mockResponse.StatusCode}-{mockResponse.ContentType}");
             byte[] shaChecksumBytes = sha.ComputeHash(valueInBytes);
 
             return BitConverter.ToString(shaChecksumBytes).Replace("-", string.Empty).ToLower();
@@ -19,7 +19,7 @@ namespace Mockbench.Shared.Helper
         {
             using var sha = SHA1.Create();
 
-            byte[] valueInBytes = ConvertHelper.ToByteArray(mockResponse.Encoding, $"{mockResponse.Body}-{mockResponse.Code}-{mockResponse.ContentType}-{mockResponse.CreatedUtc?.Ticks}");
+            byte[] valueInBytes = ConvertHelper.ToByteArray(mockResponse.Encoding, $"{mockResponse.Body}-{mockResponse.StatusCode}-{mockResponse.ContentType}-{mockResponse.CreatedUtc?.Ticks}");
             byte[] shaChecksumBytes = sha.ComputeHash(valueInBytes);
 
             return BitConverter.ToString(shaChecksumBytes).Replace("-", string.Empty).ToLower();

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient; 
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mockbench.Abstractions.ConfigurationServices;
@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Mockbench.Api.Tests.Controllers.Admin
+namespace Mockbench.Api.Tests.Controllers.Admon
 {
     public class ConfigurationControllerTests
     {

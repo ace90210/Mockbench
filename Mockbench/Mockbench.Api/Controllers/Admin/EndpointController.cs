@@ -7,9 +7,6 @@ using Mockbench.Api.Helpers;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Helper;
 using Mockbench.Shared.Models.Endpoint;
-using Mockbench.Shared.Models.Enum;
-using Mockbench.Shared.Models.Headers;
-using Mockbench.Shared.Models.QueryParameters;
 using Mockbench.Shared.Models.Response;
 using Mockbench.Shared.Models.Utility;
 using System.ComponentModel.DataAnnotations;
@@ -29,19 +26,18 @@ namespace Mockbench.Api.Controllers.Admin
             _endpointRepository = endpointRepository ?? throw new ArgumentNullException(nameof(endpointRepository));
         }
 
-        // TODO reimplement this
-        //[HttpGet("list/{microserviceId}")]
-        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<EndpointDto>))]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        //public async Task<ActionResult<IEnumerable<EndpointDto>>> GetAllForMicroservice(int microserviceId)
-        //{
-        //    if (microserviceId <= 0)
-        //        return BadRequest(ErrorMessageConstants.MicroserviceId);
+        [HttpGet("list/{microserviceId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<EndpointDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<ActionResult<IEnumerable<EndpointDto>>> GetAllForMicroservice(int microserviceId)
+        {
+            if (microserviceId <= 0)
+                return BadRequest(ErrorMessageConstants.MicroserviceId);
 
-        //    _logger.LogInformation("get request for microservice: {MicroserviceId}", microserviceId);
-        //    return Ok(await _endpointRepository.GetAllMatchingEndpointsAsync(microserviceId));
-        //}
+            _logger.LogInformation("get request for microservice: {MicroserviceId}", microserviceId);
+            return Ok(await _endpointRepository.GetAllEndpointsForMicroserviceAsync(microserviceId));
+        }
 
         [HttpGet("{endpointId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EndpointDto))]
@@ -87,10 +83,11 @@ namespace Mockbench.Api.Controllers.Admin
 
             bool isValid = GeneralHelper.TryValidateFullObject(endpointDto, new ValidationContext(endpointDto, null), results);
 
-            (bool created, MatchingEndpoints? tem) = await _endpointRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(tenantPath, environmentPath, microservicePath);
-
-            if (!isValid && created)
+            if (!isValid)
                 return BadRequest(results.ToBadRequestResult());
+
+            var tem = await _endpointRepository.CreateTenantEnvironmentMicroserviceIfNotExistsAsync(tenantPath, environmentPath, microservicePath);
+
 
             if (tem is not null)
             {

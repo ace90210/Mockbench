@@ -132,7 +132,7 @@ public class HttpServiceTests
         var restType = RestType.POST;
         var httpContext = CreateHttpContext(method: "POST", body: "{\"key\":\"value\"}");
         var endpointPath = "/test";
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Mocked Data" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Mocked Data" };
 
         _mockProxyService.Setup(p => p.ProxyRequestToMicroserviceAsync(matchingEndpoints, restType, httpContext, endpointPath))
             .ThrowsAsync(new HttpRequestException("Simulated timeout", new TimeoutException()));
@@ -180,7 +180,7 @@ public class HttpServiceTests
         var restType = RestType.GET;
         var httpContext = CreateHttpContext();
         var endpointPath = "/test";
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Mocked Data" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Mocked Data" };
 
         _mockProxyService.Setup(p => p.ProxyRequestToMicroserviceAsync(matchingEndpoints, restType, httpContext, endpointPath))
             .ThrowsAsync(new HttpRequestException("Simulated socket error", new System.Net.Sockets.SocketException()));
@@ -222,7 +222,7 @@ public class HttpServiceTests
         var httpContext = CreateHttpContext();
         var endpointPath = "/test";
         var foundEndpointDto = new EndpointDto { ExpectAuthHeader = false };
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Mocked Data", ContentType = "application/json" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Mocked Data", ContentType = "application/json" };
 
         _mockMockService.Setup(m => m.GetMatchingEndpointDtoAsync(matchingEndpoints, restType, httpContext, endpointPath))
             .ReturnsAsync(foundEndpointDto);
@@ -276,7 +276,7 @@ public class HttpServiceTests
         httpContext.Request.Headers["Authorization"] = "Bearer testtoken"; // Add Auth header
         var endpointPath = "/test";
         var foundEndpointDto = new EndpointDto { ExpectAuthHeader = true };
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Authenticated Mock" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Authenticated Mock" };
 
         _mockMockService.Setup(m => m.GetMatchingEndpointDtoAsync(matchingEndpoints, restType, httpContext, endpointPath))
             .ReturnsAsync(foundEndpointDto);
@@ -306,7 +306,7 @@ public class HttpServiceTests
         var endpointPath = "/test";
         var foundEndpointDto = new EndpointDto();
         // Simulate a mock response that is 204 but has content (which is invalid)
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.NoContent, Body = "This should not be here", ContentType = "text/plain" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.NoContent, Body = "This should not be here", ContentType = "text/plain" };
 
         _mockMockService.Setup(m => m.GetMatchingEndpointDtoAsync(matchingEndpoints, restType, httpContext, endpointPath))
             .ReturnsAsync(foundEndpointDto);
@@ -344,7 +344,7 @@ public class HttpServiceTests
         httpContext.Request.Headers[proxiedHeaderKey] = "HeaderValue";
 
         var foundEndpointDto = new EndpointDto();
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Test" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Test" };
 
         var endpointPath = "/test"; 
 
@@ -388,7 +388,7 @@ public class HttpServiceTests
         var httpContext = CreateHttpContext(method: "POST", path: "/api/data", body: "{\"data\":\"test\"}");
         var endpointPath = "/api/data";
         var foundEndpointDto = new EndpointDto();
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Debug Data" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Debug Data" };
 
         _mockMockService.Setup(m => m.GetMatchingEndpointDtoAsync(matchingEndpoints, restType, httpContext, endpointPath))
             .ReturnsAsync(foundEndpointDto);
@@ -430,7 +430,7 @@ public class HttpServiceTests
         var httpContext = CreateHttpContext();
         var endpointPath = "/test";
         var proxyResponse = new StatusCodeResult(502); // Bad Gateway
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Mocked Data After 502" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Mocked Data After 502" };
 
 
         _mockProxyService.Setup(p => p.ProxyRequestToMicroserviceAsync(matchingEndpoints, restType, httpContext, endpointPath))
@@ -470,7 +470,7 @@ public class HttpServiceTests
         var httpContext = CreateHttpContext();
         var endpointPath = "/test";
         var proxyResponse = new StatusCodeResult(503); // Service Unavailable
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Mocked Data After 503" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Mocked Data After 503" };
 
 
         _mockProxyService.Setup(p => p.ProxyRequestToMicroserviceAsync(matchingEndpoints, restType, httpContext, endpointPath))
@@ -501,7 +501,7 @@ public class HttpServiceTests
         var httpContext = CreateHttpContext();
         var endpointPath = "/test";
         var proxyResponse = new StatusCodeResult(504); // Gateway Timeout
-        var mockResponseDto = new Shared.Models.Response.MockResponseDto { Code = System.Net.HttpStatusCode.OK, Body = "Mocked Data After 504" };
+        var mockResponseDto = new Shared.Models.Response.MockResponseDto { StatusCode = System.Net.HttpStatusCode.OK, Body = "Mocked Data After 504" };
 
 
         _mockProxyService.Setup(p => p.ProxyRequestToMicroserviceAsync(matchingEndpoints, restType, httpContext, endpointPath))

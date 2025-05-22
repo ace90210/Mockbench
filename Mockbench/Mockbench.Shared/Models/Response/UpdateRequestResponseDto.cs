@@ -10,7 +10,7 @@ namespace Mockbench.Shared.Models.Response
         [MaxLength(250, ErrorMessage = "Description too long. Maximum length is 250")]
         public string? Description { get; set; }
 
-        public HttpStatusCode Code { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
 
         public SupportedEncodingType Encoding { get; set; } = SupportedEncodingType.UTF8;
 

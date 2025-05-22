@@ -176,7 +176,7 @@ namespace Mockbench.Data.Mappers
                 var updatedResponse = responses.First(r => r.Id == baseResponse.Id);
                 baseResponse.Body = updatedResponse.Body;
                 baseResponse.Encoding = updatedResponse.Encoding;
-                baseResponse.Code = updatedResponse.Code;
+                baseResponse.StatusCode = updatedResponse.StatusCode;
                 baseResponse.CreatedUtc = updatedResponse.CreatedUtc;
 
                 MergeResponseHeaders(baseResponse, updatedResponse.Headers);

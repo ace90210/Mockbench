@@ -9,6 +9,7 @@ namespace Mockbench.Abstractions.Repositories
         Task<EndpointDto> CreateEndpointAsync(EndpointDto endpointDto);
         Task<bool> DeleteEndpoint(int endpointId);
         Task<MatchingEndpoints> GetAllMatchingEndpointsAsync(string? tenantPath, string? environmentPath, string? microservicePath, string endpointUrl);
+        Task<List<EndpointDto>> GetAllEndpointsForMicroserviceAsync(int microserviceId);
         Task<EndpointDto> GetEndpoint(int id);
         Task<UpdateEndpointDto> GetUpdateEndpoint(int id);
 

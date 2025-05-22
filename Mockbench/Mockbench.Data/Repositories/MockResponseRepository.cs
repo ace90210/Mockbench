@@ -77,7 +77,7 @@ namespace Mockbench.Data.Repositories
             existingMockResponse.Body = updatedResponse.Body;
             existingMockResponse.Encoding = updatedResponse.Encoding;
             existingMockResponse.ContentType = updatedResponse.ContentType;
-            existingMockResponse.Code = updatedResponse.Code;
+            existingMockResponse.StatusCode = updatedResponse.StatusCode;
             existingMockResponse.Priority = updatedResponse.Priority;
             existingMockResponse.FakeDelay = updatedResponse.FakeDelay;
             existingMockResponse.CreatedUtc = updatedResponse.CreatedUtc;

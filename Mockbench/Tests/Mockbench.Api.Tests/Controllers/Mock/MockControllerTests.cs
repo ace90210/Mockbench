@@ -11,7 +11,7 @@ using Mockbench.Shared.Models.Environment;
 using Mockbench.Shared.Models.Microservice;
 using Moq;
 
-namespace Mockbench.Api.Tests;
+namespace Mockbench.Api.Tests.Controllers.Mock;
 public class MockControllerTests
 {
     private readonly Mock<ILogger<MockController>> _loggerMock;

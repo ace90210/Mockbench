@@ -10,7 +10,7 @@ namespace Mockbench.Data.Helpers
         {
             using var sha = SHA1.Create();
 
-            byte[] valueInBytes = ConvertHelper.ToByteArray(mockResponse.Encoding, $"{mockResponse.Body}-{mockResponse.Code}-{mockResponse.ContentType}");
+            byte[] valueInBytes = ConvertHelper.ToByteArray(mockResponse.Encoding, $"{mockResponse.Body}-{mockResponse.StatusCode}-{mockResponse.ContentType}");
             byte[] shaChecksumBytes = sha.ComputeHash(valueInBytes);
 
             return BitConverter.ToString(shaChecksumBytes).Replace("-", string.Empty).ToLower();

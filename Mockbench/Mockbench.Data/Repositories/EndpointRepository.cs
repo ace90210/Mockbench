@@ -4,6 +4,7 @@ using Mockbench.Data.Contexts;
 using Mockbench.Data.Mappers;
 using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Response;
+using Mockbench.Data.Mappers;
 
 namespace Mockbench.Data.Repositories
 {
@@ -14,7 +15,7 @@ namespace Mockbench.Data.Repositories
         {
             _context = context;
         }
-
+        
         public async Task<EndpointDto> GetEndpoint(int id)
         {
             var e = await _context.Endpoints.Include(e => e.MockResponses)
@@ -70,6 +71,19 @@ namespace Mockbench.Data.Repositories
                 MicroservicePath = microservicePath,
                 Endpoints = endpoint.ToDtos(createNew: false)
             };
+        }
+
+        public async Task<List<EndpointDto>> GetAllEndpointsForMicroserviceAsync(int microserviceId)
+        {
+            var endpoints = await _context.Endpoints.Include(e => e.QueryParameters)
+                .Include(e => e.EndpointHeaders)
+                .Include(e => e.MockResponses)
+                    .ThenInclude(mr => mr.Headers)
+                .Where(m => m.MicroserviceId == microserviceId)
+                .AsSplitQuery()
+                .ToListAsync();
+
+            return endpoints.ToDtos(false);
         }
 
         public async Task<EndpointDto> CreateEndpointAsync(EndpointDto endpointDto)

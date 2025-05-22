@@ -18,7 +18,7 @@ namespace Mockbench.Data.Models
         [MaxLength(250)]
         public string? Description { get; set; }
 
-        public HttpStatusCode Code { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
 
         public SupportedEncodingType Encoding { get; set; } = SupportedEncodingType.UTF8;
 

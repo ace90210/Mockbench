@@ -101,7 +101,7 @@ namespace Mockbench.Services.MockServices
                 ContentType = responseContentType,
                 Encoding = SupportedEncodingType.UTF8,
                 Latency = latency,
-                Code = response.StatusCode
+                StatusCode = response.StatusCode
             };
 
             mockResponse.Headers = GetResponseHeaders(matchingEndpoints.Microservice, response);
