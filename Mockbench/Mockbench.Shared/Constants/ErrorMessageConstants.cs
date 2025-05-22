@@ -2,7 +2,7 @@ namespace Mockbench.Shared.Constants;
 
 public static class ErrorMessageConstants
 {
-    public const string MicroserviceId = "Invalid microservice id";
+    public const string MicroserviceIdInvalid = "Invalid microservice id";
     
     public const string NewMicroserviceId = "Invalid microservice id (ID must be 0), new Microservice IDs are automatically assigned and cannot be set on creation.";
     

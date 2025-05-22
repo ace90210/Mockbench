@@ -33,9 +33,9 @@ namespace Mockbench.Api.Controllers.Admin
         public async Task<ActionResult<IEnumerable<EndpointDto>>> GetAllForMicroservice(int microserviceId)
         {
             if (microserviceId <= 0)
-                return BadRequest(ErrorMessageConstants.MicroserviceId);
+                return BadRequest(ErrorMessageConstants.MicroserviceIdInvalid);
 
-            _logger.LogInformation("get request for microservice: {MicroserviceId}", microserviceId);
+            _logger.LogInformation("get request for microservice: {MicroserviceIdInvalid}", microserviceId);
             return Ok(await _endpointRepository.GetAllEndpointsForMicroserviceAsync(microserviceId));
         }
 

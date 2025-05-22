@@ -30,14 +30,14 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MicroserviceDto>> Get(int microserviceId)
+        public async Task<ActionResult<MicroserviceDto>> GetById(int microserviceId)
         {
-            _logger.LogInformation("Getting microservice: {MicroserviceId}", microserviceId);
+            _logger.LogInformation("Getting microservice: {MicroserviceIdInvalid}", microserviceId);
 
             if (microserviceId <= 0)
-                return BadRequest(ErrorMessageConstants.MicroserviceId);
+                return BadRequest(ErrorMessageConstants.MicroserviceIdInvalid);
             
-            var service =  await _microserviceRepository.GetMicroserviceById(microserviceId);
+            var service =  await _microserviceRepository.GetMicroserviceByIdAsync(microserviceId);
 
             if (service == null)
                 return NotFound(ErrorMessageConstants.MicroserviceNotFound);
@@ -69,9 +69,9 @@ namespace Mockbench.Api.Controllers.Admin
         [HttpGet("list")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceDto>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<IEnumerable<MicroserviceDto>>> GetAllMicroservices()
+        public async Task<ActionResult<IEnumerable<MicroserviceDto>>> GetAll()
         {
-            return Ok(await _microserviceRepository.GetAllMicroservices());
+            return Ok(await _microserviceRepository.GetMicroservicesAsync());
         }
 
         [HttpGet("searchresultlist")]
@@ -88,7 +88,7 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MicroserviceDto>> CreateMicroservice([FromBody] MicroserviceDto? newMicroservice)
+        public async Task<ActionResult<MicroserviceDto>> Create([FromBody] MicroserviceDto? newMicroservice)
         {            
             if (newMicroservice == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
@@ -107,24 +107,40 @@ namespace Mockbench.Api.Controllers.Admin
 
             var results = new List<ValidationResult>();
 
-            var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNames();
+            try
+            {
+                var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNames();
 
-            bool isValid = GeneralHelper.TryValidateFullObject(newMicroservice, new ValidationContext(newMicroservice,
-                new Dictionary<object, object?>()
-                {
-                    { "Path", existingPaths.Select(ep => ep.Path) },
-                    { "Name", existingPaths.Select(ep => ep.Name) }
-                }), results);
+                var paths = existingPaths?.Select(ep => ep.Path) ?? Enumerable.Empty<string>();
+                var names = existingPaths?.Select(ep => ep.Name) ?? Enumerable.Empty<string>();
 
-            if (!isValid)
-                return BadRequest(results.ToBadRequestResult());
+                bool isValid = GeneralHelper.TryValidateFullObject(
+                    newMicroservice,
+                    new ValidationContext(
+                        newMicroservice,
+                        new Dictionary<object, object?>()
+                        {
+                            { "Path", paths },
+                            { "Name", names }
+                        }
+                    ),
+                    results
+                );
 
-            var createdMicroservice = await _microserviceRepository.CreateMicroservice(newMicroservice);
+                if (!isValid)
+                    return BadRequest(results.ToBadRequestResult());
 
-            if (createdMicroservice == null)
-                return NotFound(ErrorMessageConstants.EnvironmentNotFound);
-            
-            return StatusCode(201, createdMicroservice);
+                var createdMicroservice = await _microserviceRepository.CreateMicroserviceAsync(newMicroservice);
+
+                if (createdMicroservice == null)
+                    return NotFound(ErrorMessageConstants.EnvironmentNotFound);
+
+                return Created("api/microservice/" + createdMicroservice.Id, createdMicroservice);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         [HttpPut("{microserviceId}")]
@@ -133,10 +149,10 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult> UpdateMicroservice(int microserviceId, [FromBody] MicroserviceDto? updatedMicroservice)
+        public async Task<ActionResult> Update(int microserviceId, [FromBody] MicroserviceDto? updatedMicroservice)
         {
             if (microserviceId <= 0)
-                return BadRequest(ErrorMessageConstants.MicroserviceId);
+                return BadRequest(ErrorMessageConstants.MicroserviceIdInvalid);
             
             if (updatedMicroservice == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
@@ -157,17 +173,27 @@ namespace Mockbench.Api.Controllers.Admin
 
             var existingPaths = await _microserviceRepository.GetAllMicroservicePathAndNames(microserviceId);
 
-            bool isValid = GeneralHelper.TryValidateFullObject(updatedMicroservice, new ValidationContext(updatedMicroservice, 
-                new Dictionary<object, object?>()
-                {
-                    { "Path", existingPaths.Select(ep => ep.Path) },
-                    { "Name", existingPaths.Select(ep => ep.Name) }
-                }), results);
+
+            var paths = existingPaths?.Select(ep => ep.Path) ?? Enumerable.Empty<string>();
+            var names = existingPaths?.Select(ep => ep.Name) ?? Enumerable.Empty<string>();
+
+            bool isValid = GeneralHelper.TryValidateFullObject(
+                updatedMicroservice,
+                new ValidationContext(
+                    updatedMicroservice,
+                    new Dictionary<object, object?>()
+                    {
+                        { "Path", paths },
+                        { "Name", names }
+                    }
+                ),
+                results
+            );
 
             if (!isValid)
                 return BadRequest(results.ToBadRequestResult());
 
-            return await _microserviceRepository.UpdateMicroservice(microserviceId, updatedMicroservice) ? Ok() : NotFound();
+            return await _microserviceRepository.UpdateMicroserviceAsync(microserviceId, updatedMicroservice) ? Ok(updatedMicroservice) : NotFound();
         }
 
         [HttpDelete("{id}")]
@@ -178,9 +204,9 @@ namespace Mockbench.Api.Controllers.Admin
         public async Task<ActionResult> Delete(int id)
         {
             if (id <= 0)
-                return BadRequest(ErrorMessageConstants.MicroserviceId);
+                return BadRequest(ErrorMessageConstants.MicroserviceIdInvalid);
 
-            if (await _microserviceRepository.DeleteMicroservice(id))
+            if (await _microserviceRepository.DeleteMicroserviceAsync(id))
                 return Ok();
 
             return NoContent();

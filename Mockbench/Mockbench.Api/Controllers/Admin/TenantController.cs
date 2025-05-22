@@ -44,7 +44,7 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<TenantListDto>> Get([FromQuery]int skip = 0, [FromQuery]int take = 1000)
         {
-            _logger.LogInformation("Get tenant list: skip={Skip}, take={Take}", skip, take);
+            _logger.LogInformation("GetById tenant list: skip={Skip}, take={Take}", skip, take);
             return Ok(await _tenantRepository.GetAllTenantsListAsync(skip, take));
         }
 

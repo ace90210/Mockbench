@@ -54,7 +54,7 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<MicroserviceDto> GetMicroserviceById(int id)
+        public async Task<MicroserviceDto> GetMicroserviceByIdAsync(int id)
         {
             var ms = await _context.Microservices.Include(m => m.Headers).Include(ms => ms.Endpoints).AsSplitQuery().FirstOrDefaultAsync(ms => ms.Id == id);
 
@@ -80,7 +80,7 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<IEnumerable<MicroserviceDto>> GetAllMicroservices()
+        public async Task<IEnumerable<MicroserviceDto>> GetMicroservicesAsync()
         {
             var microservices = await _context.Microservices.Include(m => m.Headers).Include(ms => ms.Endpoints).AsSplitQuery().ToListAsync();
 
@@ -164,7 +164,7 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<MicroserviceDto> CreateMicroservice(MicroserviceDto newMicroserviceDto)
+        public async Task<MicroserviceDto> CreateMicroserviceAsync(MicroserviceDto newMicroserviceDto)
         {
             if (newMicroserviceDto == null)
                 throw new Exception("Error new microservice not provided");
@@ -212,7 +212,7 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<bool> UpdateMicroservice(int id, MicroserviceDto updatedMicroservice)
+        public async Task<bool> UpdateMicroserviceAsync(int id, MicroserviceDto updatedMicroservice)
         {
             if (updatedMicroservice == null)
                 return false;
@@ -288,7 +288,7 @@ namespace Mockbench.Data.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteMicroservice(int id)
+        public async Task<bool> DeleteMicroserviceAsync(int id)
         {
             var existingMicroservice = await _context.Microservices.FirstOrDefaultAsync(m => m.Id == id);
 

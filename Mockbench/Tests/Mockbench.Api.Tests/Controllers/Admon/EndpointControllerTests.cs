@@ -103,7 +103,7 @@ namespace Mockbench.Api.Tests.Admin
             {
                 FromUrl = "/new/endpoint",
                 RestType = RestType.POST,
-                MicroserviceId = 1, // Assuming a valid MicroserviceId
+                MicroserviceId = 1, // Assuming a valid MicroserviceIdInvalid
                 // FromUrl is [Required(AllowEmptyStrings = true)], so providing it.
                 // Other properties will use defaults or can be null.
             };

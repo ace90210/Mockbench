@@ -29,7 +29,7 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<ActionResult<IEnumerable<EnvironmentDto>>> Get()
         {
-            _logger.LogInformation("Get Environment list called");
+            _logger.LogInformation("GetById Environment list called");
             var environments = await _environmentRepository.GetEnvironments();
             
             return Ok(environments);
