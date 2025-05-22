@@ -99,12 +99,12 @@ namespace Mockbench.Data.Repositories
                 Name = tenant.Name,
                 Path = tenant.Path,
                 SimulateTime = tenant.SimulateTime,
-                Variables = tenant.Variables.Select(v => new TenantVariableDto()
+                Variables = tenant.Variables?.Select(v => new TenantVariableDto()
                 {
                     Id = v.Id,
                     Key = v.Key,
                     Value = v.Value
-                }).ToList()
+                })?.ToList()
             };
         }
 
@@ -214,7 +214,7 @@ namespace Mockbench.Data.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteTenantAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id);
 

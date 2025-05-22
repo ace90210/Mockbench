@@ -40,9 +40,11 @@ public static class ErrorMessageConstants
     
     public const string ResponseNotFound = "Response not found";
     
-    public const string TenantId = "Invalid tenant id";
-    
+    public const string TenantIdInvalid = "Invalid tenant id";
+
     public const string TenantPath = "Invalid tenant path";
+
+    public const string TenantPathExists = "Tenant path already exists";
     
     public const string TenantName = "Invalid tenant name";
     

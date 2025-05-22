@@ -6,6 +6,6 @@ namespace Mockbench.Shared.Models.Tenant
     {
         public int TotalTenants { get; set; }
 
-        public List<TenantBase> Tenants { get; set; }
+        public List<TenantBase> Tenants { get; set; } = new List<TenantBase>();
     }
 }

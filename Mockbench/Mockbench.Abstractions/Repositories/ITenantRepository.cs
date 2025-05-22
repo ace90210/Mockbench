@@ -6,7 +6,7 @@ namespace Mockbench.Abstractions.Repositories
     public interface ITenantRepository : IBaseRepository
     {
         Task<TenantBase> CreateTenantAsync(TenantBase newTenantDto);
-        Task<bool> DeleteTenantAsync(int id);
+        Task<bool> DeleteAsync(int id);
         Task<List<PathNameItem>> GetAllTakenTenantNameAndPathsAsync();
         Task<List<PathNameItem>> GetAllTakenTenantNameAndPathsAsync(int excludingId);
         Task<TenantListDto> GetAllTenantsListAsync(int skip, int take);

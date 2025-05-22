@@ -42,10 +42,11 @@ namespace Mockbench.Api.Controllers.Admin
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantListDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TenantListDto>> Get([FromQuery]int skip = 0, [FromQuery]int take = 1000)
+        public async Task<ActionResult<TenantListDto>> GetAll([FromQuery]int skip = 0, [FromQuery]int take = 1000)
         {
             _logger.LogInformation("GetById tenant list: skip={Skip}, take={Take}", skip, take);
-            return Ok(await _tenantRepository.GetAllTenantsListAsync(skip, take));
+            var result = await _tenantRepository.GetAllTenantsListAsync(skip, take);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -53,10 +54,10 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TenantBase>> GetTenantById(int id)
+        public async Task<ActionResult<TenantBase>> GetById(int id)
         {
             if (id <= 0)
-                return BadRequest(ErrorMessageConstants.TenantId);
+                return BadRequest(ErrorMessageConstants.TenantIdInvalid);
             
             var tenant = await _tenantRepository.GetTenantByIdAsync(id);
 
@@ -98,26 +99,44 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TenantBase>> CreateTenant([FromBody] TenantBase newTenant)
+        public async Task<ActionResult<TenantBase>> Create([FromBody] TenantBase newTenant)
         {
+            if (newTenant == null)
+                return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
+
             if (newTenant.Id != 0)
                 return BadRequest(ErrorMessageConstants.NewTenantId);
 
             var results = new List<ValidationResult>();
+            try
+            {
+                var existingTenantDetails = await _tenantRepository.GetAllTakenTenantNameAndPathsAsync();
 
-            var existingTenantDetails = await _tenantRepository.GetAllTakenTenantNameAndPathsAsync();
-            
-            bool isValid = GeneralHelper.TryValidateFullObject(newTenant, new ValidationContext(newTenant, 
-                new Dictionary<object, object?>()
-                        {
-                            { "Path", existingTenantDetails.Select(et => et.Path) },
-                            { "Name", existingTenantDetails.Select(et => et.Name) }
-                        }), results);
+                var paths = existingTenantDetails?.Select(ep => ep.Path) ?? Enumerable.Empty<string>();
+                var names = existingTenantDetails?.Select(ep => ep.Name) ?? Enumerable.Empty<string>();
 
-            if (!isValid)
-                return BadRequest(results.ToBadRequestResult());
+                bool isValid = GeneralHelper.TryValidateFullObject(newTenant, new ValidationContext(newTenant,
+                    new Dictionary<object, object?>()
+                    {
+                        { "Path", paths },
+                        { "Name", names }
+                    }), results);
 
-            return StatusCode(201, await _tenantRepository.CreateTenantAsync(newTenant));
+                if (!isValid)
+                    return BadRequest(results.ToBadRequestResult());
+
+                if(await _tenantRepository.GetTenantByPathAsync(newTenant.Path) is not null)
+                    return BadRequest(ErrorMessageConstants.TenantPathExists);
+
+                var createdTenant = await _tenantRepository.CreateTenantAsync(newTenant);
+
+                return Created($"api/tenant/{createdTenant.Id}", createdTenant);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating tenant: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
@@ -126,10 +145,10 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult> UpdateTenant(int id, [FromBody]TenantBase? updatedTenant)
+        public async Task<ActionResult> Update(int id, [FromBody]TenantBase? updatedTenant)
         {
             if (id == 0 )
-                return BadRequest(ErrorMessageConstants.TenantId);
+                return BadRequest(ErrorMessageConstants.TenantIdInvalid);
 
             if (updatedTenant == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
@@ -142,11 +161,14 @@ namespace Mockbench.Api.Controllers.Admin
             updatedTenant.Id = id;
             var existingTenantDetails = await _tenantRepository.GetAllTakenTenantNameAndPathsAsync(updatedTenant.Id);
 
-            bool isValid = GeneralHelper.TryValidateFullObject(updatedTenant, new ValidationContext(updatedTenant, 
+            var paths = existingTenantDetails?.Select(ep => ep.Path) ?? Enumerable.Empty<string>();
+            var names = existingTenantDetails?.Select(ep => ep.Name) ?? Enumerable.Empty<string>();
+
+            bool isValid = GeneralHelper.TryValidateFullObject(updatedTenant, new ValidationContext(updatedTenant,
                 new Dictionary<object, object?>()
                 {
-                    { "Path", existingTenantDetails.Select(et => et.Path) },
-                    { "Name", existingTenantDetails.Select(et => et.Name) }
+                    { "Path", paths },
+                    { "Name", names }
                 }), results);
 
             if (!isValid)
@@ -165,12 +187,12 @@ namespace Mockbench.Api.Controllers.Admin
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult> DeleteTenant(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             if (id <= 0)
-                return BadRequest(ErrorMessageConstants.TenantId);
+                return BadRequest(ErrorMessageConstants.TenantIdInvalid);
             
-            var deleted = await _tenantRepository.DeleteTenantAsync(id);
+            var deleted = await _tenantRepository.DeleteAsync(id);
 
             if (!deleted)
                 return NoContent();
