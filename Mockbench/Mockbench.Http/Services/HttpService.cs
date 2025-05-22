@@ -43,8 +43,6 @@ namespace Mockbench.Server.Services
 
             //await SendLiveFeedMessageAsync(context, endpointPath, microservice.Id);
 
-            var foundRequest = await _mockService.GetMatchingEndpointDtoAsync(matchingEndpoints, restType, context, endpointPath);
-
             bool shouldFallback = false;
             IActionResult? proxyResponse = null;
 
@@ -104,6 +102,8 @@ namespace Mockbench.Server.Services
                     _logger.LogWarning("Proxy request failed, falling back to mock response in failover mode.");
                 }               
             }
+
+            var foundRequest = await _mockService.GetMatchingEndpointDtoAsync(matchingEndpoints, restType, context, endpointPath);
 
             // If mock mode or simulation time applied
             if (matchingEndpoints.Microservice == null ||
@@ -213,7 +213,7 @@ namespace Mockbench.Server.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error sending debugger message: {ex.Message}");
+                    _logger.LogError($"Error sending debugger message: {ex.Message}");
                 }
             }
         }

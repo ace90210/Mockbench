@@ -14,6 +14,7 @@ using Moq;
 using RichardSzalay.MockHttp;
 using System.Net;
 using System.Text;
+
 namespace Mockbench.Services.Tests;
 
 public class ProxyServiceTests
