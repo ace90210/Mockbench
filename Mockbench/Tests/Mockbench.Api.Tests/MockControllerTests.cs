@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Abstractions.Services;
-using Mockbench.Server.Controllers.MockControllers;
+using Mockbench.Api.Controllers.Mock;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Models.Endpoint;
 using Mockbench.Shared.Models.Enum;
