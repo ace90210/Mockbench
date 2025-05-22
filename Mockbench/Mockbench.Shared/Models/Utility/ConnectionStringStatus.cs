@@ -1,10 +1,9 @@
-﻿namespace Mockbench.Shared.Models.Utility
+﻿namespace Mockbench.Shared.Models.Utility;
+
+public enum ConnectionStringStatus
 {
-    public enum ConnectionStringStatus
-    {
-        Untested,
-        Failed,
-        ConnectNoDatabase,
-        Success
-    }
+    Untested,
+    Failed,
+    ConnectNoDatabase,
+    Success
 }

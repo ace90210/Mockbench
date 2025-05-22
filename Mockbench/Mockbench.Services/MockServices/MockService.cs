@@ -199,7 +199,7 @@ namespace Mockbench.Services.MockServices
             return responseHeaders;
         }
 
-        public EndpointDto? FindExactEndpointAsync(MatchingEndpoints matchingEndpoints, HttpContext context, RestType restType, string endpointUrl, string requestBody)
+        public EndpointDto? FindExactEndpointAsync(MatchingEndpoints? matchingEndpoints, HttpContext context, RestType restType, string endpointUrl, string? requestBody)
         {
             if (matchingEndpoints == null || matchingEndpoints.Endpoints == null || matchingEndpoints.Endpoints.Count == 0)
             {

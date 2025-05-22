@@ -18,11 +18,13 @@ namespace Mockbench.Services.ProxyServices
     public class ProxyService : IProxyService
     {
         readonly IMockService _mockService;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly DeploymentConfiguration _deploymentConfiguration;
 
-        public ProxyService(IMockService mockService, IOptions<DeploymentConfiguration> deploymentConfigurationOptions)
+        public ProxyService(IMockService? mockService, IOptions<DeploymentConfiguration>? deploymentConfigurationOptions, IHttpClientFactory? httpClientFactory)
         {
             _mockService = mockService ?? throw new ArgumentNullException(nameof(mockService));
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _deploymentConfiguration = deploymentConfigurationOptions?.Value ?? throw new ArgumentNullException(nameof(deploymentConfigurationOptions));
         }
                
@@ -30,11 +32,11 @@ namespace Mockbench.Services.ProxyServices
         {
             if(matchingEndpoints == null) throw new ArgumentNullException(nameof(matchingEndpoints));
 
-            if (!string.IsNullOrWhiteSpace(matchingEndpoints.Microservice.TargetUrl))
+            if (!string.IsNullOrWhiteSpace(matchingEndpoints.Microservice?.TargetUrl))
             {
                 string queryString = context.Request.QueryString.ToString();
 
-                string requestBody = null, contentType = null;
+                string? requestBody = null, contentType = null;
 
                 if (restType != RestType.GET && restType != RestType.DELETE)
                 {
@@ -58,7 +60,6 @@ namespace Mockbench.Services.ProxyServices
                 stopWatch.Stop();
 
                 await _mockService.CreateMockResponseIfNotExistAsync(matchingEndpoints, context, restType, endpointPath, requestBody, response, stopWatch.Elapsed);
-
                 
                 if (response is not null)
                 {                
@@ -87,7 +88,7 @@ namespace Mockbench.Services.ProxyServices
             return new BadRequestObjectResult("Mock Microservice in Proxy mode but no target url is set");
         }
 
-        private async Task<HttpResponseMessage> SendRequestAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string requestBody, string contentType, string endpointPath)
+        private async Task<HttpResponseMessage?> SendRequestAsync(MatchingEndpoints matchingEndpoints, RestType restType, HttpContext context, string requestBody, string contentType, string endpointPath)
         {
             if (matchingEndpoints.Microservice is not null)
             {
@@ -113,7 +114,7 @@ namespace Mockbench.Services.ProxyServices
                         httpRequestMessage.Content = ConvertHelper.ToExactStringContent(requestBody, contentType);
                     }
                     
-                    using var client = new HttpClient();
+                    using var client = _httpClientFactory.CreateClient();
                     httpRequestMessage.RequestUri = new Uri(matchingEndpoints.Microservice.TargetUrl + endpointPath);
 
 

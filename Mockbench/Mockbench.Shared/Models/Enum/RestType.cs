@@ -1,11 +1,10 @@
-﻿namespace Mockbench.Shared.Models.Enum
+﻿namespace Mockbench.Shared.Models.Enum;
+
+public enum RestType
 {
-    public enum RestType
-    {
-        GET, // this will be 0
-        POST,
-        PUT,
-        PATCH,
-        DELETE
-    }
+    GET, // this will be 0
+    POST,
+    PUT,
+    PATCH,
+    DELETE
 }
