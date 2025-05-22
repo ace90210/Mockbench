@@ -25,7 +25,6 @@ namespace Mockbench.Data.Mappers
                 CreatedUtc = !createNew ? endpointDto.CreatedUtc : DateTime.Now,
                 RestType = (Shared.Models.Enum.RestType)endpointDto.RestType,
                 SimulateTime = endpointDto.SimulateTime,
-                TTL = endpointDto.Ttl,
                 MockResponses = endpointDto.MockResponses?.ToEntities(),
                 QueryParameters = endpointDto.QueryParameters?.ToEntities(),
                 EndpointHeaders = endpointDto.EndpointHeaders?.ToEntities()
@@ -49,7 +48,6 @@ namespace Mockbench.Data.Mappers
                 Enabled = endpointDto.Enabled,
                 RestType = endpointDto.RestType,
                 SimulateTime = endpointDto.SimulateTime,
-                TTL = endpointDto.Ttl,
                 MockResponses = endpointDto.Responses?.ToEntities(),
                 QueryParameters = endpointDto.QueryParameters?.ToEntities(),
                 EndpointHeaders = endpointDto.EndpointHeaders?.ToEntities(),
@@ -79,7 +77,6 @@ namespace Mockbench.Data.Mappers
                 CreatedUtc = !createNew ? endpoint.CreatedUtc : DateTime.Now,
                 RestType = endpoint.RestType,
                 SimulateTime = endpoint.SimulateTime,
-                Ttl = endpoint.TTL,
                 MockResponses = endpoint.MockResponses?.ToDtos(),
                 QueryParameters = endpoint.QueryParameters?.ToDtos(),
                 EndpointHeaders = endpoint.EndpointHeaders?.ToDtos()
@@ -104,7 +101,6 @@ namespace Mockbench.Data.Mappers
                 Enabled = endpoint.Enabled,
                 RestType = endpoint.RestType,
                 SimulateTime = endpoint.SimulateTime,
-                Ttl = endpoint.TTL,
                 Responses = endpoint.MockResponses?.ToDtos(),
                 QueryParameters = endpoint.QueryParameters?.ToDtos(),
                 EndpointHeaders = endpoint.EndpointHeaders?.ToDtos(),
@@ -129,7 +125,6 @@ namespace Mockbench.Data.Mappers
                 Enabled = endpoint.Enabled,
                 RestType = (Shared.Models.Enum.RestType)endpoint.RestType,
                 SimulateTime = endpoint.SimulateTime,
-                Ttl = endpoint.Ttl,
                 Responses = endpoint.MockResponses,
                 QueryParameters = endpoint.QueryParameters,
                 EndpointHeaders = endpoint.EndpointHeaders,
@@ -155,7 +150,6 @@ namespace Mockbench.Data.Mappers
             baseEndpoint.Enabled = endpointDto.Enabled;
             baseEndpoint.RestType = endpointDto.RestType;
             baseEndpoint.SimulateTime = endpointDto.SimulateTime;
-            baseEndpoint.TTL = endpointDto.Ttl;
             baseEndpoint.CreatedUtc = endpointDto.CreatedUtc ?? DateTime.UtcNow;
 
             MergeResponses(baseEndpoint, endpointDto.Responses);

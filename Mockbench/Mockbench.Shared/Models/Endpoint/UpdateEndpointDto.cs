@@ -26,8 +26,6 @@ namespace Mockbench.Shared.Models.Endpoint
         public RestType RestType { get; set; }
 
         public DateTime? SimulateTime { get; set; }
-
-        public TimeSpan? Ttl { get; set; }
         
         [MaxLength(10_000_000, ErrorMessage = "Body exceeded max length {0}")]
         public string FromBody { get; set; }

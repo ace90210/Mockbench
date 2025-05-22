@@ -23,8 +23,6 @@ public class EndpointDto : ICopyTo<EndpointDto>, IValidatableObject
     public bool Enabled { get; set; } = true;
 
     public RestType? RestType { get; set; } = Mockbench.Shared.Models.Enum.RestType.GET;
-
-    public TimeSpan? Ttl { get; set; }
     
     [MaxLength(10_000_000, ErrorMessage = "Body exceeded max length {0}")]
     public string? FromBody { get; set; }
@@ -64,7 +62,6 @@ public class EndpointDto : ICopyTo<EndpointDto>, IValidatableObject
         target.MockBehaviour = MockBehaviour;
         target.Enabled = Enabled;
         target.RestType = RestType;
-        target.Ttl = Ttl;
         target.FromBody = FromBody;
         target.SimulateTime = SimulateTime;
         target.CreatedUtc = CreatedUtc;

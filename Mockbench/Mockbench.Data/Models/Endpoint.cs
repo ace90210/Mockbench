@@ -32,31 +32,6 @@ namespace Mockbench.Data.Models
 
         public string? FromBody { get; set; }
 
-        [Obsolete("Property 'Duration' should be used instead.")]
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        // ReSharper disable once InconsistentNaming
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public long? TTLTicks { get; set; }
-
-        // EF doesnt handle timespans greater than 24 hours correctly
-        // Workaround to store ticks and convert
-        [NotMapped]
-        // ReSharper disable once InconsistentNaming
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public TimeSpan? TTL
-        {
-#pragma warning disable 618
-            get
-            {
-                if (TTLTicks == null)
-                    return null;
-                return new TimeSpan((long)TTLTicks);
-            }
-            set { TTLTicks = value?.Ticks; }
-#pragma warning restore 618
-        }
-
         private DateTime _createdUtc = DateTime.Now;
         [Required, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedUtc {

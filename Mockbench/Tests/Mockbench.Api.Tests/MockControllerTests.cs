@@ -96,7 +96,7 @@ public class MockControllerTests
     }
 
     [Fact]
-    public async Task ProxyAsync_ValidRequest_ReturnsResponse()
+    public async Task ProxyAsync_ValidRequest_Get_ReturnsResponse()
     {
         // Arrange
         var expectedResult = new OkResult();
@@ -125,6 +125,122 @@ public class MockControllerTests
     }
 
     [Fact]
+    public async Task ProxyAsync_ValidRequest_Post_ReturnsResponse()
+    {
+        // Arrange
+        var expectedResult = new OkResult();
+
+        var matchingEndpoint = new MatchingEndpoints
+        {
+            Environment = new EnvironmentDto { Enabled = true },
+            Microservice = new MicroserviceDto { Enabled = true }
+        };
+
+        _endpointRepositoryMock
+            .Setup(x => x.GetAllMatchingEndpointsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(matchingEndpoint);
+
+        _httpServiceMock
+            .Setup(x => x.ProcessRequestAsync(It.IsAny<MatchingEndpoints>(), RestType.POST, It.IsAny<HttpContext>(), It.IsAny<string>()))
+            .ReturnsAsync(expectedResult);
+
+        SetRequestMethod("POST");
+
+        // Act
+        var result = await _controller.ProxyAsync("t", "e/m/s");
+
+        // Assert
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public async Task ProxyAsync_ValidRequest_Put_ReturnsResponse()
+    {
+        // Arrange
+        var expectedResult = new OkResult();
+
+        var matchingEndpoint = new MatchingEndpoints
+        {
+            Environment = new EnvironmentDto { Enabled = true },
+            Microservice = new MicroserviceDto { Enabled = true }
+        };
+
+        _endpointRepositoryMock
+            .Setup(x => x.GetAllMatchingEndpointsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(matchingEndpoint);
+
+        _httpServiceMock
+            .Setup(x => x.ProcessRequestAsync(It.IsAny<MatchingEndpoints>(), RestType.PUT, It.IsAny<HttpContext>(), It.IsAny<string>()))
+            .ReturnsAsync(expectedResult);
+
+        SetRequestMethod("PUT");
+
+        // Act
+        var result = await _controller.ProxyAsync("t", "e/m/s");
+
+        // Assert
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public async Task ProxyAsync_ValidRequest_Patch_ReturnsResponse()
+    {
+        // Arrange
+        var expectedResult = new OkResult();
+
+        var matchingEndpoint = new MatchingEndpoints
+        {
+            Environment = new EnvironmentDto { Enabled = true },
+            Microservice = new MicroserviceDto { Enabled = true }
+        };
+
+        _endpointRepositoryMock
+            .Setup(x => x.GetAllMatchingEndpointsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(matchingEndpoint);
+
+        _httpServiceMock
+            .Setup(x => x.ProcessRequestAsync(It.IsAny<MatchingEndpoints>(), RestType.PATCH, It.IsAny<HttpContext>(), It.IsAny<string>()))
+            .ReturnsAsync(expectedResult);
+
+        SetRequestMethod("PATCH");
+
+        // Act
+        var result = await _controller.ProxyAsync("t", "e/m/s");
+
+        // Assert
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public async Task ProxyAsync_ValidRequest_Delete_ReturnsResponse()
+    {
+        // Arrange
+        var expectedResult = new OkResult();
+
+        var matchingEndpoint = new MatchingEndpoints
+        {
+            Environment = new EnvironmentDto { Enabled = true },
+            Microservice = new MicroserviceDto { Enabled = true }
+        };
+
+        _endpointRepositoryMock
+            .Setup(x => x.GetAllMatchingEndpointsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(matchingEndpoint);
+
+        _httpServiceMock
+            .Setup(x => x.ProcessRequestAsync(It.IsAny<MatchingEndpoints>(), RestType.DELETE, It.IsAny<HttpContext>(), It.IsAny<string>()))
+            .ReturnsAsync(expectedResult);
+
+        SetRequestMethod("DELETE");
+
+        // Act
+        var result = await _controller.ProxyAsync("t", "e/m/s");
+
+        // Assert
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
     public async Task ProxyAsync_NullResponse_ReturnsNotFound()
     {
         // Arrange
@@ -142,7 +258,7 @@ public class MockControllerTests
             .Setup(static x => x.ProcessRequestAsync(It.IsAny<MatchingEndpoints>(), RestType.GET, It.IsAny<HttpContext>(), It.IsAny<string>()))
             .ReturnsAsync((IActionResult?)null);
 
-        SetRequestMethod("GET");
+        SetRequestMethod("GET"); // This can remain GET as the null response is the focus
 
         // Act
         var result = await _controller.ProxyAsync("t", "e/m/s");
