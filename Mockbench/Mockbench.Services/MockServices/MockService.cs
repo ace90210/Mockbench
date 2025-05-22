@@ -281,12 +281,7 @@ namespace Mockbench.Services.MockServices
         private static bool CompareQueryParameters(QueryString queryString, List<QueryParameterDto> queryParameters)
         {
             var requestQueryParameters = queryString.Value.TrimStart('?').Split("&").ToHashSet();
-
-            if (requestQueryParameters.Count != queryParameters.Count)
-            {
-                return false;
-            }
-
+            
             foreach (var queryParameter in queryParameters.Where(qp => !qp.Ignore))
             {
                 if (!requestQueryParameters.Contains($"{queryParameter.Name}={queryParameter.Value}"))
