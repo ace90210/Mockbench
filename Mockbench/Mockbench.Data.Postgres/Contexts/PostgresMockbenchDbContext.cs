@@ -9,6 +9,8 @@ namespace Mockbench.Data.Postgres.Contexts;
 
 public class PostgresMockbenchDbContext : MockbenchDbContext
 {
+    public override bool IsRelationalDatabase => true;
+
     public PostgresMockbenchDbContext(
         DbContextOptions<PostgresMockbenchDbContext> options, 
         IOptions<DeploymentConfiguration> deploymentConfigurationOptions)

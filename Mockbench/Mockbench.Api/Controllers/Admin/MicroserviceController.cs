@@ -45,16 +45,13 @@ namespace Mockbench.Api.Controllers.Admin
             return Ok(service);
         }
 
-        [HttpGet("findbypath/{environmentId}/{microservicePath}")]
+        [HttpGet("findbypath/{microservicePath}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MicroserviceDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<MicroserviceDto>> Get(int environmentId, string? microservicePath)
+        public async Task<ActionResult<MicroserviceDto>> GetByPath(string? microservicePath)
         {
-            if (environmentId <= 0)
-                return BadRequest(ErrorMessageConstants.EnvironmentId);
-            
             if (string.IsNullOrWhiteSpace(microservicePath))
                 return BadRequest(ErrorMessageConstants.MicroservicePath);
             
@@ -72,14 +69,6 @@ namespace Mockbench.Api.Controllers.Admin
         public async Task<ActionResult<IEnumerable<MicroserviceDto>>> GetAll()
         {
             return Ok(await _microserviceRepository.GetMicroservicesAsync());
-        }
-
-        [HttpGet("searchresultlist")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MicroserviceDto>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<IEnumerable<MicroserviceDto>>> GetAllMicroserviceSearchResults()
-        {
-            return Ok(await _microserviceRepository.GetAllMicroserviceSearchResults());
         }
 
         [HttpPost]

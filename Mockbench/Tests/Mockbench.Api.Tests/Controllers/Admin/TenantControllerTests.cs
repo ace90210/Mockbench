@@ -8,7 +8,7 @@ using Mockbench.Shared.Models.Tenant;
 using Mockbench.Shared.Models.Utility; // Required for BadRequestResultDto
 using Moq;
 
-namespace Mockbench.Api.Tests.Admin;
+namespace Mockbench.Api.Tests.Controllers.Admin;
 
 public class TenantControllerTests
 {
@@ -34,10 +34,10 @@ public class TenantControllerTests
     public async Task GetAll_ReturnsOkObjectResultWithTenants()
     {
         // Arrange
-        var expectedTenants = new List<TenantBase>
+        var expectedTenants = new List<TenantBaseDto>
         {
-            new TenantBase { Id = 1, Name = "Tenant1", Path = "tenant1path" }, //
-            new TenantBase { Id = 2, Name = "Tenant2", Path = "tenant2path" }  //
+            new TenantBaseDto { Id = 1, Name = "Tenant1", Path = "tenant1path" }, //
+            new TenantBaseDto { Id = 2, Name = "Tenant2", Path = "tenant2path" }  //
         };
 
         var tenantListDto = new TenantListDto
@@ -80,7 +80,7 @@ public class TenantControllerTests
     {
         // Arrange
         var tenantId = 1;
-        var expectedTenant = new TenantBase { Id = tenantId, Name = "TestTenant", Path = "testtenant" }; //
+        var expectedTenant = new TenantBaseDto { Id = tenantId, Name = "TestTenant", Path = "testtenant" }; //
         _tenantRepositoryMock.Setup(repo => repo.GetTenantByIdAsync(tenantId))
             .ReturnsAsync(expectedTenant);
 
@@ -89,7 +89,7 @@ public class TenantControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var actualTenant = Assert.IsType<TenantBase>(okResult.Value);
+        var actualTenant = Assert.IsType<TenantBaseDto>(okResult.Value);
         Assert.Equal(expectedTenant.Id, actualTenant.Id);
         Assert.Equal(expectedTenant.Name, actualTenant.Name);
     }
@@ -114,10 +114,110 @@ public class TenantControllerTests
         // Arrange
         var tenantId = 1;
         _tenantRepositoryMock.Setup(repo => repo.GetTenantByIdAsync(tenantId))
-            .ReturnsAsync((TenantBase)null);
+            .ReturnsAsync((TenantBaseDto)null);
 
         // Act
         var result = await _controller.GetById(tenantId); //
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result.Result);
+    }
+
+    // --- GetByPath Tests ---
+
+    [Fact]
+    public async Task GetByPath_ValidId_ReturnsOkObjectResultWithTenant()
+    {
+        // Arrange
+        var tenantPath = "testtenant";
+        var expectedTenant = new TenantBaseDto { Id = 1, Name = "tenant", Path = tenantPath }; //
+        _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync(tenantPath))
+            .ReturnsAsync(expectedTenant);
+
+        // Act
+        var result = await _controller.GetByPath(tenantPath);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var actualTenant = Assert.IsType<TenantBaseDto>(okResult.Value);
+        Assert.Equal(expectedTenant.Id, actualTenant.Id);
+        Assert.Equal(expectedTenant.Name, actualTenant.Name);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public async Task GetByPath_InvalidId_ReturnsBadRequest(string? tenantPath)
+    {
+        // Act
+        var result = await _controller.GetByPath(tenantPath); //
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal(ErrorMessageConstants.TenantPath, badRequestResult.Value); //
+    }
+
+    [Fact]
+    public async Task GetByPath_TenantNotFound_ReturnsNotFound()
+    {
+        // Arrange
+        string tenant = "test";
+        _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync("test"))
+            .ReturnsAsync((TenantBaseDto)null);
+
+        // Act
+        var result = await _controller.GetByPath(tenant); //
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result.Result);
+    }
+
+    // --- GetByName Tests ---
+
+    [Fact]
+    public async Task GetByName_ValidId_ReturnsOkObjectResultWithTenant()
+    {
+        // Arrange
+        var tenant = "TestTenant";
+        var expectedTenant = new TenantBaseDto { Id = 1, Name = tenant, Path = "testtenant" }; //
+        _tenantRepositoryMock.Setup(repo => repo.GetTenantByNameAsync(tenant))
+            .ReturnsAsync(expectedTenant);
+
+        // Act
+        var result = await _controller.GetByName(tenant);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var actualTenant = Assert.IsType<TenantBaseDto>(okResult.Value);
+        Assert.Equal(expectedTenant.Id, actualTenant.Id);
+        Assert.Equal(expectedTenant.Name, actualTenant.Name);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public async Task GetByName_InvalidId_ReturnsBadRequest(string? tenant)
+    {
+        // Act
+        var result = await _controller.GetByName(tenant); //
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal(ErrorMessageConstants.TenantName, badRequestResult.Value); //
+    }
+
+    [Fact]
+    public async Task GetByName_TenantNotFound_ReturnsNotFound()
+    {
+        // Arrange
+        string tenant = "test";
+        _tenantRepositoryMock.Setup(repo => repo.GetTenantByNameAsync("test"))
+            .ReturnsAsync((TenantBaseDto)null);
+
+        // Act
+        var result = await _controller.GetByName(tenant); //
 
         // Assert
         Assert.IsType<NotFoundResult>(result.Result);
@@ -128,8 +228,8 @@ public class TenantControllerTests
     public async Task Create_ValidDto_ReturnsCreatedAtActionResult()
     {
         // Arrange
-        var tenantDto = new TenantBase { Name = "NewTenant", Path = "newtenantpath" }; //
-        var createdTenantDto = new TenantBase { Id = 1, Name = "NewTenant", Path = "newtenantpath" }; //
+        var tenantDto = new TenantBaseDto { Name = "NewTenant", Path = "newtenantpath" }; //
+        var createdTenantDto = new TenantBaseDto { Id = 1, Name = "NewTenant", Path = "newtenantpath" }; //
         _tenantRepositoryMock.Setup(repo => repo.CreateTenantAsync(tenantDto))
            
             .ReturnsAsync(createdTenantDto);
@@ -140,7 +240,7 @@ public class TenantControllerTests
         // Assert
         var createdAtActionResult = Assert.IsType<CreatedResult>(result.Result);
         Assert.Equal($"api/tenant/{createdTenantDto.Id}", createdAtActionResult.Location);
-        var actualDto = Assert.IsType<TenantBase>(createdAtActionResult.Value);
+        var actualDto = Assert.IsType<TenantBaseDto>(createdAtActionResult.Value);
         Assert.Equal(createdTenantDto.Path, actualDto.Path);
     }
 
@@ -160,7 +260,7 @@ public class TenantControllerTests
     public async Task Create_TenantWithSamePathExists_ReturnsConflict()
     {
         // Arrange
-        var tenantDto = new TenantBase { Name = "NewTenant", Path = "existingpath" }; //
+        var tenantDto = new TenantBaseDto { Name = "NewTenant", Path = "existingpath" }; //
         _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync(tenantDto.Path)).ReturnsAsync(tenantDto);
 
         // Act
@@ -176,7 +276,7 @@ public class TenantControllerTests
     public async Task Create_InvalidDto_NameMissing_ReturnsBadRequest()
     {
         // Arrange
-        var tenantDto = new TenantBase { Path = "testpath" };
+        var tenantDto = new TenantBaseDto { Path = "testpath" };
         _controller.ModelState.AddModelError("Name", "The Name field is required.");
 
         // Act
@@ -191,8 +291,8 @@ public class TenantControllerTests
     public async Task Create_RepositoryReturnsNull_ReturnsInternalServerError()
     {
         // Arrange
-        var tenantDto = new TenantBase { Name = "NewTenant", Path = "newtenantpath" }; //
-        _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync(tenantDto.Path)).ReturnsAsync((TenantBase)null);
+        var tenantDto = new TenantBaseDto { Name = "NewTenant", Path = "newtenantpath" }; //
+        _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync(tenantDto.Path)).ReturnsAsync((TenantBaseDto)null);
         _tenantRepositoryMock.Setup(repo => repo.CreateTenantAsync(tenantDto))
             .Throws(new Exception(ErrorMessageConstants.TenantIdInvalid)); 
 
@@ -211,10 +311,10 @@ public class TenantControllerTests
     {
         // Arrange
         var tenantId = 1;
-        var tenantDto = new TenantBase { Id = tenantId, Name = "UpdatedTenant", Path = "updatedpath" }; 
+        var tenantDto = new TenantBaseDto { Id = tenantId, Name = "UpdatedTenant", Path = "updatedpath" }; 
         _tenantRepositoryMock.Setup(repo => repo.GetTenantByIdAsync(tenantId)).ReturnsAsync(tenantDto); 
 
-        _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync(tenantDto.Path)).ReturnsAsync((TenantBase)null); 
+        _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync(tenantDto.Path)).ReturnsAsync((TenantBaseDto)null); 
 
         _tenantRepositoryMock.Setup(repo => repo.UpdateTenantBaseValuesAsync(tenantDto))
             .ReturnsAsync(true);
@@ -224,7 +324,7 @@ public class TenantControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var actualDto = Assert.IsType<TenantBase>(okResult.Value);
+        var actualDto = Assert.IsType<TenantBaseDto>(okResult.Value);
         Assert.Equal(tenantDto.Name, actualDto.Name);
     }
 
@@ -233,7 +333,7 @@ public class TenantControllerTests
     {
         // Arrange
         var tenantId = 0;
-        var tenantDto = new TenantBase { Name = "Test", Path = "testpath" }; //
+        var tenantDto = new TenantBaseDto { Name = "Test", Path = "testpath" }; //
 
         // Act
         var result = await _controller.Update(tenantId, tenantDto); //
@@ -262,7 +362,7 @@ public class TenantControllerTests
     {
         // Arrange
         var tenantId = 1;
-        var tenantDto = new TenantBase { Id = 2, Name = "Test", Path = "testpath" }; //
+        var tenantDto = new TenantBaseDto { Id = 2, Name = "Test", Path = "testpath" }; //
 
         // Act
         var result = await _controller.Update(tenantId, tenantDto); //
@@ -277,7 +377,7 @@ public class TenantControllerTests
     {
         // Arrange
         var tenantId = 1;
-        var tenantDto = new TenantBase { Id = tenantId, Path = "testpath" }; // Name is required
+        var tenantDto = new TenantBaseDto { Id = tenantId, Path = "testpath" }; // Name is required
         _controller.ModelState.AddModelError("Name", "The Name field is required.");
 
         // Act
@@ -293,9 +393,9 @@ public class TenantControllerTests
     {
         // Arrange
         var tenantId = 1;
-        var tenantDto = new TenantBase { Id = tenantId, Name = "UpdatedTenant", Path = "updatedpath" }; //
+        var tenantDto = new TenantBaseDto { Id = tenantId, Name = "UpdatedTenant", Path = "updatedpath" }; //
         _tenantRepositoryMock.Setup(repo => repo.GetTenantByIdAsync(tenantId)).ReturnsAsync(tenantDto);
-        _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync(tenantDto.Path)).ReturnsAsync((TenantBase)null);
+        _tenantRepositoryMock.Setup(repo => repo.GetTenantByPathAsync(tenantDto.Path)).ReturnsAsync((TenantBaseDto)null);
         _tenantRepositoryMock.Setup(repo => repo.UpdateTenantBaseValuesAsync(tenantDto))
             .ReturnsAsync(false);
 

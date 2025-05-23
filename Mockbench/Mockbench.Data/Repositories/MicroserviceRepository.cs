@@ -103,34 +103,6 @@ namespace Mockbench.Data.Repositories
             });
         }
 
-        public async Task<IEnumerable<MicroserviceDto>> GetAllMicroserviceSearchResults()
-        {
-            var microservices = await _context.Microservices
-                                                            .Include(m => m.Headers)
-                                                            .Include(m => m.Endpoints)
-                                                            .AsSplitQuery()
-                                                            .ToListAsync();
-
-            return microservices.Select(ms => new MicroserviceDto()
-            {
-                Id = ms.Id,
-                Name = ms.Name,
-                Path = ms.Path,
-                Enabled = ms.Enabled,
-                PassThroughTenant = ms.PassThroughTenant,
-                FakeDelay = ms.FakeDelay,
-                TargetUrl = ms.TargetUrl,
-                ProxyMode = ms.ProxyMode,
-                RandomiseMockResult = ms.RandomiseMockResult,
-                HeadersMode = ms.HeadersMode,
-                InjectForwardingHeadersOnRequest = ms.InjectForwardingHeadersOnRequest,
-                SimulateTime = ms.SimulateTime,
-                Headers = ms.Headers.ToDtos(),
-                Endpoints = ms.Endpoints.ToDtos(false)
-            });
-            
-        }
-
         public async Task<MicroserviceDto> FindMicroservice(string tenantPath, string environmentPath, string path)
         {
             if (string.IsNullOrWhiteSpace(tenantPath) || string.IsNullOrWhiteSpace(environmentPath) || string.IsNullOrWhiteSpace(path))

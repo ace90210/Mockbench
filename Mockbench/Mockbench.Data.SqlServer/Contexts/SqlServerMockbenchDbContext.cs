@@ -9,6 +9,8 @@ namespace Mockbench.Data.SqlServer.Contexts;
 
 public class SqlServerMockbenchDbContext : MockbenchDbContext
 {
+    public override bool IsRelationalDatabase => true;
+
     public SqlServerMockbenchDbContext(
         DbContextOptions<SqlServerMockbenchDbContext> options, 
         IOptions<DeploymentConfiguration> deploymentConfigurationOptions)

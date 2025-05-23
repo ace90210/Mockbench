@@ -21,9 +21,9 @@ public class EnvironmentDto : IValidatableObject
     public DateTime? SimulateTime { get; set; }
 
     [MaxLength(250, ErrorMessage = "field exceeded max length {0}")]
-    public string DefaultHealthCheckUrl { get; set; }
+    public string? DefaultHealthCheckUrl { get; set; }
 
-    public List<EnvironmentVariableDto> Variables { get; set; }
+    public List<EnvironmentVariableDto>? Variables { get; set; }
 
     public bool IsValid(IDictionary<object, object> validationDictionary = null)
     {

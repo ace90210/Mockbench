@@ -41,7 +41,7 @@ namespace Mockbench.Data.Models
 
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public List<ResponseHeader> Headers { get; set; }
+        public List<ResponseHeader>? Headers { get; set; }
 
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once UnusedAutoPropertyAccessor.Global

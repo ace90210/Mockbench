@@ -6,7 +6,7 @@ namespace Mockbench.Shared.Models.Endpoint;
 
 public class MatchingEndpoints
 {
-    public TenantBase? Tenant { get; set; }
+    public TenantBaseDto? Tenant { get; set; }
 
     public string? TenantPath { get; set; }
 

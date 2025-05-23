@@ -192,7 +192,7 @@ namespace Mockbench.Data.Repositories
             {
                 DatabaseType = _deploymentConfiguration.DatabaseConfig.Provider.ToString(),
                 CodeVersion = SharedConstants.MockbenchVersion,
-                AppliedMigrations = await _context.Database.GetAppliedMigrationsAsync()
+                AppliedMigrations = _context.IsRelationalDatabase ? await _context.Database.GetAppliedMigrationsAsync() : null,
             };
 
             var tenants = _context.Tenants.ToList();
@@ -200,7 +200,7 @@ namespace Mockbench.Data.Repositories
             tenants.ForEach(t =>
             {
                 t.Id = 0;
-                t.Variables.ForEach(v =>
+                t.Variables?.ForEach(v =>
                 {
                     v.Id = 0;
                 });
@@ -211,7 +211,7 @@ namespace Mockbench.Data.Repositories
             environments.ForEach(e =>
             {
                 e.ID = 0;
-                e.Variables.ForEach(v =>
+                e.Variables?.ForEach(v =>
                 {
                     v.Id = 0;
                 });
@@ -277,7 +277,7 @@ namespace Mockbench.Data.Repositories
         public async Task<bool> ImportDatabase(FullDatabaseDto import, bool skipDuplicates)
         {
             if (import.Tenants == null)
-                import.Tenants = new List<TenantBase>();
+                import.Tenants = new List<TenantBaseDto>();
 
             if (import.Environments == null)
                 import.Environments = new List<EnvironmentDto>();

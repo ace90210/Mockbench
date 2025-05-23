@@ -24,21 +24,7 @@ namespace Mockbench.Api.Controllers.Admin
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
         }
-
-        [HttpGet("list")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantNameList))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TenantNameList>> GetNameList([FromQuery] int skip = 0, [FromQuery] int take = 1000)
-        {            
-            var tenantList = await _tenantRepository.GetAllTenantsListAsync(skip, take);
-            var tenantNameList = new TenantNameList()
-            {
-                TenantNames = tenantList.Tenants.Select(t => new EntityKeyName() { Id = t.Id, Name = t.Name }).ToList()
-            };
-            
-            return Ok(tenantNameList);
-        }
-
+        
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantListDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
@@ -50,11 +36,11 @@ namespace Mockbench.Api.Controllers.Admin
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantBase))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantBaseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TenantBase>> GetById(int id)
+        public async Task<ActionResult<TenantBaseDto>> GetById(int id)
         {
             if (id <= 0)
                 return BadRequest(ErrorMessageConstants.TenantIdInvalid);
@@ -65,11 +51,11 @@ namespace Mockbench.Api.Controllers.Admin
         }
 
         [HttpGet("findbyname/{tenantName}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantBase))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantBaseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TenantBase>> GetByName(string tenantName)
+        public async Task<ActionResult<TenantBaseDto>> GetByName(string? tenantName)
         {
             if (string.IsNullOrWhiteSpace(tenantName))
                 return BadRequest(ErrorMessageConstants.TenantName);
@@ -80,11 +66,11 @@ namespace Mockbench.Api.Controllers.Admin
         }
 
         [HttpGet("findbypath/{path}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantBase))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantBaseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TenantBase>> GetByPath(string path)
+        public async Task<ActionResult<TenantBaseDto>> GetByPath(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
                 return BadRequest(ErrorMessageConstants.TenantPath);
@@ -95,11 +81,11 @@ namespace Mockbench.Api.Controllers.Admin
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(TenantBase))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(TenantBaseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult<TenantBase>> Create([FromBody] TenantBase newTenant)
+        public async Task<ActionResult<TenantBaseDto>> Create([FromBody] TenantBaseDto newTenant)
         {
             if (newTenant == null)
                 return BadRequest(ErrorMessageConstants.InvalidOrMissingBody);
@@ -140,12 +126,12 @@ namespace Mockbench.Api.Controllers.Admin
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantBase))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TenantBaseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResultDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<ActionResult> Update(int id, [FromBody]TenantBase? updatedTenant)
+        public async Task<ActionResult> Update(int id, [FromBody]TenantBaseDto? updatedTenant)
         {
             if (id == 0 )
                 return BadRequest(ErrorMessageConstants.TenantIdInvalid);

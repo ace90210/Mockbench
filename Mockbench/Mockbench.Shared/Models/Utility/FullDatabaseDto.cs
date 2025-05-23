@@ -8,7 +8,7 @@ namespace Mockbench.Shared.Models.Utility;
 
 public class FullDatabaseDto : IValidatableObject
 {
-    public IEnumerable<TenantBase> Tenants { get; set; }
+    public IEnumerable<TenantBaseDto> Tenants { get; set; }
 
     public IEnumerable<EnvironmentDto> Environments { get; set; }
 
@@ -30,7 +30,7 @@ public class FullDatabaseDto : IValidatableObject
         foreach (var validationResult in ValidateMicroservices(Microservices?.ToList(), validationContext)) yield return validationResult;
     }
 
-    private IEnumerable<ValidationResult> ValidateTenants(List<TenantBase> envinoments, ValidationContext validationContext)
+    private IEnumerable<ValidationResult> ValidateTenants(List<TenantBaseDto> envinoments, ValidationContext validationContext)
     {
         if (envinoments?.Count > 0)
         {

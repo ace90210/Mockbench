@@ -1,5 +1,4 @@
-﻿using Mockbench.Shared.Models.Endpoint;
-using Mockbench.Shared.Models.General;
+﻿using Mockbench.Shared.Models.General;
 using Mockbench.Shared.Models.Microservice;
 
 namespace Mockbench.Abstractions.Repositories
@@ -12,7 +11,6 @@ namespace Mockbench.Abstractions.Repositories
         Task<List<PathNameItem>> GetAllMicroservicePathAndNames();
         Task<List<PathNameItem>> GetAllMicroservicePathAndNames(int excludingMicroserviceId);
         Task<IEnumerable<MicroserviceDto>> GetMicroservicesAsync();
-        Task<IEnumerable<MicroserviceDto>> GetAllMicroserviceSearchResults();
         Task<MicroserviceDto> GetMicroserviceByIdAsync(int id);
         Task<MicroserviceDto> GetMicroservice(string microservicePath);
         Task<bool> UpdateMicroserviceAsync(int id, MicroserviceDto updatedMicroservice);

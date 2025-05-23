@@ -44,11 +44,11 @@ namespace Mockbench.Data.Models
             }
         }
         
-        public List<QueryParameter> QueryParameters { get; set; }
+        public List<QueryParameter>? QueryParameters { get; set; }
 
-        public List<MockResponse> MockResponses { get; set; }
+        public List<MockResponse>? MockResponses { get; set; }
 
-        public List<EndpointHeader> EndpointHeaders { get; set; }
+        public List<EndpointHeader>? EndpointHeaders { get; set; }
 
         public int? TenantId { get; set; }
 

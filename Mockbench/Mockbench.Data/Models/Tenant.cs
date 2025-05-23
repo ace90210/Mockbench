@@ -19,8 +19,8 @@ namespace Mockbench.Data.Models
 
         public DateTime? SimulateTime { get; set; }
 
-        public List<TenantVariable> Variables { get; set; } = new List<TenantVariable>();
+        public List<TenantVariable>? Variables { get; set; } = new List<TenantVariable>();
 
-        public List<Endpoint> Endpoints { get; set; }
+        public List<Endpoint>? Endpoints { get; set; }
     }
 }

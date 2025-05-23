@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockbench.Http.Tests", "Moc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockbench.Api.Tests", "Mockbench\Tests\Mockbench.Api.Tests\Mockbench.Api.Tests.csproj", "{5F9EB6DC-DB92-84A5-AB0D-6EB03816783A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockbench.Data.Tests", "Mockbench\Tests\Mockbench.Data.Tests\Mockbench.Data.Tests.csproj", "{8D6BE7AE-0FDF-4F51-BC8D-21BC6EAFEA9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,10 @@ Global
 		{5F9EB6DC-DB92-84A5-AB0D-6EB03816783A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F9EB6DC-DB92-84A5-AB0D-6EB03816783A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F9EB6DC-DB92-84A5-AB0D-6EB03816783A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D6BE7AE-0FDF-4F51-BC8D-21BC6EAFEA9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D6BE7AE-0FDF-4F51-BC8D-21BC6EAFEA9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D6BE7AE-0FDF-4F51-BC8D-21BC6EAFEA9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D6BE7AE-0FDF-4F51-BC8D-21BC6EAFEA9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -115,6 +121,7 @@ Global
 		{184A4745-762A-42ED-9C61-AA16CCECAC2D} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{1EF0A6AF-4BA7-460E-A507-51653334BE20} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{5F9EB6DC-DB92-84A5-AB0D-6EB03816783A} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{8D6BE7AE-0FDF-4F51-BC8D-21BC6EAFEA9D} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A9CD1156-DB5A-420C-A807-6FE3963CC411}

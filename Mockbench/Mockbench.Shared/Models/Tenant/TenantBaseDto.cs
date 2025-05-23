@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Mockbench.Shared.Models.Endpoint;
 
 namespace Mockbench.Shared.Models.Tenant;
 
-public class TenantBase : IValidatableObject
+public class TenantBaseDto : IValidatableObject
 {
     public int Id { get; set; }
 
@@ -17,7 +18,9 @@ public class TenantBase : IValidatableObject
 
     public DateTime? SimulateTime { get; set; }
 
-    public List<TenantVariableDto> Variables { get; set; }
+    public List<EndpointDto>? Endpoints { get; set; }
+
+    public List<TenantVariableDto>? Variables { get; set; }
 
     /// <summary>
     /// Validates tenant

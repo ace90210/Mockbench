@@ -69,7 +69,7 @@ public class MockServiceTests
     private MatchingEndpoints CreateMatchingEndpoints(
         List<EndpointDto>? endpoints = null,
         MicroserviceDto? microservice = null,
-        TenantBase? tenant = null,
+        TenantBaseDto? tenant = null,
         EnvironmentDto? environment = null)
     {
         return new MatchingEndpoints
@@ -349,7 +349,7 @@ public class MockServiceTests
         var matchingEndpoints = CreateMatchingEndpoints(
             microservice: new MicroserviceDto { Id = 0, Path = "newms", Name = "New MS", HeadersMode = HeadersMode.All}, // ID 0 means it needs creation
             environment: new EnvironmentDto { Id = 0, Path = "newenv", Name = "New Env" },
-            tenant: new TenantBase { Id = 0, Path = "newtenant", Name = "New Tenant" }
+            tenant: new TenantBaseDto { Id = 0, Path = "newtenant", Name = "New Tenant" }
         );
         var context = CreateHttpContext(path: "/api/data", queryString: "?param1=value1");
         var restType = RestType.GET;

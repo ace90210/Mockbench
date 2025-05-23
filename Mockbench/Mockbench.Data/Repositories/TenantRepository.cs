@@ -39,7 +39,7 @@ namespace Mockbench.Data.Repositories
                 TotalTenants = tenants.Count,
                 Tenants = tenants.Select(t =>
                 {
-                    return new TenantBase()
+                    return new TenantBaseDto()
                     {
                         Id = t.Id,
                         Name = t.Name,
@@ -50,11 +50,11 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<TenantBase?> GetTenantByIdAsync(int id)
+        public async Task<TenantBaseDto?> GetTenantByIdAsync(int id)
         {
             var tenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Id == id);
 
-            return tenant == null ? null : new TenantBase()
+            return tenant == null ? null : new TenantBaseDto()
             {
                 Id = tenant.Id,
                 Name = tenant.Name,
@@ -69,12 +69,12 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<TenantBase?> GetTenantByNameAsync(string name)
+        public async Task<TenantBaseDto?> GetTenantByNameAsync(string name)
         {
             var tenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Name == name);
 
 
-            return tenant == null ? null : new TenantBase()
+            return tenant == null ? null : new TenantBaseDto()
             {
                 Id = tenant.Id,
                 Name = tenant.Name,
@@ -89,11 +89,11 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<TenantBase?> GetTenantByPathAsync(string path)
+        public async Task<TenantBaseDto?> GetTenantByPathAsync(string path)
         {
             var tenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Path == path.ToLower());
 
-            return tenant == null ? null : new TenantBase()
+            return tenant == null ? null : new TenantBaseDto()
             {
                 Id = tenant.Id,
                 Name = tenant.Name,
@@ -108,7 +108,7 @@ namespace Mockbench.Data.Repositories
             };
         }
 
-        public async Task<TenantBase> CreateTenantAsync(TenantBase newTenantDto)
+        public async Task<TenantBaseDto> CreateTenantAsync(TenantBaseDto newTenantDto)
         {
             if (newTenantDto == null)
                 throw new Exception("No tenant provided");
@@ -137,7 +137,7 @@ namespace Mockbench.Data.Repositories
 
             await _context.SaveChangesAsync();
 
-            return new TenantBase()
+            return new TenantBaseDto()
             {
                 Id = newTenant.Id,
                 Name = newTenant.Name,
@@ -157,7 +157,7 @@ namespace Mockbench.Data.Repositories
         /// </summary>
         /// <param name="updatedTenant">the updated tenant</param>
         /// <returns>true if updated successfully</returns>
-        public async Task<bool> UpdateTenantBaseValuesAsync(TenantBase updatedTenant)
+        public async Task<bool> UpdateTenantBaseValuesAsync(TenantBaseDto updatedTenant)
         {
             var existingTenant = await _context.Tenants.Include(t => t.Variables).FirstOrDefaultAsync(t => t.Id == updatedTenant.Id);
 

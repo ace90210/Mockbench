@@ -9,6 +9,7 @@ namespace Mockbench.Data.Sqlite.Contexts;
 
 public class SqliteMockbenchDbContext : MockbenchDbContext
 {
+    public override bool IsRelationalDatabase => true;
     public SqliteMockbenchDbContext(
         DbContextOptions<SqliteMockbenchDbContext> options, 
         IOptions<DeploymentConfiguration> deploymentConfigurationOptions)

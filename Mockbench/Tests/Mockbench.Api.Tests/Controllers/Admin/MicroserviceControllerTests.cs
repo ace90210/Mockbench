@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Http; 
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Mockbench.Abstractions.Repositories;
 using Mockbench.Api.Controllers.Admin;
 using Mockbench.Shared.Constants;
 using Mockbench.Shared.Models.Enum;
+using Mockbench.Shared.Models.General;
 using Mockbench.Shared.Models.Microservice;
-using Mockbench.Shared.Models.Utility; 
 using Moq;
 
-namespace Mockbench.Api.Tests.Admin;
+namespace Mockbench.Api.Tests.Controllers.Admin;
 
 public class MicroserviceControllerTests
 {
@@ -68,7 +68,30 @@ public class MicroserviceControllerTests
         Assert.Empty(actualMicroservices);
     }
 
+    [Fact]
+    public async Task GetByPath_ValidId_ReturnsOkObjectResultWithMicroservice()
+    {
+        // Arrange
+        var microserviceId = 1;
+        var expectedMicroservice = new MicroserviceDto { Id = microserviceId, Path = "testpath" };
+        _microserviceRepositoryMock.Setup(repo => repo.GetMicroservice("testpath"))
+            .ReturnsAsync(expectedMicroservice);
+
+        _microserviceRepositoryMock.Setup(repo => repo.GetAllMicroservicePathAndNames(microserviceId))
+            .ReturnsAsync(new List<PathNameItem>() { new () { Path = "example", Name = "Example"}});
+
+        // Act
+        var result = await _controller.GetByPath("testpath");
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var actualMicroservice = Assert.IsType<MicroserviceDto>(okResult.Value);
+        Assert.Equal(expectedMicroservice.Id, actualMicroservice.Id);
+        Assert.Equal(expectedMicroservice.Name, actualMicroservice.Name);
+    }
+
     // --- GetById Tests ---
+
     [Fact]
     public async Task GetById_ValidId_ReturnsOkObjectResultWithMicroservice()
     {
