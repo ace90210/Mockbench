@@ -1,10 +1,12 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
 namespace Mockbench.Data.Sqlite.AuthenticationMigrations
 {
+    [ExcludeFromCodeCoverage]
     /// <inheritdoc />
     public partial class CreateIdentitySchema : Migration
     {

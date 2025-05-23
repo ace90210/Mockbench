@@ -5,12 +5,14 @@ using Mockbench.Data.Contexts;
 using Mockbench.Data.Postgres.Contexts;
 using Mockbench.Data.PostgresProvider.Services;
 using Mockbench.Shared.Models.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mockbench.Data.Postgres.Services;
 
 public static class ServiceCollectionExtensions
 {
-   public static IServiceCollection AddPostgresServices(this IServiceCollection services, DeploymentConfiguration deploymentConfiguration)
+    [ExcludeFromCodeCoverage]
+    public static IServiceCollection AddPostgresServices(this IServiceCollection services, DeploymentConfiguration deploymentConfiguration)
    {
         var migrationAssembly = typeof(ServiceCollectionExtensions).Assembly.GetName().Name;
 

@@ -7,12 +7,14 @@ using Mockbench.Abstractions.ConfigurationServices;
 using Mockbench.Data.Contexts;
 using Mockbench.Data.Sqlite.Contexts;
 using Mockbench.Shared.Models.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mockbench.Data.Sqlite.Services;
 
 public static class ServiceCollectionExtensions
 {
 
+    [ExcludeFromCodeCoverage]
     public static IServiceCollection AddSqliteServices(this IServiceCollection services, IWebHostEnvironment environment, DeploymentConfiguration deploymentConfiguration)
     {
         var migrationAssembly = typeof(ServiceCollectionExtensions).Assembly.GetName().Name;

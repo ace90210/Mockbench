@@ -1,11 +1,13 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
 namespace Mockbench.Data.SqlServer.AuthenticationMigrations
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public partial class CreateIdentitySchema : Migration
     {
         /// <inheritdoc />

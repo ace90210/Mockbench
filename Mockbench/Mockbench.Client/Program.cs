@@ -1,15 +1,25 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using System.Diagnostics.CodeAnalysis;
 
-var builder = WebAssemblyHostBuilder.CreateDefault(args);
+namespace Mockbench.Client;
 
-builder.Services.AddAuthorizationCore();
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthenticationStateDeserialization();
-
-// Fix: Specify the name of the HttpClient service explicitly
-builder.Services.AddHttpClient("DefaultClient", client =>
+[ExcludeFromCodeCoverage]
+public class Program
 {
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
-});
+    public static async Task Main(string[] args)
+    {
+        var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-await builder.Build().RunAsync();
+        builder.Services.AddAuthorizationCore();
+        builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddAuthenticationStateDeserialization();
+
+        // Fix: Specify the name of the HttpClient service explicitly
+        builder.Services.AddHttpClient("DefaultClient", client =>
+        {
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+        });
+
+        await builder.Build().RunAsync();
+    }
+}
